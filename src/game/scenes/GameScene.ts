@@ -6,7 +6,7 @@ import { Player } from "../entities/Player";
 import { EnemySpawner } from "../systems/EnemySpawner";
 import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES, UI_FRAMES } from "../config";
 
-const FIRE_RATE_MS = 125; // ~8 shots/sec
+const FIRE_RATE_MS = 375; // ~2.67 shots/sec
 
 export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
@@ -451,20 +451,6 @@ export class GameScene extends Phaser.Scene {
           suffix: SPRITE_FRAMES.enemyProjectileSuffix,
         }),
         frameRate: 16,
-        repeat: -1,
-      });
-    }
-
-    if (!this.anims.exists("player_engine")) {
-      this.anims.create({
-        key: "player_engine",
-        frames: this.anims.generateFrameNames(ATLAS_KEYS.ship, {
-          start: SPRITE_FRAMES.playerEngineStart,
-          end: SPRITE_FRAMES.playerEngineEnd,
-          prefix: SPRITE_FRAMES.playerEnginePrefix,
-          suffix: SPRITE_FRAMES.playerEngineSuffix,
-        }),
-        frameRate: 18,
         repeat: -1,
       });
     }

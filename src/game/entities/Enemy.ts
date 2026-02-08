@@ -99,13 +99,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   private syncFxPositions() {
-    // Offsets are tuned for the 64x64 source frames trimmed to ~24x24.
-    const h = this.displayHeight || 24;
-    const engineOffsetY = h * 0.55;
-    const weaponOffsetY = h * 0.65;
+    // Anchor engine FX close to the enemy body.
+    // Engine frames are trimmed inside a larger "real" frame, so we position
+    // relative to the enemy bounds (not engineFx displayHeight) to avoid detaching.
+    const top = this.getTopCenter();
+    this.engineFx.setPosition(top.x, top.y + 4);
 
-    this.engineFx.setPosition(this.x, this.y - engineOffsetY);
-    this.weaponFx.setPosition(this.x, this.y + weaponOffsetY);
+    // Weapon frames are trimmed differently; placing it at the same position prevents it
+    // from looking like a second ship that spawns ahead of the enemy.
+    this.weaponFx.setPosition(this.x, this.y);
   }
 
   private startFiringSequence() {
