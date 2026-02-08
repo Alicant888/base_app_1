@@ -1,13 +1,9 @@
 import Phaser from "phaser";
-import { ATLAS_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, UI_FRAMES } from "../config";
+import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS, UI_FRAMES } from "../config";
 
 export class MenuScene extends Phaser.Scene {
-  private bgStar!: Phaser.GameObjects.TileSprite;
-  private bgNebula!: Phaser.GameObjects.TileSprite;
-  private bgDust!: Phaser.GameObjects.TileSprite;
-
-  private soundIcon!: Phaser.GameObjects.Image;
   private startButton!: Phaser.GameObjects.Image;
+  private menuMusic?: Phaser.Sound.BaseSound;
 
   constructor() {
     super("MenuScene");
@@ -16,100 +12,89 @@ export class MenuScene extends Phaser.Scene {
   create() {
     this.cameras.main.setBackgroundColor("#000000");
 
-    // Parallax background (downward scroll).
-    this.bgStar = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.starfield).setOrigin(0);
-    this.bgNebula = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.nebula).setOrigin(0);
-    this.bgDust = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.dust).setOrigin(0);
+    // Static menu background image.
+    const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, IMAGE_KEYS.menuBackground).setDepth(0);
+    bg.setOrigin(0.5);
+    const scale = Math.max(GAME_WIDTH / bg.width, GAME_HEIGHT / bg.height);
+    bg.setScale(scale);
 
-    // Menu window.
-    const panel = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, ATLAS_KEYS.ui, UI_FRAMES.panelWindow);
-    panel.setDepth(10);
-
+    // Title.
     this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 55, "SPACE SHOOTER", {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "SPACE FURY", {
         fontFamily: "monospace",
-        fontSize: "26px",
+        fontSize: "52px",
         color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 12,
+        shadow: { color: "#000000", fill: true, offsetX: 0, offsetY: 4, blur: 6 },
       })
       .setOrigin(0.5)
-      .setDepth(11);
+      .setDepth(2);
+
+    // Menu music: start immediately on load, stop on START click.
+    // Note: some environments may block autoplay with sound.
+    try {
+      this.menuMusic = this.sound.add(AUDIO_KEYS.startMenuMusic, { loop: true, volume: 0.65 });
+      this.menuMusic.play();
+    } catch {
+      // ignore
+    }
 
     // START button with pointer states.
-    const btnY = GAME_HEIGHT / 2 + 35;
+    const padding = 24;
+    const btnTargetWidth = GAME_WIDTH - padding * 2;
+    const btnY = GAME_HEIGHT - padding; // bottom padding (we'll subtract half height below)
     this.startButton = this.add
       .image(GAME_WIDTH / 2, btnY, ATLAS_KEYS.ui, UI_FRAMES.btnLargeNormal)
       .setInteractive({ useHandCursor: true })
-      .setDepth(11);
+      .setDepth(2);
+
+    // Stretch-to-width while keeping aspect ratio.
+    const btnScale = btnTargetWidth / this.startButton.width;
+    this.startButton.setScale(btnScale);
+    this.startButton.setY(GAME_HEIGHT - padding - this.startButton.displayHeight / 2);
 
     this.add
-      .text(GAME_WIDTH / 2, btnY, "START", {
+      .text(GAME_WIDTH / 2, this.startButton.y, "START", {
         fontFamily: "monospace",
-        fontSize: "18px",
+        fontSize: "20px",
         color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 6,
       })
       .setOrigin(0.5)
-      .setDepth(12);
+      .setDepth(3);
 
-    let isDown = false;
-    this.startButton.on("pointerover", () => {
-      if (!isDown) this.startButton.setFrame(UI_FRAMES.btnLargeHover);
-    });
-    this.startButton.on("pointerout", () => {
-      if (!isDown) this.startButton.setFrame(UI_FRAMES.btnLargeNormal);
-    });
     this.startButton.on("pointerdown", () => {
-      isDown = true;
       this.startButton.setFrame(UI_FRAMES.btnLargePressed);
     });
     this.startButton.on("pointerup", () => {
-      isDown = false;
-      this.startButton.setFrame(UI_FRAMES.btnLargeHover);
+      this.startButton.setFrame(UI_FRAMES.btnLargeNormal);
       this.onStart();
     });
 
-    // Sound toggle.
-    const soundEnabled = Boolean(this.registry.get("soundEnabled"));
-    this.soundIcon = this.add
-      .image(GAME_WIDTH - 16, GAME_HEIGHT / 2 - 80, ATLAS_KEYS.ui, soundEnabled ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff)
-      .setOrigin(1, 0.5)
-      .setInteractive({ useHandCursor: true })
-      .setDepth(12);
-
-    this.soundIcon.on("pointerup", () => {
-      const next = !Boolean(this.registry.get("soundEnabled"));
-      this.registry.set("soundEnabled", next);
-      this.soundIcon.setFrame(next ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff);
+    // Cleanup on scene shutdown.
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.menuMusic?.stop();
+      this.menuMusic?.destroy();
+      this.menuMusic = undefined;
     });
-
-    // Hint text.
-    this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 85, "Drag to move • Auto-fire", {
-        fontFamily: "monospace",
-        fontSize: "12px",
-        color: "#c9d1d9",
-      })
-      .setOrigin(0.5)
-      .setDepth(11);
-  }
-
-  update(_time: number, delta: number) {
-    const t = delta / 16.666; // normalize ~60fps
-    // Increasing tilePositionY makes the texture appear to move "up",
-    // so we subtract to make the background drift "down" (vertical shooter feel).
-    this.bgStar.tilePositionY -= 0.25 * t;
-    this.bgNebula.tilePositionY -= 0.6 * t;
-    this.bgDust.tilePositionY -= 1.2 * t;
   }
 
   private onStart() {
     // IMPORTANT: unlock audio only after START click (user gesture).
     this.unlockAudioOnce();
+
+    // Stop menu music immediately.
+    this.menuMusic?.stop();
+    this.menuMusic?.destroy();
+    this.menuMusic = undefined;
+
     this.scene.start("GameScene");
   }
 
   private unlockAudioOnce() {
     if (this.registry.get("audioUnlocked")) return;
-    if (!Boolean(this.registry.get("soundEnabled"))) return;
 
     this.registry.set("audioUnlocked", true);
 

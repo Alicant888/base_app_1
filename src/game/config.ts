@@ -1,6 +1,16 @@
 export const GAME_WIDTH = 360;
 export const GAME_HEIGHT = 640;
 
+// Non-atlas assets served from /public/assets/.
+export const IMAGE_KEYS = {
+  menuBackground: "start_bcg",
+} as const;
+
+export const AUDIO_KEYS = {
+  startMenuMusic: "start_menu_music",
+  gameMusic: "game_music",
+} as const;
+
 // Atlas keys (DO NOT CHANGE): required by project docs.
 export const ATLAS_KEYS = {
   ship: "MainShip",
@@ -39,7 +49,28 @@ export const UI_FRAMES = {
 // Gameplay sprite frames we use (must exist in the atlases).
 export const SPRITE_FRAMES = {
   playerShip: "Main Ship - Bases/Main Ship - Base - Full health.png",
+  playerEnginePrefix:
+    "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-",
+  playerEngineSuffix: ".png",
+  playerEngineStart: 0,
+  playerEngineEnd: 5,
+
   enemyBase: "Base/Kla'ed - Scout - Base.png",
+  enemyEnginePrefix: "Engine/Kla'ed - Scout - Engine/Kla'ed - Scout - Engine-",
+  enemyEngineSuffix: ".png",
+  enemyEngineStart: 0,
+  enemyEngineEnd: 9,
+
+  enemyWeaponPrefix: "Weapons/Kla'ed - Scout - Weapons/Kla'ed - Scout - Weapons-",
+  enemyWeaponSuffix: ".png",
+  enemyWeaponStart: 0,
+  enemyWeaponEnd: 5,
+
+  enemyProjectilePrefix: "Projectiles/Kla'ed - Bullet/Kla'ed - Bullet-",
+  enemyProjectileSuffix: ".png",
+  enemyProjectileStart: 0,
+  enemyProjectileEnd: 3,
+
   enemyDestructionPrefix: "Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-",
   enemyDestructionSuffix: ".png",
   enemyDestructionStart: 0,

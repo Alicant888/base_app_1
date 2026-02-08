@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { platform } from "@/src/platform";
-import { ATLAS_KEYS, GAME_HEIGHT, GAME_WIDTH } from "../config";
+import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS } from "../config";
 
 export class PreloadScene extends Phaser.Scene {
   constructor() {
@@ -28,11 +28,15 @@ export class PreloadScene extends Phaser.Scene {
     this.load.atlas(ATLAS_KEYS.fx, "/assets/atlases/FX.png", "/assets/atlases/FX.json");
     this.load.atlas(ATLAS_KEYS.ui, "/assets/atlases/ui.png", "/assets/atlases/ui.json");
     this.load.atlas(ATLAS_KEYS.bg, "/assets/atlases/backgrounds.png", "/assets/atlases/backgrounds.json");
+
+    // Menu background (static) + menu music.
+    this.load.image(IMAGE_KEYS.menuBackground, "/assets/start_bcg.png");
+    this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.wav");
+    this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/music.wav");
   }
 
   create() {
     // Defaults (persist across scenes).
-    if (!this.registry.has("soundEnabled")) this.registry.set("soundEnabled", true);
     if (!this.registry.has("audioUnlocked")) this.registry.set("audioUnlocked", false);
 
     // Base Mini App: hide the native splash screen once we're ready to show content.

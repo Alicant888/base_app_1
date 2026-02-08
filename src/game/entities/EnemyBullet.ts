@@ -1,11 +1,11 @@
 import Phaser from "phaser";
-import { GAME_HEIGHT } from "../config";
+import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
-const BULLET_SPEED = 420;
+const ENEMY_BULLET_SPEED = 240;
 
-export class Bullet extends Phaser.Physics.Arcade.Image {
+export class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, "bullet");
+    super(scene, x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyProjectilePrefix}${SPRITE_FRAMES.enemyProjectileStart}${SPRITE_FRAMES.enemyProjectileSuffix}`);
 
     this.setActive(false);
     this.setVisible(false);
@@ -22,14 +22,19 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
 
     body.enable = true;
     body.reset(x, y);
-
     body.allowGravity = false;
-    this.setVelocity(0, -BULLET_SPEED);
+
+    this.setVelocity(0, ENEMY_BULLET_SPEED);
+    this.play("enemy_bullet");
+
+    // Small hitbox.
+    body.setSize(this.width * 0.7, this.height * 0.7, true);
   }
 
   kill() {
     this.setActive(false);
     this.setVisible(false);
+    this.anims.stop();
 
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (body) {
@@ -40,9 +45,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
 
   update() {
     if (!this.active) return;
-    if (this.y < -16) this.kill();
-    // Safety: if something pushes the bullet down, recycle it too.
-    if (this.y > GAME_HEIGHT + 16) this.kill();
+    if (this.y > GAME_HEIGHT + 32) this.kill();
   }
 }
 
