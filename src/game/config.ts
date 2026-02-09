@@ -75,5 +75,18 @@ export const SPRITE_FRAMES = {
   enemyDestructionSuffix: ".png",
   enemyDestructionStart: 0,
   enemyDestructionEnd: 8,
+
+  // Shield pickup icon (atlas: FX)
+  shieldPickupPrefix:
+    "Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-",
+  shieldPickupSuffix: ".png",
+  shieldPickupStart: 0,
+  shieldPickupEnd: 9,
+
+  // Player round shield overlay (atlas: MainShip)
+  playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
+  playerShieldSuffix: ".png",
+  playerShieldStart: 0,
+  playerShieldEnd: 9,
 } as const;
 

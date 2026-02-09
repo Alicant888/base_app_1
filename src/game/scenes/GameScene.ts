@@ -3,6 +3,7 @@ import { Bullet } from "../entities/Bullet";
 import { Enemy } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
 import { Player } from "../entities/Player";
+import { ShieldPickup } from "../entities/ShieldPickup";
 import { EnemySpawner } from "../systems/EnemySpawner";
 import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES, UI_FRAMES } from "../config";
 
@@ -17,6 +18,7 @@ export class GameScene extends Phaser.Scene {
   private bullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
+  private shieldPickups!: Phaser.Physics.Arcade.Group;
   private spawner!: EnemySpawner;
 
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -27,6 +29,8 @@ export class GameScene extends Phaser.Scene {
   private readonly maxHp = 5;
   private kills = 0;
   private isGameOver = false;
+  private shieldHits = 0;
+  private shieldFx?: Phaser.GameObjects.Sprite;
 
   private hpBar!: Phaser.GameObjects.Image;
   private fireEvent?: Phaser.Time.TimerEvent;
@@ -43,6 +47,7 @@ export class GameScene extends Phaser.Scene {
     this.hp = this.maxHp;
     this.kills = 0;
     this.isGameOver = false;
+    this.shieldHits = 0;
     this.draggingPointerId = null;
 
     // Background (parallax).
@@ -65,6 +70,12 @@ export class GameScene extends Phaser.Scene {
     this.enemyBullets = this.physics.add.group({
       classType: EnemyBullet,
       maxSize: 60,
+      runChildUpdate: true,
+    });
+
+    this.shieldPickups = this.physics.add.group({
+      classType: ShieldPickup,
+      maxSize: 20,
       runChildUpdate: true,
     });
 
@@ -108,6 +119,14 @@ export class GameScene extends Phaser.Scene {
       this,
     );
 
+    this.physics.add.overlap(
+      this.player,
+      this.shieldPickups,
+      this.onShieldPickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
     // Auto-fire (single shot).
     this.fireEvent = this.time.addEvent({
       delay: FIRE_RATE_MS,
@@ -137,6 +156,9 @@ export class GameScene extends Phaser.Scene {
       this.gameMusic?.stop();
       this.gameMusic?.destroy();
       this.gameMusic = undefined;
+
+      this.shieldFx?.destroy();
+      this.shieldFx = undefined;
     });
   }
 
@@ -155,6 +177,10 @@ export class GameScene extends Phaser.Scene {
     }
 
     this.spawner.update(time);
+
+    if (this.shieldFx) {
+      this.shieldFx.setPosition(this.player.x, this.player.y);
+    }
   }
 
   private setupPointerDrag() {
@@ -239,6 +265,11 @@ export class GameScene extends Phaser.Scene {
 
     this.spawnExplosion(enemy.x, enemy.y);
     this.kills += 1;
+
+    // 4% chance to drop a shield pickup.
+    if (!this.isGameOver && Phaser.Math.FloatBetween(0, 1) < 0.04) {
+      this.spawnShieldPickup(enemy.x, enemy.y);
+    }
   }
 
   private onEnemyHitsPlayer(_playerObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
@@ -257,8 +288,25 @@ export class GameScene extends Phaser.Scene {
     this.takeHit();
   }
 
+  private onShieldPickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as ShieldPickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.addShield(5);
+  }
+
   private takeHit() {
     if (this.isGameOver) return;
+
+    if (this.shieldHits > 0) {
+      this.shieldHits = Math.max(0, this.shieldHits - 1);
+      this.flashShield();
+      if (this.shieldHits === 0) {
+        this.disableShield();
+      }
+      return;
+    }
 
     this.hp = Math.max(0, this.hp - 1);
     this.updateBars();
@@ -286,6 +334,60 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  private addShield(hits: number) {
+    // No stacking: picking up a new shield just refreshes durability.
+    this.shieldHits = hits;
+    this.enableShield();
+  }
+
+  private enableShield() {
+    if (!this.shieldFx) {
+      this.shieldFx = this.add
+        .sprite(
+          this.player.x,
+          this.player.y,
+          ATLAS_KEYS.ship,
+          `${SPRITE_FRAMES.playerShieldPrefix}${SPRITE_FRAMES.playerShieldStart}${SPRITE_FRAMES.playerShieldSuffix}`,
+        )
+        .setDepth(6);
+
+      // Optional: make it feel more "energy-like".
+      this.shieldFx.setBlendMode(Phaser.BlendModes.ADD);
+    }
+
+    this.shieldFx.setVisible(true);
+    this.shieldFx.play("player_shield", true);
+  }
+
+  private disableShield() {
+    if (!this.shieldFx) return;
+    this.shieldFx.setVisible(false);
+    this.shieldFx.anims.stop();
+  }
+
+  private flashShield() {
+    if (!this.shieldFx || !this.shieldFx.visible) return;
+
+    this.shieldFx.setTintFill(0xffffff);
+    this.tweens.add({
+      targets: this.shieldFx,
+      alpha: 0.25,
+      duration: 50,
+      yoyo: true,
+      repeat: 2,
+      onComplete: () => {
+        this.shieldFx?.clearTint();
+        if (this.shieldFx) this.shieldFx.setAlpha(1);
+      },
+    });
+  }
+
+  private spawnShieldPickup(x: number, y: number) {
+    const pickup = this.shieldPickups.get(x, y) as ShieldPickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
   private triggerGameOver() {
     if (this.isGameOver) return;
     this.isGameOver = true;
@@ -298,6 +400,8 @@ export class GameScene extends Phaser.Scene {
     this.gameMusic?.stop();
     this.gameMusic?.destroy();
     this.gameMusic = undefined;
+
+    this.disableShield();
 
     const depth = 100;
     const padding = 18;
@@ -452,6 +556,34 @@ export class GameScene extends Phaser.Scene {
           suffix: SPRITE_FRAMES.enemyProjectileSuffix,
         }),
         frameRate: 16,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("shield_pickup")) {
+      this.anims.create({
+        key: "shield_pickup",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.fx, {
+          start: SPRITE_FRAMES.shieldPickupStart,
+          end: SPRITE_FRAMES.shieldPickupEnd,
+          prefix: SPRITE_FRAMES.shieldPickupPrefix,
+          suffix: SPRITE_FRAMES.shieldPickupSuffix,
+        }),
+        frameRate: 14,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("player_shield")) {
+      this.anims.create({
+        key: "player_shield",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.ship, {
+          start: SPRITE_FRAMES.playerShieldStart,
+          end: SPRITE_FRAMES.playerShieldEnd,
+          prefix: SPRITE_FRAMES.playerShieldPrefix,
+          suffix: SPRITE_FRAMES.playerShieldSuffix,
+        }),
+        frameRate: 18,
         repeat: -1,
       });
     }
