@@ -20,6 +20,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Visual FX sprites (not part of the physics body).
     this.engineFx = scene.add
       .sprite(x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`)
+      .setOrigin(0.5, 1)
       .setDepth(3)
       .setVisible(false);
 
@@ -103,7 +104,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Engine frames are trimmed inside a larger "real" frame, so we position
     // relative to the enemy bounds (not engineFx displayHeight) to avoid detaching.
     const top = this.getTopCenter();
-    this.engineFx.setPosition(top.x, top.y + 4);
+    // With origin (0.5, 1) this pins the bottom of the flame to the top of the ship.
+    // Engine frames have a lot of transparent space (trim) below the visible flame,
+    // so we push the sprite down to keep the visible pixels tight to the ship.
+    this.engineFx.setPosition(top.x, top.y + 32);
 
     // Weapon frames are trimmed differently; placing it at the same position prevents it
     // from looking like a second ship that spawns ahead of the enemy.

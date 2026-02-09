@@ -325,7 +325,8 @@ export class GameScene extends Phaser.Scene {
         fontSize: "16px",
         color: "#ffffff",
         stroke: "#000000",
-        strokeThickness: 6,
+        strokeThickness: 4,
+        padding: { x: 8, y: 6 },
       })
       .setOrigin(0.5)
       .setDepth(depth + 2);
