@@ -25,6 +25,10 @@ Ship (atlas: `MainShip`)
 Enemy (atlas: `Enemy`)
 
 - `Base/Kla'ed - Scout - Base.png`
+- `Engine/Kla'ed - Scout - Engine/Kla'ed - Scout - Engine-0.png` … `Engine/Kla'ed - Scout - Engine/Kla'ed - Scout - Engine-9.png`
+- `Weapons/Kla'ed - Scout - Weapons/Kla'ed - Scout - Weapons-0.png` … `Weapons/Kla'ed - Scout - Weapons/Kla'ed - Scout - Weapons-5.png`
+- `Projectiles/Kla'ed - Bullet/Kla'ed - Bullet-0.png` … `Projectiles/Kla'ed - Bullet/Kla'ed - Bullet-3.png`
+- `Shield/Kla'ed - Scout - Shield/Kla'ed - Scout - Shield-0.png` … `Shield/Kla'ed - Scout - Shield/Kla'ed - Scout - Shield-9.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-0.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-1.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-2.png`
@@ -34,6 +38,14 @@ Enemy (atlas: `Enemy`)
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-6.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-7.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-8.png`
+
+FX (atlas: `FX`)
+
+- `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png` … `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png`
+
+Ship shield overlay (atlas: `MainShip`)
+
+- `Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-0.png` … `Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-9.png`
 
 Bullets
 

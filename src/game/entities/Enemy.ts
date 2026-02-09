@@ -4,11 +4,13 @@ import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
 export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private engineFx: Phaser.GameObjects.Sprite;
+  private shieldFx: Phaser.GameObjects.Sprite;
   private weaponFx: Phaser.GameObjects.Sprite;
   private enemyBullets?: Phaser.Physics.Arcade.Group;
 
   private nextFireAt = 0;
   private isFiring = false;
+  private shieldHp = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, ATLAS_KEYS.enemy, SPRITE_FRAMES.enemyBase);
@@ -24,13 +26,24 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       .setDepth(3)
       .setVisible(false);
 
+    this.shieldFx = scene.add
+      .sprite(x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`)
+      .setDepth(6)
+      .setVisible(false);
+
     this.weaponFx = scene.add
       .sprite(x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`)
       .setDepth(5)
       .setVisible(false);
   }
 
-  spawn(x: number, y: number, speedY: number, enemyBullets: Phaser.Physics.Arcade.Group) {
+  spawn(
+    x: number,
+    y: number,
+    speedY: number,
+    enemyBullets: Phaser.Physics.Arcade.Group,
+    hasShield: boolean,
+  ) {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return;
 
@@ -56,6 +69,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.engineFx.setFlipY(true);
     this.engineFx.play("enemy_engine", true);
 
+    // Shield (optional). If present: 1 hit to break.
+    this.shieldHp = hasShield ? 1 : 0;
+    if (hasShield) {
+      this.shieldFx.setVisible(true);
+      this.shieldFx.setFlipY(true);
+      this.shieldFx.play("enemy_shield", true);
+    } else {
+      this.shieldFx.setVisible(false);
+      this.shieldFx.anims.stop();
+    }
+
     // Weapon FX is off until firing.
     this.weaponFx.setVisible(false);
     this.weaponFx.setFlipY(true);
@@ -71,7 +95,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);
 
     this.isFiring = false;
+    this.shieldHp = 0;
     this.engineFx.setVisible(false);
+    this.shieldFx.setVisible(false);
+    this.shieldFx.anims.stop();
     this.weaponFx.setVisible(false);
     this.weaponFx.anims.stop();
     this.weaponFx.removeAllListeners();
@@ -95,8 +122,25 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   override destroy(fromScene?: boolean) {
     this.engineFx.destroy();
+    this.shieldFx.destroy();
     this.weaponFx.destroy();
     super.destroy(fromScene);
+  }
+
+  /**
+   * Returns true if the enemy should be destroyed by this hit.
+   * The first hit breaks the shield (1 HP), the second destroys the enemy.
+   */
+  onPlayerBulletHit(): boolean {
+    if (!this.active) return false;
+
+    if (this.shieldHp > 0) {
+      this.shieldHp = 0;
+      this.breakShield();
+      return false;
+    }
+
+    return true;
   }
 
   private syncFxPositions() {
@@ -109,9 +153,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // so we push the sprite down to keep the visible pixels tight to the ship.
     this.engineFx.setPosition(top.x, top.y + 32);
 
+    this.shieldFx.setPosition(this.x, this.y);
+
     // Weapon frames are trimmed differently; placing it at the same position prevents it
     // from looking like a second ship that spawns ahead of the enemy.
     this.weaponFx.setPosition(this.x, this.y);
+  }
+
+  private breakShield() {
+    this.shieldFx.setVisible(false);
+    this.shieldFx.anims.stop();
+
+    // Tiny feedback flash.
+    this.setTintFill(0x7df9ff);
+    this.scene.time.delayedCall(70, () => {
+      if (!this.active) return;
+      this.clearTint();
+    });
   }
 
   private startFiringSequence() {

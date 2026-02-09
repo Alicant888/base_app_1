@@ -261,14 +261,18 @@ export class GameScene extends Phaser.Scene {
     if (!bullet.active || !enemy.active) return;
 
     bullet.kill();
-    enemy.kill();
+    const destroyed = enemy.onPlayerBulletHit();
 
-    this.spawnExplosion(enemy.x, enemy.y);
-    this.kills += 1;
+    if (destroyed) {
+      enemy.kill();
 
-    // 4% chance to drop a shield pickup.
-    if (!this.isGameOver && Phaser.Math.FloatBetween(0, 1) < 0.04) {
-      this.spawnShieldPickup(enemy.x, enemy.y);
+      this.spawnExplosion(enemy.x, enemy.y);
+      this.kills += 1;
+
+      // 4% chance to drop a shield pickup.
+      if (!this.isGameOver && Phaser.Math.FloatBetween(0, 1) < 0.04) {
+        this.spawnShieldPickup(enemy.x, enemy.y);
+      }
     }
   }
 
@@ -499,6 +503,8 @@ export class GameScene extends Phaser.Scene {
       .sprite(x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`)
       .setDepth(6);
 
+    // Enemy faces down (flipY), so keep destruction animation consistent.
+    boom.setFlipY(true);
     boom.play("enemy_explode");
     boom.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => boom.destroy());
   }
@@ -556,6 +562,20 @@ export class GameScene extends Phaser.Scene {
           suffix: SPRITE_FRAMES.enemyProjectileSuffix,
         }),
         frameRate: 16,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("enemy_shield")) {
+      this.anims.create({
+        key: "enemy_shield",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.enemyShieldStart,
+          end: SPRITE_FRAMES.enemyShieldEnd,
+          prefix: SPRITE_FRAMES.enemyShieldPrefix,
+          suffix: SPRITE_FRAMES.enemyShieldSuffix,
+        }),
+        frameRate: 18,
         repeat: -1,
       });
     }

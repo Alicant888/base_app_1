@@ -71,6 +71,11 @@ export const SPRITE_FRAMES = {
   enemyProjectileStart: 0,
   enemyProjectileEnd: 3,
 
+  enemyShieldPrefix: "Shield/Kla'ed - Scout - Shield/Kla'ed - Scout - Shield-",
+  enemyShieldSuffix: ".png",
+  enemyShieldStart: 0,
+  enemyShieldEnd: 9,
+
   enemyDestructionPrefix: "Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-",
   enemyDestructionSuffix: ".png",
   enemyDestructionStart: 0,

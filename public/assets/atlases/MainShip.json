@@ -4,8 +4,8 @@
 			"image": "MainShip.png",
 			"format": "RGBA8888",
 			"size": {
-				"w": 63,
-				"h": 650
+				"w": 475,
+				"h": 128
 			},
 			"scale": 1,
 			"frames": [
@@ -28,132 +28,6 @@
 						"y": 1,
 						"w": 52,
 						"h": 52
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 1,
-						"y": 6,
-						"w": 7,
-						"h": 8
-					},
-					"frame": {
-						"x": 55,
-						"y": 1,
-						"w": 7,
-						"h": 8
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 6,
-						"w": 7,
-						"h": 8
-					},
-					"frame": {
-						"x": 55,
-						"y": 1,
-						"w": 7,
-						"h": 8
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 1,
-						"y": 5,
-						"w": 7,
-						"h": 8
-					},
-					"frame": {
-						"x": 55,
-						"y": 1,
-						"w": 7,
-						"h": 8
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 5,
-						"w": 7,
-						"h": 8
-					},
-					"frame": {
-						"x": 55,
-						"y": 1,
-						"w": 7,
-						"h": 8
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 1,
-						"y": 6,
-						"w": 7,
-						"h": 7
-					},
-					"frame": {
-						"x": 55,
-						"y": 11,
-						"w": 7,
-						"h": 7
-					}
-				},
-				{
-					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 12,
-						"h": 24
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 6,
-						"w": 7,
-						"h": 7
-					},
-					"frame": {
-						"x": 55,
-						"y": 11,
-						"w": 7,
-						"h": 7
 					}
 				},
 				{
@@ -192,8 +66,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 109,
+						"x": 55,
+						"y": 1,
 						"w": 52,
 						"h": 52
 					}
@@ -213,8 +87,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 163,
+						"x": 55,
+						"y": 55,
 						"w": 52,
 						"h": 52
 					}
@@ -234,8 +108,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 217,
+						"x": 109,
+						"y": 1,
 						"w": 52,
 						"h": 52
 					}
@@ -255,8 +129,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 271,
+						"x": 109,
+						"y": 55,
 						"w": 52,
 						"h": 52
 					}
@@ -276,8 +150,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 325,
+						"x": 163,
+						"y": 1,
 						"w": 52,
 						"h": 52
 					}
@@ -297,8 +171,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 379,
+						"x": 163,
+						"y": 55,
 						"w": 52,
 						"h": 52
 					}
@@ -318,8 +192,8 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 433,
+						"x": 217,
+						"y": 1,
 						"w": 52,
 						"h": 52
 					}
@@ -339,10 +213,94 @@
 						"h": 52
 					},
 					"frame": {
-						"x": 1,
-						"y": 487,
+						"x": 217,
+						"y": 55,
 						"w": 52,
 						"h": 52
+					}
+				},
+				{
+					"filename": "Main Ship - Bases/Main Ship - Base - Damaged.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 10,
+						"w": 32,
+						"h": 28
+					},
+					"frame": {
+						"x": 271,
+						"y": 1,
+						"w": 32,
+						"h": 28
+					}
+				},
+				{
+					"filename": "Main Ship - Bases/Main Ship - Base - Full health.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 10,
+						"w": 32,
+						"h": 28
+					},
+					"frame": {
+						"x": 271,
+						"y": 31,
+						"w": 32,
+						"h": 28
+					}
+				},
+				{
+					"filename": "Main Ship - Bases/Main Ship - Base - Slight damage.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 10,
+						"w": 32,
+						"h": 28
+					},
+					"frame": {
+						"x": 305,
+						"y": 1,
+						"w": 32,
+						"h": 28
+					}
+				},
+				{
+					"filename": "Main Ship - Bases/Main Ship - Base - Very damaged.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 10,
+						"w": 32,
+						"h": 28
+					},
+					"frame": {
+						"x": 271,
+						"y": 61,
+						"w": 32,
+						"h": 28
 					}
 				},
 				{
@@ -360,8 +318,8 @@
 						"h": 29
 					},
 					"frame": {
-						"x": 1,
-						"y": 541,
+						"x": 305,
+						"y": 31,
 						"w": 31,
 						"h": 29
 					}
@@ -381,31 +339,10 @@
 						"h": 29
 					},
 					"frame": {
-						"x": 34,
-						"y": 541,
+						"x": 339,
+						"y": 1,
 						"w": 28,
 						"h": 29
-					}
-				},
-				{
-					"filename": "Main Ship - Bases/Main Ship - Base - Full health.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 48,
-						"h": 48
-					},
-					"spriteSourceSize": {
-						"x": 8,
-						"y": 10,
-						"w": 32,
-						"h": 28
-					},
-					"frame": {
-						"x": 1,
-						"y": 572,
-						"w": 32,
-						"h": 28
 					}
 				},
 				{
@@ -423,8 +360,8 @@
 						"h": 28
 					},
 					"frame": {
-						"x": 35,
-						"y": 572,
+						"x": 369,
+						"y": 1,
 						"w": 26,
 						"h": 28
 					}
@@ -444,8 +381,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 602,
+						"x": 305,
+						"y": 62,
 						"w": 26,
 						"h": 26
 					}
@@ -465,10 +402,94 @@
 						"h": 23
 					},
 					"frame": {
-						"x": 29,
-						"y": 602,
+						"x": 397,
+						"y": 1,
 						"w": 29,
 						"h": 23
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 338,
+						"y": 32,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 338,
+						"y": 32,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 428,
+						"y": 1,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Engines/Main Ship - Engines - Big Pulse Engine.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 15,
+						"y": 16,
+						"w": 18,
+						"h": 21
+					},
+					"frame": {
+						"x": 456,
+						"y": 1,
+						"w": 18,
+						"h": 21
 					}
 				},
 				{
@@ -486,10 +507,241 @@
 						"h": 19
 					},
 					"frame": {
-						"x": 29,
-						"y": 627,
+						"x": 271,
+						"y": 91,
 						"w": 26,
 						"h": 19
+					}
+				},
+				{
+					"filename": "Main Ship - Engines/Main Ship - Engines - Base Engine.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 19,
+						"w": 24,
+						"h": 17
+					},
+					"frame": {
+						"x": 1,
+						"y": 109,
+						"w": 24,
+						"h": 17
+					}
+				},
+				{
+					"filename": "Main Ship - Engines/Main Ship - Engines - Burst Engine.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 23,
+						"w": 24,
+						"h": 17
+					},
+					"frame": {
+						"x": 27,
+						"y": 109,
+						"w": 24,
+						"h": 17
+					}
+				},
+				{
+					"filename": "Main Ship - Engines/Main Ship - Engines - Supercharged Engine.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 20,
+						"w": 24,
+						"h": 16
+					},
+					"frame": {
+						"x": 53,
+						"y": 109,
+						"w": 24,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Powering/Main Ship - Engines - Big Pulse Engine - Powering-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 79,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 79,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Powering/Main Ship - Engines - Big Pulse Engine - Powering-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 97,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 97,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Powering/Main Ship - Engines - Big Pulse Engine - Powering-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 115,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 115,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Powering/Main Ship - Engines - Big Pulse Engine - Powering-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 133,
+						"y": 109,
+						"w": 16,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 13
+					},
+					"frame": {
+						"x": 133,
+						"y": 109,
+						"w": 16,
+						"h": 13
 					}
 				},
 				{
@@ -507,10 +759,2278 @@
 						"h": 19
 					},
 					"frame": {
-						"x": 1,
-						"y": 630,
+						"x": 397,
+						"y": 26,
 						"w": 26,
 						"h": 19
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 369,
+						"y": 31,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 425,
+						"y": 27,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 425,
+						"y": 27,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 425,
+						"y": 27,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 397,
+						"y": 47,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 8,
+						"w": 26,
+						"h": 24
+					},
+					"frame": {
+						"x": 397,
+						"y": 47,
+						"w": 26,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 12,
+						"w": 26,
+						"h": 20
+					},
+					"frame": {
+						"x": 425,
+						"y": 53,
+						"w": 26,
+						"h": 20
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 12,
+						"w": 17,
+						"h": 26
+					},
+					"frame": {
+						"x": 333,
+						"y": 62,
+						"w": 17,
+						"h": 26
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 13,
+						"w": 16,
+						"h": 25
+					},
+					"frame": {
+						"x": 352,
+						"y": 58,
+						"w": 16,
+						"h": 25
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 370,
+						"y": 57,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 151,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 151,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 151,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 151,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 165,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 165,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 179,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 179,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 193,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 193,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 207,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 207,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 221,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 221,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Idle/Main Ship - Engines - Burst Engine - Idle-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 235,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 1,
+						"w": 12,
+						"h": 16
+					},
+					"frame": {
+						"x": 235,
+						"y": 109,
+						"w": 12,
+						"h": 16
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 249,
+						"y": 109,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 2,
+						"w": 12,
+						"h": 15
+					},
+					"frame": {
+						"x": 249,
+						"y": 109,
+						"w": 12,
+						"h": 15
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 15,
+						"w": 14,
+						"h": 23
+					},
+					"frame": {
+						"x": 453,
+						"y": 27,
+						"w": 14,
+						"h": 23
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 453,
+						"y": 52,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 299,
+						"y": 91,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 321,
+						"y": 90,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 343,
+						"y": 90,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 343,
+						"y": 90,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 4,
+						"w": 12,
+						"h": 13
+					},
+					"frame": {
+						"x": 321,
+						"y": 114,
+						"w": 12,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 13
+					},
+					"frame": {
+						"x": 335,
+						"y": 114,
+						"w": 8,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 13
+					},
+					"frame": {
+						"x": 335,
+						"y": 114,
+						"w": 8,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 13
+					},
+					"frame": {
+						"x": 345,
+						"y": 114,
+						"w": 8,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 13
+					},
+					"frame": {
+						"x": 345,
+						"y": 114,
+						"w": 8,
+						"h": 13
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 7,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 370,
+						"y": 81,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 13,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 365,
+						"y": 105,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 11,
+						"w": 20,
+						"h": 22
+					},
+					"frame": {
+						"x": 365,
+						"y": 105,
+						"w": 20,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 48,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 15,
+						"y": 13,
+						"w": 19,
+						"h": 22
+					},
+					"frame": {
+						"x": 387,
+						"y": 105,
+						"w": 19,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 12
+					},
+					"frame": {
+						"x": 355,
+						"y": 114,
+						"w": 8,
+						"h": 12
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 16,
+						"w": 15,
+						"h": 22
+					},
+					"frame": {
+						"x": 392,
+						"y": 73,
+						"w": 15,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 15,
+						"w": 14,
+						"h": 23
+					},
+					"frame": {
+						"x": 409,
+						"y": 73,
+						"w": 14,
+						"h": 23
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 16,
+						"w": 15,
+						"h": 22
+					},
+					"frame": {
+						"x": 425,
+						"y": 75,
+						"w": 15,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 16,
+						"w": 15,
+						"h": 22
+					},
+					"frame": {
+						"x": 425,
+						"y": 75,
+						"w": 15,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 16,
+						"w": 15,
+						"h": 22
+					},
+					"frame": {
+						"x": 425,
+						"y": 75,
+						"w": 15,
+						"h": 22
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 17,
+						"w": 15,
+						"h": 21
+					},
+					"frame": {
+						"x": 408,
+						"y": 98,
+						"w": 15,
+						"h": 21
+					}
+				},
+				{
+					"filename": "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 24,
+						"h": 48
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 17,
+						"w": 15,
+						"h": 21
+					},
+					"frame": {
+						"x": 425,
+						"y": 99,
+						"w": 15,
+						"h": 21
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Idle/Main Ship - Engines - Big Pulse Engine - Idle-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 408,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 408,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Idle/Main Ship - Engines - Big Pulse Engine - Idle-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 426,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Idle/Main Ship - Engines - Big Pulse Engine - Idle-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 426,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 426,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 426,
+						"y": 122,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 14
+					},
+					"frame": {
+						"x": 442,
+						"y": 75,
+						"w": 8,
+						"h": 14
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 452,
+						"y": 76,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Spritesheet/Main Ship - Engines - Burst Engine - Spritesheet-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 3,
+						"w": 12,
+						"h": 14
+					},
+					"frame": {
+						"x": 452,
+						"y": 76,
+						"w": 12,
+						"h": 14
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 14
+					},
+					"frame": {
+						"x": 466,
+						"y": 76,
+						"w": 8,
+						"h": 14
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 5,
+						"w": 12,
+						"h": 12
+					},
+					"frame": {
+						"x": 263,
+						"y": 115,
+						"w": 12,
+						"h": 12
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 12
+					},
+					"frame": {
+						"x": 442,
+						"y": 91,
+						"w": 8,
+						"h": 12
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Burst Engine - Powering/Main Ship - Engines - Burst Engine - Powering-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 6,
+						"w": 12,
+						"h": 11
+					},
+					"frame": {
+						"x": 452,
+						"y": 92,
+						"w": 12,
+						"h": 11
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 10
+					},
+					"frame": {
+						"x": 466,
+						"y": 92,
+						"w": 8,
+						"h": 10
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Idle/Main Ship - Engines - Big Pulse Engine - Idle-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 442,
+						"y": 105,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Big Pulse Engine - Spritesheet/Main Ship - Engines - Big Pulse Engine - Spritesheet-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 16,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 1,
+						"w": 16,
+						"h": 5
+					},
+					"frame": {
+						"x": 442,
+						"y": 105,
+						"w": 16,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 10
+					},
+					"frame": {
+						"x": 466,
+						"y": 104,
+						"w": 8,
+						"h": 10
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 5,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 5,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 5,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 5,
+						"w": 7,
+						"h": 8
+					},
+					"frame": {
+						"x": 442,
+						"y": 112,
+						"w": 7,
+						"h": 8
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 5
+					},
+					"frame": {
+						"x": 444,
+						"y": 122,
+						"w": 8,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 5
+					},
+					"frame": {
+						"x": 444,
+						"y": 122,
+						"w": 8,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 2,
+						"w": 6,
+						"h": 3
+					},
+					"frame": {
+						"x": 352,
+						"y": 85,
+						"w": 6,
+						"h": 3
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 2,
+						"w": 6,
+						"h": 3
+					},
+					"frame": {
+						"x": 352,
+						"y": 85,
+						"w": 6,
+						"h": 3
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 2,
+						"w": 6,
+						"h": 3
+					},
+					"frame": {
+						"x": 79,
+						"y": 124,
+						"w": 6,
+						"h": 3
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 2,
+						"w": 6,
+						"h": 3
+					},
+					"frame": {
+						"x": 79,
+						"y": 124,
+						"w": 6,
+						"h": 3
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 451,
+						"y": 112,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Idle/Main Ship - Engines - Base Engine - Idle-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 451,
+						"y": 112,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 451,
+						"y": 112,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 451,
+						"y": 112,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 7,
+						"w": 7,
+						"h": 10
+					},
+					"frame": {
+						"x": 277,
+						"y": 112,
+						"w": 7,
+						"h": 10
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 7,
+						"w": 7,
+						"h": 10
+					},
+					"frame": {
+						"x": 277,
+						"y": 112,
+						"w": 7,
+						"h": 10
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 7,
+						"w": 7,
+						"h": 9
+					},
+					"frame": {
+						"x": 286,
+						"y": 112,
+						"w": 7,
+						"h": 9
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 7,
+						"w": 7,
+						"h": 9
+					},
+					"frame": {
+						"x": 286,
+						"y": 112,
+						"w": 7,
+						"h": 9
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 7,
+						"w": 7,
+						"h": 9
+					},
+					"frame": {
+						"x": 286,
+						"y": 112,
+						"w": 7,
+						"h": 9
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 7,
+						"w": 7,
+						"h": 9
+					},
+					"frame": {
+						"x": 286,
+						"y": 112,
+						"w": 7,
+						"h": 9
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 4
+					},
+					"frame": {
+						"x": 286,
+						"y": 123,
+						"w": 8,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 2,
+						"w": 8,
+						"h": 4
+					},
+					"frame": {
+						"x": 286,
+						"y": 123,
+						"w": 8,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 5
+					},
+					"frame": {
+						"x": 392,
+						"y": 97,
+						"w": 8,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 5
+					},
+					"frame": {
+						"x": 392,
+						"y": 97,
+						"w": 8,
+						"h": 5
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 4
+					},
+					"frame": {
+						"x": 295,
+						"y": 115,
+						"w": 8,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 8,
+						"h": 4
+					},
+					"frame": {
+						"x": 295,
+						"y": 115,
+						"w": 8,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 305,
+						"y": 115,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 305,
+						"y": 115,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 305,
+						"y": 115,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Spritesheet/Main Ship - Engines - Base Engine - Spritesheet-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 6,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 305,
+						"y": 115,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 2,
+						"w": 7,
+						"h": 4
+					},
+					"frame": {
+						"x": 296,
+						"y": 121,
+						"w": 7,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Idle/Main Ship - Engines - Supercharged Engine - Idle-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 8
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 7,
+						"h": 4
+					},
+					"frame": {
+						"x": 296,
+						"y": 121,
+						"w": 7,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 2,
+						"w": 7,
+						"h": 4
+					},
+					"frame": {
+						"x": 296,
+						"y": 121,
+						"w": 7,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Spritesheet/Main Ship - Engines - Supercharged Engine - Spritesheet-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 16
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 2,
+						"w": 7,
+						"h": 4
+					},
+					"frame": {
+						"x": 296,
+						"y": 121,
+						"w": 7,
+						"h": 4
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 7,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 460,
+						"y": 116,
+						"w": 7,
+						"h": 7
+					}
+				},
+				{
+					"filename": "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 12,
+						"h": 24
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 7,
+						"w": 7,
+						"h": 7
+					},
+					"frame": {
+						"x": 460,
+						"y": 116,
+						"w": 7,
+						"h": 7
 					}
 				}
 			]
@@ -519,6 +3039,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:09d815bc51d6411569b59feb860840b6:c4c328ce34e09fe238804ce0c7bed0da:76017b13b1c2ca405c07053c3f2f7567$"
+		"smartupdate": "$TexturePacker:SmartUpdate:03d72d141435256fd609a6b1fcda7909:91b2318777367d1246ac258371ab7446:76017b13b1c2ca405c07053c3f2f7567$"
 	}
 }

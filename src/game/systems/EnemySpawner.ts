@@ -22,11 +22,12 @@ export class EnemySpawner {
     const x = Phaser.Math.Between(24, GAME_WIDTH - 24);
     const y = -24;
     const speedY = Phaser.Math.Between(90, 160);
+    const hasShield = Phaser.Math.FloatBetween(0, 1) < 0.9;
 
     const enemy = this.enemies.get(x, y) as Enemy | null;
     if (!enemy) return;
 
-    enemy.spawn(x, y, speedY, this.enemyBullets);
+    enemy.spawn(x, y, speedY, this.enemyBullets, hasShield);
   }
 }
 
