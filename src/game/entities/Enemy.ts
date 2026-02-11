@@ -136,13 +136,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
    * Returns true if the enemy should be destroyed by this hit.
    * The first hit breaks the shield (1 HP), the second destroys the enemy.
    */
-  onPlayerBulletHit(): boolean {
+  onPlayerBulletHit(damage = 1): boolean {
     if (!this.active) return false;
 
     if (this.shieldHp > 0) {
       this.shieldHp = 0;
       this.breakShield();
-      return false;
+      // Shield absorbs 1 damage.
+      const remaining = Math.max(0, damage - 1);
+      return remaining > 0;
     }
 
     return true;

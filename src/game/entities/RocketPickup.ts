@@ -1,0 +1,58 @@
+import Phaser from "phaser";
+import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
+
+const PICKUP_SPEED_Y = 95;
+// TUNE PICKUP ICON SCALE HERE:
+const ROCKET_PICKUP_SCALE = 0.8; // -20%
+
+export class RocketPickup extends Phaser.Physics.Arcade.Sprite {
+  constructor(scene: Phaser.Scene, x: number, y: number) {
+    super(
+      scene,
+      x,
+      y,
+      ATLAS_KEYS.fx,
+      `${SPRITE_FRAMES.rocketPickupPrefix}${SPRITE_FRAMES.rocketPickupStart}${SPRITE_FRAMES.rocketPickupSuffix}`,
+    );
+
+    this.setActive(false);
+    this.setVisible(false);
+    this.setDepth(6);
+    this.setScale(ROCKET_PICKUP_SCALE);
+  }
+
+  spawn(x: number, y: number) {
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (!body) return;
+
+    this.setPosition(x, y);
+    this.setActive(true);
+    this.setVisible(true);
+
+    body.enable = true;
+    body.reset(x, y);
+    body.allowGravity = false;
+    this.setVelocity(0, PICKUP_SPEED_Y);
+
+    this.play("rocket_pickup", true);
+    body.setSize(this.displayWidth * 0.8, this.displayHeight * 0.8, true);
+  }
+
+  kill() {
+    this.setActive(false);
+    this.setVisible(false);
+    this.anims.stop();
+
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (body) {
+      body.stop();
+      body.enable = false;
+    }
+  }
+
+  update() {
+    if (!this.active) return;
+    if (this.y > GAME_HEIGHT + 64) this.kill();
+  }
+}
+

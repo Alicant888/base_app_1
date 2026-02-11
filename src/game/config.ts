@@ -196,6 +196,24 @@ export const SPRITE_FRAMES = {
   autoCannonBulletStart: 0,
   autoCannonBulletEnd: 3,
 
+  // Rocket pickup icon (atlas: FX)
+  rocketPickupPrefix: "PickupsPack/Weapons/Pickup Icon - Weapons - Rocket/Pickup Icon - Weapons - Rocket-",
+  rocketPickupSuffix: ".png",
+  rocketPickupStart: 0,
+  rocketPickupEnd: 9,
+
+  // Rockets weapon (atlas: MainShip) - left uses even frames, right uses odd frames.
+  rocketsWeaponPrefix: "Main Ship - Weapons/Main Ship - Weapons - Rockets/Main Ship - Weapons - Rockets-",
+  rocketsWeaponSuffix: ".png",
+  rocketsWeaponStart: 0,
+  rocketsWeaponEnd: 9,
+
+  // Rocket projectile (atlas: FX)
+  rocketProjectilePrefix: "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-",
+  rocketProjectileSuffix: ".png",
+  rocketProjectileStart: 0,
+  rocketProjectileEnd: 2,
+
   // Player round shield overlay (atlas: MainShip)
   playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
   playerShieldSuffix: ".png",
