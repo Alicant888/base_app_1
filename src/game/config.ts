@@ -214,6 +214,44 @@ export const SPRITE_FRAMES = {
   rocketProjectileStart: 0,
   rocketProjectileEnd: 2,
 
+  // Zapper pickup icon (atlas: FX)
+  zapperPickupPrefix: "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-",
+  zapperPickupSuffix: ".png",
+  zapperPickupStart: 0,
+  zapperPickupEnd: 9,
+
+  // Zapper weapon (atlas: MainShip)
+  zapperWeaponPrefix: "Main Ship - Weapons/Main Ship - Weapons - Zapper/Main Ship - Weapons - Zapper-",
+  zapperWeaponSuffix: ".png",
+  zapperWeaponStart: 0,
+  zapperWeaponEnd: 9,
+
+  // Zapper projectile (atlas: FX)
+  zapperProjectilePrefix: "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-",
+  zapperProjectileSuffix: ".png",
+  zapperProjectileStart: 0,
+  zapperProjectileEnd: 7,
+
+  // Big Space Gun 2000 pickup icon (atlas: FX)
+  bigSpaceGunPickupPrefix:
+    "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-",
+  bigSpaceGunPickupSuffix: ".png",
+  bigSpaceGunPickupStart: 0,
+  bigSpaceGunPickupEnd: 9,
+
+  // Big Space Gun weapon (atlas: MainShip)
+  bigSpaceGunWeaponPrefix: "Main Ship - Weapons/Main Ship - Weapons - Big Space Gun/Main Ship - Weapons - Big Space Gun-",
+  bigSpaceGunWeaponSuffix: ".png",
+  bigSpaceGunWeaponStart: 0,
+  bigSpaceGunWeaponEnd: 9,
+
+  // Big Space Gun projectile (atlas: FX)
+  bigSpaceGunProjectilePrefix:
+    "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-",
+  bigSpaceGunProjectileSuffix: ".png",
+  bigSpaceGunProjectileStart: 0,
+  bigSpaceGunProjectileEnd: 9,
+
   // Player round shield overlay (atlas: MainShip)
   playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
   playerShieldSuffix: ".png",

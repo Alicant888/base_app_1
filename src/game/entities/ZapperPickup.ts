@@ -3,22 +3,22 @@ import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
 const PICKUP_SPEED_Y = 95;
 // TUNE PICKUP ICON SCALE HERE:
-const AUTO_CANNONS_PICKUP_SCALE = 0.8; // -20%
+const ZAPPER_PICKUP_SCALE = 0.8; // -20%
 
-export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
+export class ZapperPickup extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(
       scene,
       x,
       y,
       ATLAS_KEYS.fx,
-      `${SPRITE_FRAMES.autoCannonsPickupPrefix}${SPRITE_FRAMES.autoCannonsPickupStart}${SPRITE_FRAMES.autoCannonsPickupSuffix}`,
+      `${SPRITE_FRAMES.zapperPickupPrefix}${SPRITE_FRAMES.zapperPickupStart}${SPRITE_FRAMES.zapperPickupSuffix}`,
     );
 
     this.setActive(false);
     this.setVisible(false);
     this.setDepth(6);
-    this.setScale(AUTO_CANNONS_PICKUP_SCALE);
+    this.setScale(ZAPPER_PICKUP_SCALE);
   }
 
   spawn(x: number, y: number) {
@@ -34,7 +34,7 @@ export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
     body.allowGravity = false;
     this.setVelocity(0, PICKUP_SPEED_Y);
 
-    this.play("auto_cannons_pickup", true);
+    this.play("zapper_pickup", true);
     body.setSize(this.displayWidth * 0.8, this.displayHeight * 0.8, true);
   }
 

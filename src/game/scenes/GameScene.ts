@@ -3,6 +3,8 @@ import { BaseEnginePickup } from "../entities/BaseEnginePickup";
 import { AutoCannonBullet } from "../entities/AutoCannonBullet";
 import { AutoCannonsPickup } from "../entities/AutoCannonsPickup";
 import { BigPulseEnginePickup } from "../entities/BigPulseEnginePickup";
+import { BigSpaceGunPickup } from "../entities/BigSpaceGunPickup";
+import { BigSpaceGunProjectile } from "../entities/BigSpaceGunProjectile";
 import { Bullet } from "../entities/Bullet";
 import { BurstEnginePickup } from "../entities/BurstEnginePickup";
 import { Enemy } from "../entities/Enemy";
@@ -11,6 +13,8 @@ import { FiringRatePickup } from "../entities/FiringRatePickup";
 import { HealthPickup } from "../entities/HealthPickup";
 import { RocketPickup } from "../entities/RocketPickup";
 import { RocketProjectile } from "../entities/RocketProjectile";
+import { ZapperPickup } from "../entities/ZapperPickup";
+import { ZapperProjectile } from "../entities/ZapperProjectile";
 import { SuperchargedEnginePickup } from "../entities/SuperchargedEnginePickup";
 import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
@@ -83,6 +87,29 @@ const ROCKET_PROJECTILE_SPREAD_MULTIPLIER = 0.7;
 // - Frame ...Rockets-4 => fire a pair (left+right) in parallel
 const ROCKET_WEAPON_FIRE_FRAME = `${SPRITE_FRAMES.rocketsWeaponPrefix}4${SPRITE_FRAMES.rocketsWeaponSuffix}`;
 
+// TUNE WEAPON OFFSETS HERE (Zapper):
+// - Weapon sprite position is relative to the player.
+// - Projectile spawn is relative to the weapon sprite (muzzles).
+const ZAPPER_DAMAGE = 4;
+const ZAPPER_WEAPON_OFFSET_X = 0;
+const ZAPPER_WEAPON_OFFSET_Y = -2;
+const ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_Y = -6;
+const ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_X_L = -7;
+const ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_X_R = 7;
+
+// Zapper firing is synced to the weapon animation frames:
+// - Frame ...Zapper-7 => fire both projectiles (left + right) simultaneously
+const ZAPPER_WEAPON_FIRE_FRAME = `${SPRITE_FRAMES.zapperWeaponPrefix}7${SPRITE_FRAMES.zapperWeaponSuffix}`;
+
+// TUNE WEAPON OFFSETS HERE (Big Space Gun):
+const BIG_SPACE_GUN_DAMAGE = 5;
+const BIG_SPACE_GUN_WEAPON_OFFSET_X = 0;
+const BIG_SPACE_GUN_WEAPON_OFFSET_Y = -2;
+const BIG_SPACE_GUN_PROJECTILE_FROM_WEAPON_OFFSET_X = 0;
+const BIG_SPACE_GUN_PROJECTILE_FROM_WEAPON_OFFSET_Y = -10;
+// Fire a single centered projectile on this weapon frame:
+const BIG_SPACE_GUN_WEAPON_FIRE_FRAME = `${SPRITE_FRAMES.bigSpaceGunWeaponPrefix}7${SPRITE_FRAMES.bigSpaceGunWeaponSuffix}`;
+
 export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
   private bgNebula!: Phaser.GameObjects.TileSprite;
@@ -92,6 +119,8 @@ export class GameScene extends Phaser.Scene {
   private bullets!: Phaser.Physics.Arcade.Group;
   private autoCannonBullets!: Phaser.Physics.Arcade.Group;
   private rocketProjectiles!: Phaser.Physics.Arcade.Group;
+  private zapperProjectiles!: Phaser.Physics.Arcade.Group;
+  private bigSpaceGunProjectiles!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
   private shieldPickups!: Phaser.Physics.Arcade.Group;
@@ -99,6 +128,8 @@ export class GameScene extends Phaser.Scene {
   private firingRatePickups!: Phaser.Physics.Arcade.Group;
   private autoCannonsPickups!: Phaser.Physics.Arcade.Group;
   private rocketPickups!: Phaser.Physics.Arcade.Group;
+  private zapperPickups!: Phaser.Physics.Arcade.Group;
+  private bigSpaceGunPickups!: Phaser.Physics.Arcade.Group;
   private baseEnginePickups!: Phaser.Physics.Arcade.Group;
   private superchargedEnginePickups!: Phaser.Physics.Arcade.Group;
   private burstEnginePickups!: Phaser.Physics.Arcade.Group;
@@ -131,9 +162,13 @@ export class GameScene extends Phaser.Scene {
 
   private hasAutoCannons = false;
   private hasRockets = false;
+  private hasZapper = false;
+  private hasBigSpaceGun = false;
   private autoCannonWeaponSprite?: Phaser.GameObjects.Sprite;
   private rocketWeaponL?: Phaser.GameObjects.Sprite;
   private rocketWeaponR?: Phaser.GameObjects.Sprite;
+  private zapperWeaponSprite?: Phaser.GameObjects.Sprite;
+  private bigSpaceGunWeaponSprite?: Phaser.GameObjects.Sprite;
   private lastRocketShotAt = 0;
 
   constructor() {
@@ -155,6 +190,8 @@ export class GameScene extends Phaser.Scene {
     this.activeEngineType = null;
     this.hasAutoCannons = false;
     this.hasRockets = false;
+    this.hasZapper = false;
+    this.hasBigSpaceGun = false;
 
     this.destroyPlayerEngineFx();
     this.destroyPlayerWeaponFx();
@@ -184,6 +221,18 @@ export class GameScene extends Phaser.Scene {
 
     this.rocketProjectiles = this.physics.add.group({
       classType: RocketProjectile,
+      maxSize: 80,
+      runChildUpdate: true,
+    });
+
+    this.zapperProjectiles = this.physics.add.group({
+      classType: ZapperProjectile,
+      maxSize: 120,
+      runChildUpdate: true,
+    });
+
+    this.bigSpaceGunProjectiles = this.physics.add.group({
+      classType: BigSpaceGunProjectile,
       maxSize: 80,
       runChildUpdate: true,
     });
@@ -220,6 +269,18 @@ export class GameScene extends Phaser.Scene {
 
     this.rocketPickups = this.physics.add.group({
       classType: RocketPickup,
+      maxSize: 12,
+      runChildUpdate: true,
+    });
+
+    this.zapperPickups = this.physics.add.group({
+      classType: ZapperPickup,
+      maxSize: 12,
+      runChildUpdate: true,
+    });
+
+    this.bigSpaceGunPickups = this.physics.add.group({
+      classType: BigSpaceGunPickup,
       maxSize: 12,
       runChildUpdate: true,
     });
@@ -290,6 +351,22 @@ export class GameScene extends Phaser.Scene {
       undefined,
       this,
     );
+
+    this.physics.add.overlap(
+      this.zapperProjectiles,
+      this.enemies,
+      this.onZapperHitsEnemy as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.bigSpaceGunProjectiles,
+      this.enemies,
+      this.onBigSpaceGunHitsEnemy as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
     this.physics.add.overlap(
       this.player,
       this.enemies,
@@ -342,6 +419,22 @@ export class GameScene extends Phaser.Scene {
       this.player,
       this.rocketPickups,
       this.onRocketPickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.zapperPickups,
+      this.onZapperPickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.bigSpaceGunPickups,
+      this.onBigSpaceGunPickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
       undefined,
       this,
     );
@@ -562,6 +655,58 @@ export class GameScene extends Phaser.Scene {
     return true;
   }
 
+  private spawnZapperProjectile(x: number, y: number): boolean {
+    const proj = this.zapperProjectiles.get(x, y) as ZapperProjectile | null;
+    if (!proj) return false;
+    proj.fire(x, y);
+    return true;
+  }
+
+  private spawnBigSpaceGunProjectile(x: number, y: number): boolean {
+    const proj = this.bigSpaceGunProjectiles.get(x, y) as BigSpaceGunProjectile | null;
+    if (!proj) return false;
+    proj.fire(x, y);
+    return true;
+  }
+
+  private fireZapperBarrel(side: "left" | "right") {
+    if (this.isGameOver) return;
+    if (!this.player.active) return;
+    if (!this.hasZapper) return;
+
+    const wx = this.zapperWeaponSprite?.visible ? this.zapperWeaponSprite.x : this.player.x + ZAPPER_WEAPON_OFFSET_X;
+    const wy = this.zapperWeaponSprite?.visible ? this.zapperWeaponSprite.y : this.player.y + ZAPPER_WEAPON_OFFSET_Y;
+
+    const xOffset = side === "left" ? ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_X_L : ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_X_R;
+    const x = wx + xOffset;
+    const y = wy + ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_Y;
+
+    const fired = this.spawnZapperProjectile(x, y);
+    if (fired && side === "left") {
+      this.playSfx(AUDIO_KEYS.laserShort, 0.3);
+    }
+  }
+
+  private fireZapperPair() {
+    this.fireZapperBarrel("left");
+    this.fireZapperBarrel("right");
+  }
+
+  private fireBigSpaceGunShot() {
+    if (this.isGameOver) return;
+    if (!this.player.active) return;
+    if (!this.hasBigSpaceGun) return;
+
+    const wx = this.bigSpaceGunWeaponSprite?.visible ? this.bigSpaceGunWeaponSprite.x : this.player.x + BIG_SPACE_GUN_WEAPON_OFFSET_X;
+    const wy = this.bigSpaceGunWeaponSprite?.visible ? this.bigSpaceGunWeaponSprite.y : this.player.y + BIG_SPACE_GUN_WEAPON_OFFSET_Y;
+
+    const x = wx + BIG_SPACE_GUN_PROJECTILE_FROM_WEAPON_OFFSET_X;
+    const y = wy + BIG_SPACE_GUN_PROJECTILE_FROM_WEAPON_OFFSET_Y;
+
+    const fired = this.spawnBigSpaceGunProjectile(x, y);
+    if (fired) this.playSfx(AUDIO_KEYS.laserShort, 0.33);
+  }
+
   private fireRocketsPair() {
     if (this.isGameOver) return;
     if (!this.player.active) return;
@@ -610,11 +755,23 @@ export class GameScene extends Phaser.Scene {
   ) {
     if (this.isGameOver) return;
     if (!this.player.active) return;
-    if (!this.hasAutoCannons) return;
-    if (animation.key !== "auto_cannon_weapon") return;
+    if (animation.key === "auto_cannon_weapon") {
+      if (!this.hasAutoCannons) return;
+      if (frameKey === AUTO_CANNON_WEAPON_FIRE_LEFT_FRAME) this.fireAutoCannonBarrel("left");
+      else if (frameKey === AUTO_CANNON_WEAPON_FIRE_RIGHT_FRAME) this.fireAutoCannonBarrel("right");
+      return;
+    }
 
-    if (frameKey === AUTO_CANNON_WEAPON_FIRE_LEFT_FRAME) this.fireAutoCannonBarrel("left");
-    else if (frameKey === AUTO_CANNON_WEAPON_FIRE_RIGHT_FRAME) this.fireAutoCannonBarrel("right");
+    if (animation.key === "zapper_weapon") {
+      if (!this.hasZapper) return;
+      if (frameKey === ZAPPER_WEAPON_FIRE_FRAME) this.fireZapperPair();
+      return;
+    }
+
+    if (animation.key === "big_space_gun_weapon") {
+      if (!this.hasBigSpaceGun) return;
+      if (frameKey === BIG_SPACE_GUN_WEAPON_FIRE_FRAME) this.fireBigSpaceGunShot();
+    }
   }
 
   private onRocketsAnimationUpdate(
@@ -665,6 +822,46 @@ export class GameScene extends Phaser.Scene {
 
     rocket.kill();
     const destroyed = enemy.onPlayerBulletHit(ROCKET_DAMAGE_MULTIPLIER);
+
+    if (destroyed) {
+      enemy.kill();
+
+      this.spawnExplosion(enemy.x, enemy.y);
+      this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
+      this.kills += 1;
+
+      this.maybeSpawnPickup(enemy.x, enemy.y);
+    }
+  }
+
+  private onZapperHitsEnemy(projObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
+    const proj = projObj as ZapperProjectile;
+    const enemy = enemyObj as Enemy;
+
+    if (!proj.active || !enemy.active) return;
+
+    proj.kill();
+    const destroyed = enemy.onPlayerBulletHit(ZAPPER_DAMAGE);
+
+    if (destroyed) {
+      enemy.kill();
+
+      this.spawnExplosion(enemy.x, enemy.y);
+      this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
+      this.kills += 1;
+
+      this.maybeSpawnPickup(enemy.x, enemy.y);
+    }
+  }
+
+  private onBigSpaceGunHitsEnemy(projObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
+    const proj = projObj as BigSpaceGunProjectile;
+    const enemy = enemyObj as Enemy;
+
+    if (!proj.active || !enemy.active) return;
+
+    proj.kill();
+    const destroyed = enemy.onPlayerBulletHit(BIG_SPACE_GUN_DAMAGE);
 
     if (destroyed) {
       enemy.kill();
@@ -734,6 +931,22 @@ export class GameScene extends Phaser.Scene {
 
     pickup.kill();
     this.activateRockets();
+  }
+
+  private onZapperPickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as ZapperPickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.activateZapper();
+  }
+
+  private onBigSpaceGunPickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as BigSpaceGunPickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.activateBigSpaceGun();
   }
 
   private onBaseEnginePickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
@@ -889,11 +1102,25 @@ export class GameScene extends Phaser.Scene {
     pickup.spawn(x, y);
   }
 
+  private spawnZapperPickup(x: number, y: number) {
+    const pickup = this.zapperPickups.get(x, y) as ZapperPickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
+  private spawnBigSpaceGunPickup(x: number, y: number) {
+    const pickup = this.bigSpaceGunPickups.get(x, y) as BigSpaceGunPickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
   private maybeSpawnPickup(x: number, y: number) {
     if (this.isGameOver) return;
 
     // Spawn at most one pickup to avoid clutter, using exact probabilities:
-    // - Rocket: 50%
+    // - Big Space Gun: 50%
+    // - Zapper: 1%
+    // - Rocket: 1%
     // - Auto Cannons: 1%
     // - Base engine: 1%
     // - Supercharged engine: 1%
@@ -903,15 +1130,17 @@ export class GameScene extends Phaser.Scene {
     // - Firing rate: 4%
     // - Shield: 4%
     const r = Phaser.Math.FloatBetween(0, 1);
-    if (r < 0.5) this.spawnRocketPickup(x, y);
-    else if (r < 0.51) this.spawnAutoCannonsPickup(x, y);
-    else if (r < 0.52) this.spawnBaseEnginePickup(x, y);
-    else if (r < 0.53) this.spawnSuperchargedEnginePickup(x, y);
-    else if (r < 0.54) this.spawnBurstEnginePickup(x, y);
-    else if (r < 0.55) this.spawnBigPulseEnginePickup(x, y);
-    else if (r < 0.58) this.spawnHealthPickup(x, y);
-    else if (r < 0.62) this.spawnFiringRatePickup(x, y);
-    else if (r < 0.66) this.spawnShieldPickup(x, y);
+    if (r < 0.5) this.spawnBigSpaceGunPickup(x, y);
+    else if (r < 0.51) this.spawnZapperPickup(x, y);
+    else if (r < 0.52) this.spawnRocketPickup(x, y);
+    else if (r < 0.53) this.spawnAutoCannonsPickup(x, y);
+    else if (r < 0.54) this.spawnBaseEnginePickup(x, y);
+    else if (r < 0.55) this.spawnSuperchargedEnginePickup(x, y);
+    else if (r < 0.56) this.spawnBurstEnginePickup(x, y);
+    else if (r < 0.57) this.spawnBigPulseEnginePickup(x, y);
+    else if (r < 0.6) this.spawnHealthPickup(x, y);
+    else if (r < 0.64) this.spawnFiringRatePickup(x, y);
+    else if (r < 0.68) this.spawnShieldPickup(x, y);
   }
 
   private triggerGameOver() {
@@ -1155,6 +1384,26 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.createLoopAnimIfFrames(
+      "zapper_pickup",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.zapperPickupPrefix,
+      SPRITE_FRAMES.zapperPickupStart,
+      SPRITE_FRAMES.zapperPickupEnd,
+      SPRITE_FRAMES.zapperPickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
+      "big_space_gun_pickup",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.bigSpaceGunPickupPrefix,
+      SPRITE_FRAMES.bigSpaceGunPickupStart,
+      SPRITE_FRAMES.bigSpaceGunPickupEnd,
+      SPRITE_FRAMES.bigSpaceGunPickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
       "base_engine_pickup",
       ATLAS_KEYS.fx,
       SPRITE_FRAMES.baseEnginePickupPrefix,
@@ -1261,6 +1510,46 @@ export class GameScene extends Phaser.Scene {
       SPRITE_FRAMES.rocketProjectileStart,
       SPRITE_FRAMES.rocketProjectileEnd,
       SPRITE_FRAMES.rocketProjectileSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "zapper_weapon",
+      ATLAS_KEYS.ship,
+      SPRITE_FRAMES.zapperWeaponPrefix,
+      SPRITE_FRAMES.zapperWeaponStart,
+      SPRITE_FRAMES.zapperWeaponEnd,
+      SPRITE_FRAMES.zapperWeaponSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "zapper_projectile",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.zapperProjectilePrefix,
+      SPRITE_FRAMES.zapperProjectileStart,
+      SPRITE_FRAMES.zapperProjectileEnd,
+      SPRITE_FRAMES.zapperProjectileSuffix,
+      16.2, // slowed by 10%
+    );
+
+    this.createLoopAnimIfFrames(
+      "big_space_gun_weapon",
+      ATLAS_KEYS.ship,
+      SPRITE_FRAMES.bigSpaceGunWeaponPrefix,
+      SPRITE_FRAMES.bigSpaceGunWeaponStart,
+      SPRITE_FRAMES.bigSpaceGunWeaponEnd,
+      SPRITE_FRAMES.bigSpaceGunWeaponSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "big_space_gun_projectile",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.bigSpaceGunProjectilePrefix,
+      SPRITE_FRAMES.bigSpaceGunProjectileStart,
+      SPRITE_FRAMES.bigSpaceGunProjectileEnd,
+      SPRITE_FRAMES.bigSpaceGunProjectileSuffix,
       18,
     );
 
@@ -1531,6 +1820,65 @@ export class GameScene extends Phaser.Scene {
     this.syncPlayerWeaponFx();
   }
 
+  private activateZapper() {
+    this.hasZapper = true;
+
+    const weaponFrame = `${SPRITE_FRAMES.zapperWeaponPrefix}${SPRITE_FRAMES.zapperWeaponStart}${SPRITE_FRAMES.zapperWeaponSuffix}`;
+
+    if (!this.zapperWeaponSprite) {
+      this.zapperWeaponSprite = this.add
+        .sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, weaponFrame)
+        .setDepth(DEPTH_WEAPON)
+        .setScale(1);
+    }
+
+    this.zapperWeaponSprite.setVisible(true);
+    this.zapperWeaponSprite.setDepth(DEPTH_WEAPON);
+    this.zapperWeaponSprite.setFrame(weaponFrame);
+
+    try {
+      this.zapperWeaponSprite.play("zapper_weapon", true);
+    } catch {
+      // ignore
+    }
+
+    // Sync zapper shots to animation frames (frame -1 => left, frame -2 => right).
+    this.zapperWeaponSprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, this.onWeaponAnimationUpdate, this);
+    this.zapperWeaponSprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, this.onWeaponAnimationUpdate, this);
+
+    if (this.shieldFx) this.shieldFx.setDepth(DEPTH_SHIELD);
+    this.syncPlayerWeaponFx();
+  }
+
+  private activateBigSpaceGun() {
+    this.hasBigSpaceGun = true;
+
+    const weaponFrame = `${SPRITE_FRAMES.bigSpaceGunWeaponPrefix}${SPRITE_FRAMES.bigSpaceGunWeaponStart}${SPRITE_FRAMES.bigSpaceGunWeaponSuffix}`;
+
+    if (!this.bigSpaceGunWeaponSprite) {
+      this.bigSpaceGunWeaponSprite = this.add
+        .sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, weaponFrame)
+        .setDepth(DEPTH_WEAPON)
+        .setScale(1);
+    }
+
+    this.bigSpaceGunWeaponSprite.setVisible(true);
+    this.bigSpaceGunWeaponSprite.setDepth(DEPTH_WEAPON);
+    this.bigSpaceGunWeaponSprite.setFrame(weaponFrame);
+
+    try {
+      this.bigSpaceGunWeaponSprite.play("big_space_gun_weapon", true);
+    } catch {
+      // ignore
+    }
+
+    this.bigSpaceGunWeaponSprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, this.onWeaponAnimationUpdate, this);
+    this.bigSpaceGunWeaponSprite.on(Phaser.Animations.Events.ANIMATION_UPDATE, this.onWeaponAnimationUpdate, this);
+
+    if (this.shieldFx) this.shieldFx.setDepth(DEPTH_SHIELD);
+    this.syncPlayerWeaponFx();
+  }
+
   private syncPlayerWeaponFx() {
     if (this.autoCannonWeaponSprite) {
       if (!this.hasAutoCannons) {
@@ -1558,6 +1906,29 @@ export class GameScene extends Phaser.Scene {
         this.rocketWeaponR.setPosition(this.player.x + ROCKET_WEAPON_OFFSET_X_R, this.player.y + ROCKET_WEAPON_OFFSET_Y_R);
       }
     }
+
+    if (this.zapperWeaponSprite) {
+      if (!this.hasZapper) {
+        this.zapperWeaponSprite.setVisible(false);
+      } else {
+        this.zapperWeaponSprite.setVisible(true);
+        this.zapperWeaponSprite.setDepth(DEPTH_WEAPON);
+        this.zapperWeaponSprite.setPosition(this.player.x + ZAPPER_WEAPON_OFFSET_X, this.player.y + ZAPPER_WEAPON_OFFSET_Y);
+      }
+    }
+
+    if (this.bigSpaceGunWeaponSprite) {
+      if (!this.hasBigSpaceGun) {
+        this.bigSpaceGunWeaponSprite.setVisible(false);
+      } else {
+        this.bigSpaceGunWeaponSprite.setVisible(true);
+        this.bigSpaceGunWeaponSprite.setDepth(DEPTH_WEAPON);
+        this.bigSpaceGunWeaponSprite.setPosition(
+          this.player.x + BIG_SPACE_GUN_WEAPON_OFFSET_X,
+          this.player.y + BIG_SPACE_GUN_WEAPON_OFFSET_Y,
+        );
+      }
+    }
   }
 
   private destroyPlayerWeaponFx() {
@@ -1567,6 +1938,10 @@ export class GameScene extends Phaser.Scene {
     this.rocketWeaponL = undefined;
     this.rocketWeaponR?.destroy();
     this.rocketWeaponR = undefined;
+    this.zapperWeaponSprite?.destroy();
+    this.zapperWeaponSprite = undefined;
+    this.bigSpaceGunWeaponSprite?.destroy();
+    this.bigSpaceGunWeaponSprite = undefined;
   }
 
   private activateBaseEngine() {

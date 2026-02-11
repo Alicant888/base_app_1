@@ -1,27 +1,27 @@
 import Phaser from "phaser";
 import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
-const PICKUP_SPEED_Y = 95;
-// TUNE PICKUP ICON SCALE HERE:
-const AUTO_CANNONS_PICKUP_SCALE = 0.8; // -20%
+const ZAPPER_PROJECTILE_SPEED = 420;
+// TUNE PROJECTILE SCALE HERE:
+const ZAPPER_PROJECTILE_SCALE = 0.85;
 
-export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
+export class ZapperProjectile extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(
       scene,
       x,
       y,
       ATLAS_KEYS.fx,
-      `${SPRITE_FRAMES.autoCannonsPickupPrefix}${SPRITE_FRAMES.autoCannonsPickupStart}${SPRITE_FRAMES.autoCannonsPickupSuffix}`,
+      `${SPRITE_FRAMES.zapperProjectilePrefix}${SPRITE_FRAMES.zapperProjectileStart}${SPRITE_FRAMES.zapperProjectileSuffix}`,
     );
 
     this.setActive(false);
     this.setVisible(false);
-    this.setDepth(6);
-    this.setScale(AUTO_CANNONS_PICKUP_SCALE);
+    this.setDepth(4);
+    this.setScale(ZAPPER_PROJECTILE_SCALE);
   }
 
-  spawn(x: number, y: number) {
+  fire(x: number, y: number) {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return;
 
@@ -32,10 +32,11 @@ export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
     body.enable = true;
     body.reset(x, y);
     body.allowGravity = false;
-    this.setVelocity(0, PICKUP_SPEED_Y);
 
-    this.play("auto_cannons_pickup", true);
-    body.setSize(this.displayWidth * 0.8, this.displayHeight * 0.8, true);
+    this.setVelocity(0, -ZAPPER_PROJECTILE_SPEED);
+    this.play("zapper_projectile", true);
+
+    body.setSize(this.displayWidth * 0.7, this.displayHeight * 0.7, true);
   }
 
   kill() {
@@ -52,7 +53,8 @@ export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
 
   update() {
     if (!this.active) return;
-    if (this.y > GAME_HEIGHT + 64) this.kill();
+    if (this.y < -48) this.kill();
+    if (this.y > GAME_HEIGHT + 48) this.kill();
   }
 }
 
