@@ -125,6 +125,23 @@ export const SPRITE_FRAMES = {
   baseEngineFlameStart: 0,
   baseEngineFlameEnd: 7,
 
+  // Supercharged engine pickup icon (atlas: FX)
+  superchargedEnginePickupPrefix:
+    "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-",
+  superchargedEnginePickupSuffix: ".png",
+  superchargedEnginePickupStart: 0,
+  superchargedEnginePickupEnd: 9,
+
+  // Supercharged engine sprite (atlas: MainShip)
+  superchargedEngineSprite: "Main Ship - Engines/Main Ship - Engines - Supercharged Engine.png",
+
+  // Supercharged engine flame (atlas: MainShip)
+  superchargedEngineFlamePrefix:
+    "Main Ship - Engine Effects/Main Ship - Engines - Supercharged Engine - Powering/Main Ship - Engines - Supercharged Engine - Powering-",
+  superchargedEngineFlameSuffix: ".png",
+  superchargedEngineFlameStart: 0,
+  superchargedEngineFlameEnd: 7,
+
   // Player round shield overlay (atlas: MainShip)
   playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
   playerShieldSuffix: ".png",

@@ -5,6 +5,7 @@ import { Enemy } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
 import { FiringRatePickup } from "../entities/FiringRatePickup";
 import { HealthPickup } from "../entities/HealthPickup";
+import { SuperchargedEnginePickup } from "../entities/SuperchargedEnginePickup";
 import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
 import { EnemySpawner } from "../systems/EnemySpawner";
@@ -26,6 +27,12 @@ const BASE_ENGINE_OFFSET_Y = 2;
 const BASE_ENGINE_FLAME_OFFSET_Y = 17;
 const BASE_ENGINE_FLAME_SPACING_X = 7;
 
+// TUNE ENGINE FX OFFSETS HERE (Supercharged Engine):
+// - Separate tuning from Base Engine.
+const SUPERCHARGED_ENGINE_OFFSET_Y = 2;
+const SUPERCHARGED_ENGINE_FLAME_OFFSET_Y = 18;
+const SUPERCHARGED_ENGINE_FLAME_SPACING_X = 7;
+
 export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
   private bgNebula!: Phaser.GameObjects.TileSprite;
@@ -39,6 +46,7 @@ export class GameScene extends Phaser.Scene {
   private healthPickups!: Phaser.Physics.Arcade.Group;
   private firingRatePickups!: Phaser.Physics.Arcade.Group;
   private baseEnginePickups!: Phaser.Physics.Arcade.Group;
+  private superchargedEnginePickups!: Phaser.Physics.Arcade.Group;
   private spawner!: EnemySpawner;
 
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -58,6 +66,7 @@ export class GameScene extends Phaser.Scene {
   private engineSprite?: Phaser.GameObjects.Image;
   private engineFlameL?: Phaser.GameObjects.Sprite;
   private engineFlameR?: Phaser.GameObjects.Sprite;
+  private activeEngineType: "base" | "supercharged" | null = null;
   private fireRateMultiplier = 1;
 
   private lifeIcons: Phaser.GameObjects.Image[] = [];
@@ -80,6 +89,7 @@ export class GameScene extends Phaser.Scene {
     this.moveSpeedMultiplier = 1;
     this.draggingPointerId = null;
     this.hasDragTarget = false;
+    this.activeEngineType = null;
 
     this.destroyPlayerEngineFx();
 
@@ -126,6 +136,12 @@ export class GameScene extends Phaser.Scene {
 
     this.baseEnginePickups = this.physics.add.group({
       classType: BaseEnginePickup,
+      maxSize: 12,
+      runChildUpdate: true,
+    });
+
+    this.superchargedEnginePickups = this.physics.add.group({
+      classType: SuperchargedEnginePickup,
       maxSize: 12,
       runChildUpdate: true,
     });
@@ -200,6 +216,14 @@ export class GameScene extends Phaser.Scene {
       this.player,
       this.baseEnginePickups,
       this.onBaseEnginePickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.superchargedEnginePickups,
+      this.onSuperchargedEnginePickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
       undefined,
       this,
     );
@@ -448,6 +472,14 @@ export class GameScene extends Phaser.Scene {
     this.activateBaseEngine();
   }
 
+  private onSuperchargedEnginePickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as SuperchargedEnginePickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.activateSuperchargedEngine();
+  }
+
   private takeHit() {
     if (this.isGameOver) return;
 
@@ -561,15 +593,17 @@ export class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
 
     // Spawn at most one pickup to avoid clutter, using exact probabilities:
-    // - Base engine: 50% (for now, for testing)
+    // - Supercharged engine: 50%
+    // - Base engine: 0.1%
     // - Health: 3%
     // - Firing rate: 4%
     // - Shield: 4%
     const r = Phaser.Math.FloatBetween(0, 1);
-    if (r < 0.5) this.spawnBaseEnginePickup(x, y);
-    else if (r < 0.5 + 0.03) this.spawnHealthPickup(x, y);
-    else if (r < 0.5 + 0.03 + 0.04) this.spawnFiringRatePickup(x, y);
-    else if (r < 0.5 + 0.03 + 0.04 + 0.04) this.spawnShieldPickup(x, y);
+    if (r < 0.5) this.spawnSuperchargedEnginePickup(x, y);
+    else if (r < 0.5 + 0.001) this.spawnBaseEnginePickup(x, y);
+    else if (r < 0.5 + 0.001 + 0.03) this.spawnHealthPickup(x, y);
+    else if (r < 0.5 + 0.001 + 0.03 + 0.04) this.spawnFiringRatePickup(x, y);
+    else if (r < 0.5 + 0.001 + 0.03 + 0.04 + 0.04) this.spawnShieldPickup(x, y);
   }
 
   private triggerGameOver() {
@@ -804,12 +838,32 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.createLoopAnimIfFrames(
+      "supercharged_engine_pickup",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.superchargedEnginePickupPrefix,
+      SPRITE_FRAMES.superchargedEnginePickupStart,
+      SPRITE_FRAMES.superchargedEnginePickupEnd,
+      SPRITE_FRAMES.superchargedEnginePickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
       "base_engine_flame",
       ATLAS_KEYS.ship,
       SPRITE_FRAMES.baseEngineFlamePrefix,
       SPRITE_FRAMES.baseEngineFlameStart,
       SPRITE_FRAMES.baseEngineFlameEnd,
       SPRITE_FRAMES.baseEngineFlameSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "supercharged_engine_flame",
+      ATLAS_KEYS.ship,
+      SPRITE_FRAMES.superchargedEngineFlamePrefix,
+      SPRITE_FRAMES.superchargedEngineFlameStart,
+      SPRITE_FRAMES.superchargedEngineFlameEnd,
+      SPRITE_FRAMES.superchargedEngineFlameSuffix,
       18,
     );
 
@@ -945,9 +999,16 @@ export class GameScene extends Phaser.Scene {
     pickup.spawn(x, y);
   }
 
+  private spawnSuperchargedEnginePickup(x: number, y: number) {
+    const pickup = this.superchargedEnginePickups.get(x, y) as SuperchargedEnginePickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
   private activateBaseEngine() {
     // +25% move speed.
     this.moveSpeedMultiplier = 1.25;
+    this.activeEngineType = "base";
 
     // Engine sprite above the ship.
     if (!this.engineSprite) {
@@ -956,6 +1017,7 @@ export class GameScene extends Phaser.Scene {
         .setDepth(DEPTH_ENGINE)
         .setScale(1);
     }
+    this.engineSprite.setFrame(SPRITE_FRAMES.baseEngineSprite);
     this.engineSprite.setVisible(true);
     this.engineSprite.setDepth(DEPTH_ENGINE);
 
@@ -988,18 +1050,70 @@ export class GameScene extends Phaser.Scene {
     this.syncPlayerEngineFx();
   }
 
+  private activateSuperchargedEngine() {
+    // +50% move speed.
+    this.moveSpeedMultiplier = 1.5;
+    this.activeEngineType = "supercharged";
+
+    if (!this.engineSprite) {
+      this.engineSprite = this.add
+        .image(this.player.x, this.player.y, ATLAS_KEYS.ship, SPRITE_FRAMES.superchargedEngineSprite)
+        .setDepth(DEPTH_ENGINE)
+        .setScale(1);
+    }
+    this.engineSprite.setFrame(SPRITE_FRAMES.superchargedEngineSprite);
+    this.engineSprite.setVisible(true);
+    this.engineSprite.setDepth(DEPTH_ENGINE);
+
+    const flameFrame = `${SPRITE_FRAMES.superchargedEngineFlamePrefix}${SPRITE_FRAMES.superchargedEngineFlameStart}${SPRITE_FRAMES.superchargedEngineFlameSuffix}`;
+
+    if (!this.engineFlameL) {
+      this.engineFlameL = this.add
+        .sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, flameFrame)
+        .setDepth(DEPTH_ENGINE_FLAMES)
+        .setScale(1);
+    }
+    if (!this.engineFlameR) {
+      this.engineFlameR = this.add
+        .sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, flameFrame)
+        .setDepth(DEPTH_ENGINE_FLAMES)
+        .setScale(1);
+    }
+
+    this.engineFlameL.setVisible(true);
+    this.engineFlameR.setVisible(true);
+    this.engineFlameL.setDepth(DEPTH_ENGINE_FLAMES);
+    this.engineFlameR.setDepth(DEPTH_ENGINE_FLAMES);
+
+    try {
+      this.engineFlameL.play("supercharged_engine_flame", true);
+      this.engineFlameR.play("supercharged_engine_flame", true);
+    } catch {
+      // ignore
+    }
+
+    if (this.shieldFx) this.shieldFx.setDepth(DEPTH_SHIELD);
+    this.syncPlayerEngineFx();
+  }
+
   private syncPlayerEngineFx() {
     if (!this.engineSprite) return;
     if (!this.engineSprite.visible) return;
 
     const engineX = this.player.x;
-    const engineY = this.player.y + BASE_ENGINE_OFFSET_Y;
+    const engineOffsetY = this.activeEngineType === "supercharged" ? SUPERCHARGED_ENGINE_OFFSET_Y : BASE_ENGINE_OFFSET_Y;
+    const flameOffsetY =
+      this.activeEngineType === "supercharged" ? SUPERCHARGED_ENGINE_FLAME_OFFSET_Y : BASE_ENGINE_FLAME_OFFSET_Y;
+    const flameSpacingX =
+      this.activeEngineType === "supercharged" ? SUPERCHARGED_ENGINE_FLAME_SPACING_X : BASE_ENGINE_FLAME_SPACING_X;
+
+    const engineY = this.player.y + engineOffsetY;
     this.engineSprite.setPosition(engineX, engineY);
 
     if (this.engineFlameL && this.engineFlameR) {
-      const flameY = this.player.y + BASE_ENGINE_FLAME_OFFSET_Y;
-      this.engineFlameL.setPosition(engineX - BASE_ENGINE_FLAME_SPACING_X, flameY);
-      this.engineFlameR.setPosition(engineX + BASE_ENGINE_FLAME_SPACING_X, flameY);
+      const flameY = this.player.y + flameOffsetY;
+      this.engineFlameL.setPosition(engineX - flameSpacingX, flameY);
+      this.engineFlameR.setPosition(engineX + flameSpacingX, flameY);
     }
   }
 
@@ -1010,6 +1124,7 @@ export class GameScene extends Phaser.Scene {
     this.engineFlameL = undefined;
     this.engineFlameR?.destroy();
     this.engineFlameR = undefined;
+    this.activeEngineType = null;
   }
 }
 
