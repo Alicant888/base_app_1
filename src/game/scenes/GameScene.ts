@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { BaseEnginePickup } from "../entities/BaseEnginePickup";
 import { Bullet } from "../entities/Bullet";
 import { Enemy } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
@@ -10,6 +11,20 @@ import { EnemySpawner } from "../systems/EnemySpawner";
 import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES, UI_FRAMES } from "../config";
 
 const BASE_FIRE_RATE_MS = 375; // ~2.67 shots/sec
+const BASE_MOVE_SPEED_PX_PER_SEC = 280;
+const BASE_MOVE_SPEED_MULTIPLIER = 0.8; // Main Ship is 20% slower by default.
+
+const DEPTH_PLAYER = 5;
+const DEPTH_ENGINE_FLAMES = 5.5;
+const DEPTH_ENGINE = 6;
+const DEPTH_SHIELD = 7;
+
+// TUNE ENGINE FX OFFSETS HERE (Base Engine):
+// - These values control where the engine sprite and the two flames appear relative to the player.
+// - Adjust them to match your art perfectly.
+const BASE_ENGINE_OFFSET_Y = 2;
+const BASE_ENGINE_FLAME_OFFSET_Y = 17;
+const BASE_ENGINE_FLAME_SPACING_X = 7;
 
 export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
@@ -23,11 +38,14 @@ export class GameScene extends Phaser.Scene {
   private shieldPickups!: Phaser.Physics.Arcade.Group;
   private healthPickups!: Phaser.Physics.Arcade.Group;
   private firingRatePickups!: Phaser.Physics.Arcade.Group;
+  private baseEnginePickups!: Phaser.Physics.Arcade.Group;
   private spawner!: EnemySpawner;
 
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private draggingPointerId: number | null = null;
   private dragOffset = new Phaser.Math.Vector2();
+  private dragTarget = new Phaser.Math.Vector2();
+  private hasDragTarget = false;
 
   private hp = 5;
   private readonly maxHp = 5;
@@ -35,6 +53,11 @@ export class GameScene extends Phaser.Scene {
   private isGameOver = false;
   private shieldHits = 0;
   private shieldFx?: Phaser.GameObjects.Sprite;
+  private moveSpeedMultiplier = 1;
+
+  private engineSprite?: Phaser.GameObjects.Image;
+  private engineFlameL?: Phaser.GameObjects.Sprite;
+  private engineFlameR?: Phaser.GameObjects.Sprite;
   private fireRateMultiplier = 1;
 
   private lifeIcons: Phaser.GameObjects.Image[] = [];
@@ -54,7 +77,11 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = false;
     this.shieldHits = 0;
     this.fireRateMultiplier = 1;
+    this.moveSpeedMultiplier = 1;
     this.draggingPointerId = null;
+    this.hasDragTarget = false;
+
+    this.destroyPlayerEngineFx();
 
     // Background (parallax).
     this.bgStar = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.starfield).setOrigin(0);
@@ -97,6 +124,12 @@ export class GameScene extends Phaser.Scene {
       runChildUpdate: true,
     });
 
+    this.baseEnginePickups = this.physics.add.group({
+      classType: BaseEnginePickup,
+      maxSize: 12,
+      runChildUpdate: true,
+    });
+
     this.enemies = this.physics.add.group({
       classType: Enemy,
       maxSize: 50,
@@ -105,6 +138,7 @@ export class GameScene extends Phaser.Scene {
 
     // Player.
     this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT - 80);
+    this.player.setDepth(DEPTH_PLAYER);
     this.updatePlayerDamageAppearance();
 
     // Input.
@@ -162,6 +196,14 @@ export class GameScene extends Phaser.Scene {
       this,
     );
 
+    this.physics.add.overlap(
+      this.player,
+      this.baseEnginePickups,
+      this.onBaseEnginePickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
     // Auto-fire (single shot).
     this.fireEvent = this.time.addEvent({
       delay: this.getFireDelayMs(),
@@ -194,6 +236,8 @@ export class GameScene extends Phaser.Scene {
 
       this.shieldFx?.destroy();
       this.shieldFx = undefined;
+
+      this.destroyPlayerEngineFx();
     });
   }
 
@@ -207,7 +251,9 @@ export class GameScene extends Phaser.Scene {
     this.bgDust.tilePositionY -= 2.0 * t;
 
     // Pointer drag takes priority; keyboard works when not dragging.
-    if (this.draggingPointerId === null) {
+    if (this.draggingPointerId !== null && this.hasDragTarget) {
+      this.updateDragMovement(delta);
+    } else {
       this.updateKeyboardMovement(delta);
     }
 
@@ -216,6 +262,8 @@ export class GameScene extends Phaser.Scene {
     if (this.shieldFx) {
       this.shieldFx.setPosition(this.player.x, this.player.y);
     }
+
+    this.syncPlayerEngineFx();
   }
 
   private playSfx(key: string, volume = 1) {
@@ -232,19 +280,27 @@ export class GameScene extends Phaser.Scene {
       if (this.draggingPointerId !== null) return;
       this.draggingPointerId = pointer.id;
       this.dragOffset.set(pointer.x - this.player.x, pointer.y - this.player.y);
+
+      this.dragTarget.set(this.player.x, this.player.y);
+      this.hasDragTarget = true;
     };
 
     const onPointerUp = (pointer: Phaser.Input.Pointer) => {
-      if (pointer.id === this.draggingPointerId) this.draggingPointerId = null;
+      if (pointer.id === this.draggingPointerId) {
+        this.draggingPointerId = null;
+        this.hasDragTarget = false;
+      }
     };
 
     const onPointerMove = (pointer: Phaser.Input.Pointer) => {
       if (pointer.id !== this.draggingPointerId) return;
       if (!pointer.isDown) return;
 
-      this.player.x = pointer.x - this.dragOffset.x;
-      this.player.y = pointer.y - this.dragOffset.y;
-      this.player.clampToBounds();
+      const halfW = this.player.displayWidth * 0.5;
+      const halfH = this.player.displayHeight * 0.5;
+      const tx = Phaser.Math.Clamp(pointer.x - this.dragOffset.x, halfW, GAME_WIDTH - halfW);
+      const ty = Phaser.Math.Clamp(pointer.y - this.dragOffset.y, GAME_HEIGHT * 0.25, GAME_HEIGHT - halfH);
+      this.dragTarget.set(tx, ty);
     };
 
     this.input.on(Phaser.Input.Events.POINTER_DOWN, onPointerDown);
@@ -261,7 +317,7 @@ export class GameScene extends Phaser.Scene {
   private updateKeyboardMovement(delta: number) {
     if (!this.cursors) return;
 
-    const speed = 280; // px/sec
+    const speed = this.getMoveSpeed(); // px/sec
     const dt = delta / 1000;
 
     let dx = 0;
@@ -282,12 +338,32 @@ export class GameScene extends Phaser.Scene {
     this.player.clampToBounds();
   }
 
+  private updateDragMovement(delta: number) {
+    const dt = delta / 1000;
+    const speed = this.getMoveSpeed();
+    const maxDist = speed * dt;
+
+    const dx = this.dragTarget.x - this.player.x;
+    const dy = this.dragTarget.y - this.player.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist <= 0.001) return;
+
+    const t = Math.min(1, maxDist / dist);
+    this.player.x += dx * t;
+    this.player.y += dy * t;
+    this.player.clampToBounds();
+  }
+
+  private getMoveSpeed() {
+    return BASE_MOVE_SPEED_PX_PER_SEC * BASE_MOVE_SPEED_MULTIPLIER * this.moveSpeedMultiplier;
+  }
+
   private fireSingleShot() {
     if (!this.player.active) return;
 
     const x = this.player.x;
     // Start from under the ship center.
-    const y = this.player.y + this.player.displayHeight * 0.45;
+    const y = this.player.y - this.player.displayHeight * 0.1;
 
     if (this.spawnBullet(x, y)) {
       this.playSfx(AUDIO_KEYS.laserShort, 0.35);
@@ -364,6 +440,14 @@ export class GameScene extends Phaser.Scene {
     this.setFireRateMultiplier(0.8);
   }
 
+  private onBaseEnginePickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as BaseEnginePickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.activateBaseEngine();
+  }
+
   private takeHit() {
     if (this.isGameOver) return;
 
@@ -421,13 +505,14 @@ export class GameScene extends Phaser.Scene {
           ATLAS_KEYS.ship,
           `${SPRITE_FRAMES.playerShieldPrefix}${SPRITE_FRAMES.playerShieldStart}${SPRITE_FRAMES.playerShieldSuffix}`,
         )
-        .setDepth(6);
+        .setDepth(DEPTH_SHIELD);
 
       // Optional: make it feel more "energy-like".
       this.shieldFx.setBlendMode(Phaser.BlendModes.ADD);
     }
 
     this.shieldFx.setVisible(true);
+    this.shieldFx.setDepth(DEPTH_SHIELD);
     this.shieldFx.play("player_shield", true);
   }
 
@@ -476,13 +561,15 @@ export class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
 
     // Spawn at most one pickup to avoid clutter, using exact probabilities:
+    // - Base engine: 50% (for now, for testing)
     // - Health: 3%
     // - Firing rate: 4%
     // - Shield: 4%
     const r = Phaser.Math.FloatBetween(0, 1);
-    if (r < 0.03) this.spawnHealthPickup(x, y);
-    else if (r < 0.03 + 0.04) this.spawnFiringRatePickup(x, y);
-    else if (r < 0.03 + 0.04 + 0.04) this.spawnShieldPickup(x, y);
+    if (r < 0.5) this.spawnBaseEnginePickup(x, y);
+    else if (r < 0.5 + 0.03) this.spawnHealthPickup(x, y);
+    else if (r < 0.5 + 0.03 + 0.04) this.spawnFiringRatePickup(x, y);
+    else if (r < 0.5 + 0.03 + 0.04 + 0.04) this.spawnShieldPickup(x, y);
   }
 
   private triggerGameOver() {
@@ -706,6 +793,26 @@ export class GameScene extends Phaser.Scene {
       14,
     );
 
+    this.createLoopAnimIfFrames(
+      "base_engine_pickup",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.baseEnginePickupPrefix,
+      SPRITE_FRAMES.baseEnginePickupStart,
+      SPRITE_FRAMES.baseEnginePickupEnd,
+      SPRITE_FRAMES.baseEnginePickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
+      "base_engine_flame",
+      ATLAS_KEYS.ship,
+      SPRITE_FRAMES.baseEngineFlamePrefix,
+      SPRITE_FRAMES.baseEngineFlameStart,
+      SPRITE_FRAMES.baseEngineFlameEnd,
+      SPRITE_FRAMES.baseEngineFlameSuffix,
+      18,
+    );
+
     if (!this.anims.exists("player_shield")) {
       this.anims.create({
         key: "player_shield",
@@ -830,6 +937,79 @@ export class GameScene extends Phaser.Scene {
       loop: true,
       callback: () => this.fireSingleShot(),
     });
+  }
+
+  private spawnBaseEnginePickup(x: number, y: number) {
+    const pickup = this.baseEnginePickups.get(x, y) as BaseEnginePickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
+  private activateBaseEngine() {
+    // +25% move speed.
+    this.moveSpeedMultiplier = 1.25;
+
+    // Engine sprite above the ship.
+    if (!this.engineSprite) {
+      this.engineSprite = this.add
+        .image(this.player.x, this.player.y, ATLAS_KEYS.ship, SPRITE_FRAMES.baseEngineSprite)
+        .setDepth(DEPTH_ENGINE)
+        .setScale(1);
+    }
+    this.engineSprite.setVisible(true);
+    this.engineSprite.setDepth(DEPTH_ENGINE);
+
+    // Two flames behind the engine (parallel).
+    const flameFrame = `${SPRITE_FRAMES.baseEngineFlamePrefix}${SPRITE_FRAMES.baseEngineFlameStart}${SPRITE_FRAMES.baseEngineFlameSuffix}`;
+
+    if (!this.engineFlameL) {
+      this.engineFlameL = this.add.sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, flameFrame).setDepth(DEPTH_ENGINE_FLAMES).setScale(1);
+    }
+    if (!this.engineFlameR) {
+      this.engineFlameR = this.add.sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, flameFrame).setDepth(DEPTH_ENGINE_FLAMES).setScale(1);
+    }
+
+    this.engineFlameL.setVisible(true);
+    this.engineFlameR.setVisible(true);
+    this.engineFlameL.setDepth(DEPTH_ENGINE_FLAMES);
+    this.engineFlameR.setDepth(DEPTH_ENGINE_FLAMES);
+
+    // Play flames if the animation exists (guarded in ensureAnimations).
+    try {
+      this.engineFlameL.play("base_engine_flame", true);
+      this.engineFlameR.play("base_engine_flame", true);
+    } catch {
+      // ignore
+    }
+
+    // Shield should render above the engine.
+    if (this.shieldFx) this.shieldFx.setDepth(DEPTH_SHIELD);
+
+    this.syncPlayerEngineFx();
+  }
+
+  private syncPlayerEngineFx() {
+    if (!this.engineSprite) return;
+    if (!this.engineSprite.visible) return;
+
+    const engineX = this.player.x;
+    const engineY = this.player.y + BASE_ENGINE_OFFSET_Y;
+    this.engineSprite.setPosition(engineX, engineY);
+
+    if (this.engineFlameL && this.engineFlameR) {
+      const flameY = this.player.y + BASE_ENGINE_FLAME_OFFSET_Y;
+      this.engineFlameL.setPosition(engineX - BASE_ENGINE_FLAME_SPACING_X, flameY);
+      this.engineFlameR.setPosition(engineX + BASE_ENGINE_FLAME_SPACING_X, flameY);
+    }
+  }
+
+  private destroyPlayerEngineFx() {
+    this.engineSprite?.destroy();
+    this.engineSprite = undefined;
+    this.engineFlameL?.destroy();
+    this.engineFlameL = undefined;
+    this.engineFlameR?.destroy();
+    this.engineFlameR = undefined;
   }
 }
 

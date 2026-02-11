@@ -109,6 +109,22 @@ export const SPRITE_FRAMES = {
   firingRatePickupStart: 0,
   firingRatePickupEnd: 9,
 
+  // Base engine pickup icon (atlas: FX)
+  baseEnginePickupPrefix: "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-",
+  baseEnginePickupSuffix: ".png",
+  baseEnginePickupStart: 0,
+  baseEnginePickupEnd: 9,
+
+  // Base engine sprite (atlas: MainShip)
+  baseEngineSprite: "Main Ship - Engines/Main Ship - Engines - Base Engine.png",
+
+  // Base engine flame (atlas: MainShip)
+  baseEngineFlamePrefix:
+    "Main Ship - Engine Effects/Main Ship - Engines - Base Engine - Powering/Main Ship - Engines - Base Engine - Powering-",
+  baseEngineFlameSuffix: ".png",
+  baseEngineFlameStart: 0,
+  baseEngineFlameEnd: 7,
+
   // Player round shield overlay (atlas: MainShip)
   playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
   playerShieldSuffix: ".png",
