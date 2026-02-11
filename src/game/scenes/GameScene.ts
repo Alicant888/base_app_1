@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { BaseEnginePickup } from "../entities/BaseEnginePickup";
+import { AutoCannonBullet } from "../entities/AutoCannonBullet";
+import { AutoCannonsPickup } from "../entities/AutoCannonsPickup";
 import { BigPulseEnginePickup } from "../entities/BigPulseEnginePickup";
 import { Bullet } from "../entities/Bullet";
 import { BurstEnginePickup } from "../entities/BurstEnginePickup";
@@ -22,6 +24,7 @@ const DEPTH_PLAYER = 5;
 const DEPTH_ENGINE_FLAMES = 6.5;
 const DEPTH_ENGINE = 6;
 const DEPTH_SHIELD = 7;
+const DEPTH_WEAPON = 4.8; // under the ship, still under the shield.
 
 // TUNE ENGINE FX OFFSETS HERE (Base Engine):
 // - These values control where the engine sprite and the two flames appear relative to the player.
@@ -46,6 +49,16 @@ const BIG_PULSE_ENGINE_OFFSET_Y = 5;
 const BIG_PULSE_ENGINE_FLAME_OFFSET_Y = 20;
 const BIG_PULSE_ENGINE_FLAME_OFFSET_X = 0; // single flame (center)
 
+// TUNE WEAPON OFFSETS HERE (Auto Cannons):
+// - Weapon sprite position is relative to the player.
+// - Bullet spawn is relative to the weapon sprite (muzzles).
+const AUTO_CANNON_BARREL_OFFSET_MS = 333;
+const AUTO_CANNON_WEAPON_OFFSET_X = 0;
+const AUTO_CANNON_WEAPON_OFFSET_Y = -2;
+const AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_Y = -6;
+const AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_X_L = -10;
+const AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_X_R = 10;
+
 export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
   private bgNebula!: Phaser.GameObjects.TileSprite;
@@ -53,11 +66,13 @@ export class GameScene extends Phaser.Scene {
 
   private player!: Player;
   private bullets!: Phaser.Physics.Arcade.Group;
+  private autoCannonBullets!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
   private shieldPickups!: Phaser.Physics.Arcade.Group;
   private healthPickups!: Phaser.Physics.Arcade.Group;
   private firingRatePickups!: Phaser.Physics.Arcade.Group;
+  private autoCannonsPickups!: Phaser.Physics.Arcade.Group;
   private baseEnginePickups!: Phaser.Physics.Arcade.Group;
   private superchargedEnginePickups!: Phaser.Physics.Arcade.Group;
   private burstEnginePickups!: Phaser.Physics.Arcade.Group;
@@ -86,7 +101,11 @@ export class GameScene extends Phaser.Scene {
 
   private lifeIcons: Phaser.GameObjects.Image[] = [];
   private fireEvent?: Phaser.Time.TimerEvent;
+  private secondaryFireStartEvent?: Phaser.Time.TimerEvent;
   private gameMusic?: Phaser.Sound.BaseSound;
+
+  private activeWeaponType: "default" | "autoCannons" = "default";
+  private weaponSprite?: Phaser.GameObjects.Sprite;
 
   constructor() {
     super("GameScene");
@@ -105,8 +124,10 @@ export class GameScene extends Phaser.Scene {
     this.draggingPointerId = null;
     this.hasDragTarget = false;
     this.activeEngineType = null;
+    this.activeWeaponType = "default";
 
     this.destroyPlayerEngineFx();
+    this.destroyPlayerWeaponFx();
 
     // Background (parallax).
     this.bgStar = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.starfield).setOrigin(0);
@@ -122,6 +143,12 @@ export class GameScene extends Phaser.Scene {
     this.bullets = this.physics.add.group({
       classType: Bullet,
       maxSize: 80,
+      runChildUpdate: true,
+    });
+
+    this.autoCannonBullets = this.physics.add.group({
+      classType: AutoCannonBullet,
+      maxSize: 120,
       runChildUpdate: true,
     });
 
@@ -145,6 +172,12 @@ export class GameScene extends Phaser.Scene {
 
     this.firingRatePickups = this.physics.add.group({
       classType: FiringRatePickup,
+      maxSize: 12,
+      runChildUpdate: true,
+    });
+
+    this.autoCannonsPickups = this.physics.add.group({
+      classType: AutoCannonsPickup,
       maxSize: 12,
       runChildUpdate: true,
     });
@@ -199,6 +232,14 @@ export class GameScene extends Phaser.Scene {
       undefined,
       this,
     );
+
+    this.physics.add.overlap(
+      this.autoCannonBullets,
+      this.enemies,
+      this.onBulletHitsEnemy as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
     this.physics.add.overlap(
       this.player,
       this.enemies,
@@ -241,6 +282,14 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(
       this.player,
+      this.autoCannonsPickups,
+      this.onAutoCannonsPickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.player,
       this.baseEnginePickups,
       this.onBaseEnginePickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
       undefined,
@@ -271,12 +320,8 @@ export class GameScene extends Phaser.Scene {
       this,
     );
 
-    // Auto-fire (single shot).
-    this.fireEvent = this.time.addEvent({
-      delay: this.getFireDelayMs(),
-      loop: true,
-      callback: () => this.fireSingleShot(),
-    });
+    // Auto-fire (weapon-dependent).
+    this.configureWeaponFireEvents();
 
     // UI overlay.
     this.createUI();
@@ -294,8 +339,7 @@ export class GameScene extends Phaser.Scene {
 
     // Cleanup on scene shutdown.
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.fireEvent?.remove(false);
-      this.fireEvent = undefined;
+      this.destroyWeaponFireEvents();
 
       this.gameMusic?.stop();
       this.gameMusic?.destroy();
@@ -305,6 +349,7 @@ export class GameScene extends Phaser.Scene {
       this.shieldFx = undefined;
 
       this.destroyPlayerEngineFx();
+      this.destroyPlayerWeaponFx();
     });
   }
 
@@ -330,6 +375,7 @@ export class GameScene extends Phaser.Scene {
       this.shieldFx.setPosition(this.player.x, this.player.y);
     }
 
+    this.syncPlayerWeaponFx();
     this.syncPlayerEngineFx();
   }
 
@@ -444,8 +490,41 @@ export class GameScene extends Phaser.Scene {
     return true;
   }
 
+  private spawnAutoCannonBullet(x: number, y: number): boolean {
+    const bullet = this.autoCannonBullets.get(x, y) as AutoCannonBullet | null;
+    if (!bullet) return false;
+    bullet.fire(x, y);
+    return true;
+  }
+
+  private fireAutoCannonBarrel(side: "left" | "right") {
+    if (this.isGameOver) return;
+    if (!this.player.active) return;
+    if (this.activeWeaponType !== "autoCannons") return;
+
+    const wx = this.weaponSprite?.visible ? this.weaponSprite.x : this.player.x + AUTO_CANNON_WEAPON_OFFSET_X;
+    const wy = this.weaponSprite?.visible ? this.weaponSprite.y : this.player.y + AUTO_CANNON_WEAPON_OFFSET_Y;
+
+    const xOffset = side === "left" ? AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_X_L : AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_X_R;
+    const x = wx + xOffset;
+    const y = wy + AUTO_CANNON_BULLET_FROM_WEAPON_OFFSET_Y;
+
+    const fired = this.spawnAutoCannonBullet(x, y);
+    if (fired && side === "left") {
+      this.playSfx(AUDIO_KEYS.laserShort, 0.3);
+    }
+  }
+
+  private fireAutoCannonsPair() {
+    this.fireAutoCannonBarrel("left");
+    this.secondaryFireStartEvent?.remove(false);
+    this.secondaryFireStartEvent = this.time.delayedCall(AUTO_CANNON_BARREL_OFFSET_MS, () => {
+      this.fireAutoCannonBarrel("right");
+    });
+  }
+
   private onBulletHitsEnemy(bulletObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
-    const bullet = bulletObj as Bullet;
+    const bullet = bulletObj as unknown as { active: boolean; kill: () => void };
     const enemy = enemyObj as Enemy;
 
     if (!bullet.active || !enemy.active) return;
@@ -505,6 +584,14 @@ export class GameScene extends Phaser.Scene {
     pickup.kill();
     // +20% fire rate => delay * 0.8
     this.setFireRateMultiplier(0.8);
+  }
+
+  private onAutoCannonsPickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as AutoCannonsPickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.activateAutoCannons();
   }
 
   private onBaseEnginePickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
@@ -648,25 +735,33 @@ export class GameScene extends Phaser.Scene {
     pickup.spawn(x, y);
   }
 
+  private spawnAutoCannonsPickup(x: number, y: number) {
+    const pickup = this.autoCannonsPickups.get(x, y) as AutoCannonsPickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
   private maybeSpawnPickup(x: number, y: number) {
     if (this.isGameOver) return;
 
     // Spawn at most one pickup to avoid clutter, using exact probabilities:
-    // - Burst engine: 40%
-    // - Big Pulse engine: 40%
-    // - Supercharged engine: 8.9%
-    // - Base engine: 0.1%
+    // - Auto Cannons: 50%
+    // - Base engine: 1%
+    // - Supercharged engine: 1%
+    // - Burst engine: 1%
+    // - Big Pulse engine: 1%
     // - Health: 3%
     // - Firing rate: 4%
     // - Shield: 4%
     const r = Phaser.Math.FloatBetween(0, 1);
-    if (r < 0.4) this.spawnBurstEnginePickup(x, y);
-    else if (r < 0.8) this.spawnBigPulseEnginePickup(x, y);
-    else if (r < 0.889) this.spawnSuperchargedEnginePickup(x, y);
-    else if (r < 0.89) this.spawnBaseEnginePickup(x, y);
-    else if (r < 0.92) this.spawnHealthPickup(x, y);
-    else if (r < 0.96) this.spawnFiringRatePickup(x, y);
-    else if (r < 1.0) this.spawnShieldPickup(x, y);
+    if (r < 0.5) this.spawnAutoCannonsPickup(x, y);
+    else if (r < 0.51) this.spawnBaseEnginePickup(x, y);
+    else if (r < 0.52) this.spawnSuperchargedEnginePickup(x, y);
+    else if (r < 0.53) this.spawnBurstEnginePickup(x, y);
+    else if (r < 0.54) this.spawnBigPulseEnginePickup(x, y);
+    else if (r < 0.57) this.spawnHealthPickup(x, y);
+    else if (r < 0.61) this.spawnFiringRatePickup(x, y);
+    else if (r < 0.65) this.spawnShieldPickup(x, y);
   }
 
   private triggerGameOver() {
@@ -675,8 +770,7 @@ export class GameScene extends Phaser.Scene {
 
     // Freeze gameplay systems.
     this.physics.world.pause();
-    this.fireEvent?.remove(false);
-    this.fireEvent = undefined;
+    this.destroyWeaponFireEvents();
 
     this.gameMusic?.stop();
     this.gameMusic?.destroy();
@@ -891,6 +985,16 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.createLoopAnimIfFrames(
+      "auto_cannons_pickup",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.autoCannonsPickupPrefix,
+      SPRITE_FRAMES.autoCannonsPickupStart,
+      SPRITE_FRAMES.autoCannonsPickupEnd,
+      SPRITE_FRAMES.autoCannonsPickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
       "base_engine_pickup",
       ATLAS_KEYS.fx,
       SPRITE_FRAMES.baseEnginePickupPrefix,
@@ -967,6 +1071,26 @@ export class GameScene extends Phaser.Scene {
       SPRITE_FRAMES.bigPulseEngineFlameStart,
       SPRITE_FRAMES.bigPulseEngineFlameEnd,
       SPRITE_FRAMES.bigPulseEngineFlameSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "auto_cannon_weapon",
+      ATLAS_KEYS.ship,
+      SPRITE_FRAMES.autoCannonWeaponPrefix,
+      SPRITE_FRAMES.autoCannonWeaponStart,
+      SPRITE_FRAMES.autoCannonWeaponEnd,
+      SPRITE_FRAMES.autoCannonWeaponSuffix,
+      18,
+    );
+
+    this.createLoopAnimIfFrames(
+      "auto_cannon_bullet",
+      ATLAS_KEYS.fx,
+      SPRITE_FRAMES.autoCannonBulletPrefix,
+      SPRITE_FRAMES.autoCannonBulletStart,
+      SPRITE_FRAMES.autoCannonBulletEnd,
+      SPRITE_FRAMES.autoCannonBulletSuffix,
       18,
     );
 
@@ -1076,6 +1200,37 @@ export class GameScene extends Phaser.Scene {
     (this.player.body as Phaser.Physics.Arcade.Body).setSize(this.player.width * 0.6, this.player.height * 0.6, true);
   }
 
+  private destroyWeaponFireEvents() {
+    this.fireEvent?.remove(false);
+    this.fireEvent = undefined;
+
+    this.secondaryFireStartEvent?.remove(false);
+    this.secondaryFireStartEvent = undefined;
+  }
+
+  private configureWeaponFireEvents() {
+    this.destroyWeaponFireEvents();
+    if (this.isGameOver) return;
+
+    if (this.activeWeaponType === "autoCannons") {
+      // Ensure the right barrel shot lands before the next cycle.
+      const delay = Math.max(this.getFireDelayMs(), AUTO_CANNON_BARREL_OFFSET_MS + 20);
+      this.fireEvent = this.time.addEvent({
+        delay,
+        loop: true,
+        callback: () => this.fireAutoCannonsPair(),
+      });
+      return;
+    }
+
+    // Default weapon (single shot).
+    this.fireEvent = this.time.addEvent({
+      delay: this.getFireDelayMs(),
+      loop: true,
+      callback: () => this.fireSingleShot(),
+    });
+  }
+
   private getFireDelayMs() {
     return Math.round(BASE_FIRE_RATE_MS * this.fireRateMultiplier);
   }
@@ -1084,16 +1239,7 @@ export class GameScene extends Phaser.Scene {
     this.fireRateMultiplier = Phaser.Math.Clamp(multiplier, 0.2, 2);
 
     if (this.isGameOver) return;
-    if (this.fireEvent) {
-      this.fireEvent.remove(false);
-      this.fireEvent = undefined;
-    }
-
-    this.fireEvent = this.time.addEvent({
-      delay: this.getFireDelayMs(),
-      loop: true,
-      callback: () => this.fireSingleShot(),
-    });
+    this.configureWeaponFireEvents();
   }
 
   private spawnBaseEnginePickup(x: number, y: number) {
@@ -1118,6 +1264,53 @@ export class GameScene extends Phaser.Scene {
     const pickup = this.bigPulseEnginePickups.get(x, y) as BigPulseEnginePickup | null;
     if (!pickup) return;
     pickup.spawn(x, y);
+  }
+
+  private activateAutoCannons() {
+    this.activeWeaponType = "autoCannons";
+
+    const weaponFrame = `${SPRITE_FRAMES.autoCannonWeaponPrefix}${SPRITE_FRAMES.autoCannonWeaponStart}${SPRITE_FRAMES.autoCannonWeaponSuffix}`;
+
+    if (!this.weaponSprite) {
+      this.weaponSprite = this.add
+        .sprite(this.player.x, this.player.y, ATLAS_KEYS.ship, weaponFrame)
+        .setDepth(DEPTH_WEAPON)
+        .setScale(1);
+    }
+
+    this.weaponSprite.setVisible(true);
+    this.weaponSprite.setDepth(DEPTH_WEAPON);
+    this.weaponSprite.setFrame(weaponFrame);
+
+    try {
+      this.weaponSprite.play("auto_cannon_weapon", true);
+    } catch {
+      // ignore
+    }
+
+    // Shield should render above the weapon.
+    if (this.shieldFx) this.shieldFx.setDepth(DEPTH_SHIELD);
+
+    this.syncPlayerWeaponFx();
+    this.configureWeaponFireEvents();
+  }
+
+  private syncPlayerWeaponFx() {
+    if (!this.weaponSprite) return;
+
+    if (this.activeWeaponType !== "autoCannons") {
+      this.weaponSprite.setVisible(false);
+      return;
+    }
+
+    this.weaponSprite.setVisible(true);
+    this.weaponSprite.setDepth(DEPTH_WEAPON);
+    this.weaponSprite.setPosition(this.player.x + AUTO_CANNON_WEAPON_OFFSET_X, this.player.y + AUTO_CANNON_WEAPON_OFFSET_Y);
+  }
+
+  private destroyPlayerWeaponFx() {
+    this.weaponSprite?.destroy();
+    this.weaponSprite = undefined;
   }
 
   private activateBaseEngine() {

@@ -175,6 +175,27 @@ export const SPRITE_FRAMES = {
   bigPulseEngineFlameStart: 0,
   bigPulseEngineFlameEnd: 7,
 
+  // Auto Cannons pickup icon (atlas: FX)
+  autoCannonsPickupPrefix:
+    "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-",
+  autoCannonsPickupSuffix: ".png",
+  autoCannonsPickupStart: 0,
+  autoCannonsPickupEnd: 9,
+
+  // Auto Cannon weapon (atlas: MainShip)
+  autoCannonWeaponPrefix:
+    "Main Ship - Weapons/Main Ship - Weapons - Auto Cannon/Main Ship - Weapons - Auto Cannon-",
+  autoCannonWeaponSuffix: ".png",
+  autoCannonWeaponStart: 0,
+  autoCannonWeaponEnd: 6,
+
+  // Auto Cannon bullet projectile (atlas: FX)
+  autoCannonBulletPrefix:
+    "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-",
+  autoCannonBulletSuffix: ".png",
+  autoCannonBulletStart: 0,
+  autoCannonBulletEnd: 3,
+
   // Player round shield overlay (atlas: MainShip)
   playerShieldPrefix: "Main Ship - Shields/Main Ship - Shields - Round Shield/Main Ship - Shields - Round Shield-",
   playerShieldSuffix: ".png",
