@@ -7,7 +7,7 @@ import { BigSpaceGunPickup } from "../entities/BigSpaceGunPickup";
 import { BigSpaceGunProjectile } from "../entities/BigSpaceGunProjectile";
 import { Bullet } from "../entities/Bullet";
 import { BurstEnginePickup } from "../entities/BurstEnginePickup";
-import { Enemy } from "../entities/Enemy";
+import { Enemy, type EnemyKind } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
 import { FiringRatePickup } from "../entities/FiringRatePickup";
 import { HealthPickup } from "../entities/HealthPickup";
@@ -806,7 +806,7 @@ export class GameScene extends Phaser.Scene {
     if (destroyed) {
       enemy.kill();
 
-      this.spawnExplosion(enemy.x, enemy.y);
+      this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
 
@@ -826,7 +826,7 @@ export class GameScene extends Phaser.Scene {
     if (destroyed) {
       enemy.kill();
 
-      this.spawnExplosion(enemy.x, enemy.y);
+      this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
 
@@ -846,7 +846,7 @@ export class GameScene extends Phaser.Scene {
     if (destroyed) {
       enemy.kill();
 
-      this.spawnExplosion(enemy.x, enemy.y);
+      this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
 
@@ -866,7 +866,7 @@ export class GameScene extends Phaser.Scene {
     if (destroyed) {
       enemy.kill();
 
-      this.spawnExplosion(enemy.x, enemy.y);
+      this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
 
@@ -1118,7 +1118,8 @@ export class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
 
     // Spawn at most one pickup to avoid clutter, using exact probabilities:
-    // - Big Space Gun: 50%
+    // Weapons (each): 1%
+    // - Big Space Gun: 1%
     // - Zapper: 1%
     // - Rocket: 1%
     // - Auto Cannons: 1%
@@ -1130,17 +1131,17 @@ export class GameScene extends Phaser.Scene {
     // - Firing rate: 4%
     // - Shield: 4%
     const r = Phaser.Math.FloatBetween(0, 1);
-    if (r < 0.5) this.spawnBigSpaceGunPickup(x, y);
-    else if (r < 0.51) this.spawnZapperPickup(x, y);
-    else if (r < 0.52) this.spawnRocketPickup(x, y);
-    else if (r < 0.53) this.spawnAutoCannonsPickup(x, y);
-    else if (r < 0.54) this.spawnBaseEnginePickup(x, y);
-    else if (r < 0.55) this.spawnSuperchargedEnginePickup(x, y);
-    else if (r < 0.56) this.spawnBurstEnginePickup(x, y);
-    else if (r < 0.57) this.spawnBigPulseEnginePickup(x, y);
-    else if (r < 0.6) this.spawnHealthPickup(x, y);
-    else if (r < 0.64) this.spawnFiringRatePickup(x, y);
-    else if (r < 0.68) this.spawnShieldPickup(x, y);
+    if (r < 0.01) this.spawnBigSpaceGunPickup(x, y);
+    else if (r < 0.02) this.spawnZapperPickup(x, y);
+    else if (r < 0.03) this.spawnRocketPickup(x, y);
+    else if (r < 0.04) this.spawnAutoCannonsPickup(x, y);
+    else if (r < 0.05) this.spawnBaseEnginePickup(x, y);
+    else if (r < 0.06) this.spawnSuperchargedEnginePickup(x, y);
+    else if (r < 0.07) this.spawnBurstEnginePickup(x, y);
+    else if (r < 0.08) this.spawnBigPulseEnginePickup(x, y);
+    else if (r < 0.11) this.spawnHealthPickup(x, y);
+    else if (r < 0.15) this.spawnFiringRatePickup(x, y);
+    else if (r < 0.19) this.spawnShieldPickup(x, y);
   }
 
   private triggerGameOver() {
@@ -1250,12 +1251,15 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
-  private spawnExplosion(x: number, y: number) {
-    const boom = this.add
-      .sprite(x, y, ATLAS_KEYS.enemy, `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`)
-      .setDepth(6);
+  private spawnExplosion(x: number, y: number, kind: EnemyKind) {
+    const isFighter = kind === "fighter";
+    const frame = isFighter
+      ? `${SPRITE_FRAMES.fighterDestructionPrefix}${SPRITE_FRAMES.fighterDestructionStart}${SPRITE_FRAMES.fighterDestructionSuffix}`
+      : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
 
-    boom.play("enemy_explode");
+    const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(6);
+
+    boom.play(isFighter ? "fighter_explode" : "enemy_explode");
     // Use negative scale instead of flipY to ensure vertical mirroring applies
     // consistently across trimmed atlas frames.
     boom.setScale(boom.scaleX, -Math.abs(boom.scaleY));
@@ -1277,6 +1281,20 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("fighter_explode")) {
+      this.anims.create({
+        key: "fighter_explode",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.fighterDestructionStart,
+          end: SPRITE_FRAMES.fighterDestructionEnd,
+          prefix: SPRITE_FRAMES.fighterDestructionPrefix,
+          suffix: SPRITE_FRAMES.fighterDestructionSuffix,
+        }),
+        frameRate: 20,
+        repeat: 0,
+      });
+    }
+
     if (!this.anims.exists("enemy_engine")) {
       this.anims.create({
         key: "enemy_engine",
@@ -1291,6 +1309,20 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("fighter_engine")) {
+      this.anims.create({
+        key: "fighter_engine",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.fighterEngineStart,
+          end: SPRITE_FRAMES.fighterEngineEnd,
+          prefix: SPRITE_FRAMES.fighterEnginePrefix,
+          suffix: SPRITE_FRAMES.fighterEngineSuffix,
+        }),
+        frameRate: 14,
+        repeat: -1,
+      });
+    }
+
     if (!this.anims.exists("enemy_weapon_flame")) {
       this.anims.create({
         key: "enemy_weapon_flame",
@@ -1299,6 +1331,20 @@ export class GameScene extends Phaser.Scene {
           end: SPRITE_FRAMES.enemyWeaponEnd,
           prefix: SPRITE_FRAMES.enemyWeaponPrefix,
           suffix: SPRITE_FRAMES.enemyWeaponSuffix,
+        }),
+        frameRate: 22,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("fighter_weapon_flame")) {
+      this.anims.create({
+        key: "fighter_weapon_flame",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.fighterWeaponStart,
+          end: SPRITE_FRAMES.fighterWeaponEnd,
+          prefix: SPRITE_FRAMES.fighterWeaponPrefix,
+          suffix: SPRITE_FRAMES.fighterWeaponSuffix,
         }),
         frameRate: 22,
         repeat: 0,
@@ -1327,6 +1373,20 @@ export class GameScene extends Phaser.Scene {
           end: SPRITE_FRAMES.enemyShieldEnd,
           prefix: SPRITE_FRAMES.enemyShieldPrefix,
           suffix: SPRITE_FRAMES.enemyShieldSuffix,
+        }),
+        frameRate: 18,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("fighter_shield")) {
+      this.anims.create({
+        key: "fighter_shield",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.fighterShieldStart,
+          end: SPRITE_FRAMES.fighterShieldEnd,
+          prefix: SPRITE_FRAMES.fighterShieldPrefix,
+          suffix: SPRITE_FRAMES.fighterShieldSuffix,
         }),
         frameRate: 18,
         repeat: -1,

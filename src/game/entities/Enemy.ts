@@ -2,6 +2,14 @@ import Phaser from "phaser";
 import { EnemyBullet } from "./EnemyBullet";
 import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
+export type EnemyKind = "scout" | "fighter";
+
+const FIGHTER_HP = 2;
+const FIGHTER_SHIELD_HP = 2;
+const FIGHTER_BULLET_OFFSET_X = 6;
+const FIGHTER_WEAPON_FIRE_RIGHT_FRAME = `${SPRITE_FRAMES.fighterWeaponPrefix}1${SPRITE_FRAMES.fighterWeaponSuffix}`;
+const FIGHTER_WEAPON_FIRE_LEFT_FRAME = `${SPRITE_FRAMES.fighterWeaponPrefix}3${SPRITE_FRAMES.fighterWeaponSuffix}`;
+
 export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private engineFx: Phaser.GameObjects.Sprite;
   private shieldFx: Phaser.GameObjects.Sprite;
@@ -10,6 +18,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   private nextFireAt = 0;
   private isFiring = false;
+  private kind: EnemyKind = "scout";
+  private hp = 1;
   private shieldHp = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -42,14 +52,20 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     y: number,
     speedY: number,
     enemyBullets: Phaser.Physics.Arcade.Group,
+    kind: EnemyKind,
     hasShield: boolean,
   ) {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return;
 
+    this.kind = kind;
     this.enemyBullets = enemyBullets;
 
-    this.setFrame(SPRITE_FRAMES.enemyBase);
+    const isFighter = this.kind === "fighter";
+    this.hp = isFighter ? FIGHTER_HP : 1;
+    this.shieldHp = isFighter ? (hasShield ? FIGHTER_SHIELD_HP : 0) : hasShield ? 1 : 0;
+
+    this.setFrame(isFighter ? SPRITE_FRAMES.fighterBase : SPRITE_FRAMES.enemyBase);
     this.setPosition(x, y);
     this.setActive(true);
     this.setVisible(true);
@@ -65,22 +81,33 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     body.setSize(this.width * 0.7, this.height * 0.7, true);
 
     // Engine loop.
+    const engineFrame = isFighter
+      ? `${SPRITE_FRAMES.fighterEnginePrefix}${SPRITE_FRAMES.fighterEngineStart}${SPRITE_FRAMES.fighterEngineSuffix}`
+      : `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`;
+    this.engineFx.setFrame(engineFrame);
     this.engineFx.setVisible(true);
     this.engineFx.setFlipY(true);
-    this.engineFx.play("enemy_engine", true);
+    this.engineFx.play(isFighter ? "fighter_engine" : "enemy_engine", true);
 
-    // Shield (optional). If present: 1 hit to break.
-    this.shieldHp = hasShield ? 1 : 0;
-    if (hasShield) {
+    // Shield. Scout: optional (1 HP). Fighter: optional (2 HP).
+    if (this.shieldHp > 0) {
+      const shieldFrame = isFighter
+        ? `${SPRITE_FRAMES.fighterShieldPrefix}${SPRITE_FRAMES.fighterShieldStart}${SPRITE_FRAMES.fighterShieldSuffix}`
+        : `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`;
+      this.shieldFx.setFrame(shieldFrame);
       this.shieldFx.setVisible(true);
       this.shieldFx.setFlipY(true);
-      this.shieldFx.play("enemy_shield", true);
+      this.shieldFx.play(isFighter ? "fighter_shield" : "enemy_shield", true);
     } else {
       this.shieldFx.setVisible(false);
       this.shieldFx.anims.stop();
     }
 
     // Weapon FX is off until firing.
+    const weaponFrame = isFighter
+      ? `${SPRITE_FRAMES.fighterWeaponPrefix}${SPRITE_FRAMES.fighterWeaponStart}${SPRITE_FRAMES.fighterWeaponSuffix}`
+      : `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`;
+    this.weaponFx.setFrame(weaponFrame);
     this.weaponFx.setVisible(false);
     this.weaponFx.setFlipY(true);
     this.weaponFx.anims.stop();
@@ -100,6 +127,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);
 
     this.isFiring = false;
+    this.hp = 0;
     this.shieldHp = 0;
     this.engineFx.setVisible(false);
     this.shieldFx.setVisible(false);
@@ -134,20 +162,31 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
   /**
    * Returns true if the enemy should be destroyed by this hit.
-   * The first hit breaks the shield (1 HP), the second destroys the enemy.
    */
   onPlayerBulletHit(damage = 1): boolean {
     if (!this.active) return false;
 
-    if (this.shieldHp > 0) {
-      this.shieldHp = 0;
-      this.breakShield();
-      // Shield absorbs 1 damage.
-      const remaining = Math.max(0, damage - 1);
-      return remaining > 0;
+    let remaining = Math.max(0, damage);
+
+    if (this.shieldHp > 0 && remaining > 0) {
+      const shieldBefore = this.shieldHp;
+      this.shieldHp = Math.max(0, this.shieldHp - remaining);
+      remaining = Math.max(0, remaining - shieldBefore);
+
+      if (this.shieldHp === 0) {
+        this.breakShield();
+      }
     }
 
-    return true;
+    if (remaining > 0) {
+      this.hp = Math.max(0, this.hp - remaining);
+    }
+
+    return this.hp <= 0;
+  }
+
+  getKind(): EnemyKind {
+    return this.kind;
   }
 
   private syncFxPositions() {
@@ -186,29 +225,88 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.weaponFx.setVisible(true);
     this.weaponFx.removeAllListeners();
 
-    // Flame animation before shot.
-    this.weaponFx.play("enemy_weapon_flame", true);
+    if (this.kind === "fighter") {
+      let firedRight = false;
+      let firedLeft = false;
+      let playedSfx = false;
 
+      const tryPlaySfx = () => {
+        if (playedSfx) return;
+        playedSfx = true;
+        if (!this.scene.registry.get("audioUnlocked")) return;
+        try {
+          this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.35 });
+        } catch {
+          // ignore
+        }
+      };
+
+      // Sync right/left shots to specific weapon frames.
+      this.weaponFx.on(
+        Phaser.Animations.Events.ANIMATION_UPDATE,
+        (_animation: Phaser.Animations.Animation, _frame: Phaser.Animations.AnimationFrame, _gameObject: Phaser.GameObjects.Sprite, frameKey: string) => {
+          if (!this.active) return;
+          if (!this.enemyBullets) return;
+
+          const x = this.x;
+          const y = this.y + (this.displayHeight || 24) * 0.15;
+
+          if (frameKey === FIGHTER_WEAPON_FIRE_RIGHT_FRAME && !firedRight) {
+            firedRight = true;
+            const fired = this.spawnEnemyBulletAt(x + FIGHTER_BULLET_OFFSET_X, y);
+            if (fired) tryPlaySfx();
+            return;
+          }
+
+          if (frameKey === FIGHTER_WEAPON_FIRE_LEFT_FRAME && !firedLeft) {
+            firedLeft = true;
+            const fired = this.spawnEnemyBulletAt(x - FIGHTER_BULLET_OFFSET_X, y);
+            if (fired) tryPlaySfx();
+          }
+        },
+      );
+
+      this.weaponFx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        this.weaponFx.setVisible(false);
+        this.weaponFx.removeAllListeners();
+
+        this.isFiring = false;
+        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+      });
+
+      this.weaponFx.play("fighter_weapon_flame", true);
+      return;
+    }
+
+    // Scout: flame animation before a single shot.
     this.weaponFx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
       this.weaponFx.setVisible(false);
-      this.spawnBullet();
+      this.weaponFx.removeAllListeners();
+      this.spawnBullets();
 
       this.isFiring = false;
       this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
     });
+
+    this.weaponFx.play("enemy_weapon_flame", true);
   }
 
-  private spawnBullet() {
+  private spawnEnemyBulletAt(x: number, y: number): boolean {
+    if (!this.enemyBullets) return false;
+    const bullet = this.enemyBullets.get(x, y) as EnemyBullet | null;
+    if (!bullet) return false;
+    bullet.fire(x, y);
+    return true;
+  }
+
+  private spawnBullets() {
     if (!this.enemyBullets) return;
 
     const x = this.x;
-    const y = this.y + (this.displayHeight || 24) * 0.85;
-    const bullet = this.enemyBullets.get(x, y) as EnemyBullet | null;
-    if (!bullet) return;
+    const y = this.y + (this.displayHeight || 24) * 0.15;
+    const firedAny = this.spawnEnemyBulletAt(x, y);
 
-    bullet.fire(x, y);
-
-    if (this.scene.registry.get("audioUnlocked")) {
+    if (firedAny && this.scene.registry.get("audioUnlocked")) {
       try {
         this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.35 });
       } catch {

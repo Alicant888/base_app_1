@@ -39,6 +39,15 @@ Enemy (atlas: `Enemy`)
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-7.png`
 - `Destruction/Kla'ed - Scout - Destruction/Kla'ed - Scout - Destruction-8.png`
 
+Enemy Fighter (atlas: `Enemy`)
+
+- `Base/Kla'ed - Fighter - Base.png`
+- `Engine/Kla'ed - Fighter - Engine/Kla'ed - Fighter - Engine-0.png` … `Engine/Kla'ed - Fighter - Engine/Kla'ed - Fighter - Engine-9.png`
+- `Weapons/Kla'ed - Fighter - Weapons/Kla'ed - Fighter - Weapons-0.png` … `Weapons/Kla'ed - Fighter - Weapons/Kla'ed - Fighter - Weapons-5.png`
+- `Projectiles/Kla'ed - Bullet/Kla'ed - Bullet-0.png` … `Projectiles/Kla'ed - Bullet/Kla'ed - Bullet-3.png`
+- `Shield/Kla'ed - Fighter - Shield/Kla'ed - Fighter - Shield-0.png` … `Shield/Kla'ed - Fighter - Shield/Kla'ed - Fighter - Shield-9.png`
+- `Destruction/Kla'ed - Fighter - Destruction/Kla'ed - Fighter - Destruction-0.png` … `Destruction/Kla'ed - Fighter - Destruction/Kla'ed - Fighter - Destruction-7.png`
+
 FX (atlas: `FX`)
 
 - `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png` … `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png`

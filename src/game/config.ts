@@ -90,6 +90,29 @@ export const SPRITE_FRAMES = {
   enemyDestructionStart: 0,
   enemyDestructionEnd: 8,
 
+  fighterBase: "Base/Kla'ed - Fighter - Base.png",
+  fighterEnginePrefix: "Engine/Kla'ed - Fighter - Engine/Kla'ed - Fighter - Engine-",
+  fighterEngineSuffix: ".png",
+  fighterEngineStart: 0,
+  fighterEngineEnd: 9,
+
+  fighterWeaponPrefix: "Weapons/Kla'ed - Fighter - Weapons/Kla'ed - Fighter - Weapons-",
+  fighterWeaponSuffix: ".png",
+  fighterWeaponStart: 0,
+  fighterWeaponEnd: 5,
+
+  // Fighter uses the same projectile frames as Scout (Kla'ed - Bullet).
+
+  fighterShieldPrefix: "Shield/Kla'ed - Fighter - Shield/Kla'ed - Fighter - Shield-",
+  fighterShieldSuffix: ".png",
+  fighterShieldStart: 0,
+  fighterShieldEnd: 9,
+
+  fighterDestructionPrefix: "Destruction/Kla'ed - Fighter - Destruction/Kla'ed - Fighter - Destruction-",
+  fighterDestructionSuffix: ".png",
+  fighterDestructionStart: 0,
+  fighterDestructionEnd: 7,
+
   // Shield pickup icon (atlas: FX)
   shieldPickupPrefix:
     "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-",
