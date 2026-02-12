@@ -3,7 +3,7 @@ import { ATLAS_KEYS, GAME_HEIGHT, SPRITE_FRAMES } from "../config";
 
 const BIG_SPACE_GUN_PROJECTILE_SPEED = 400;
 // TUNE PROJECTILE SCALE HERE:
-const BIG_SPACE_GUN_PROJECTILE_SCALE = 0.9;
+const BIG_SPACE_GUN_PROJECTILE_SCALE = 0.7;
 
 export class BigSpaceGunProjectile extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
