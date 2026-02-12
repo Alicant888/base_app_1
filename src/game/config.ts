@@ -139,6 +139,32 @@ export const SPRITE_FRAMES = {
   torpedoShipDestructionStart: 0,
   torpedoShipDestructionEnd: 8,
 
+  frigateBase: "Base/Kla'ed - Frigate - Base.png",
+  frigateEnginePrefix: "Engine/Kla'ed - Frigate - Engine/Kla'ed - Frigate - Engine-",
+  frigateEngineSuffix: ".png",
+  frigateEngineStart: 0,
+  frigateEngineEnd: 9,
+
+  frigateWeaponPrefix: "Weapons/Kla'ed - Frigate - Weapons/Kla'ed - Frigate - Weapons-",
+  frigateWeaponSuffix: ".png",
+  frigateWeaponStart: 0,
+  frigateWeaponEnd: 5,
+
+  frigateShieldPrefix: "Shield/Kla'ed - Frigate - Shield/Kla'ed - Frigate - Shield-",
+  frigateShieldSuffix: ".png",
+  frigateShieldStart: 0,
+  frigateShieldEnd: 9,
+
+  frigateDestructionPrefix: "Destruction/Kla'ed - Frigate - Destruction/Kla'ed - Frigate - Destruction-",
+  frigateDestructionSuffix: ".png",
+  frigateDestructionStart: 0,
+  frigateDestructionEnd: 8,
+
+  bigBulletProjectilePrefix: "Projectiles/Kla'ed - Big Bullet/Kla'ed - Big Bullet-",
+  bigBulletProjectileSuffix: ".png",
+  bigBulletProjectileStart: 0,
+  bigBulletProjectileEnd: 3,
+
   // Shield pickup icon (atlas: FX)
   shieldPickupPrefix:
     "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-",

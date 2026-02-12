@@ -11,6 +11,7 @@ export type EnemyProjectileFireOptions = {
   frame?: string;
   depth?: number;
   flipY?: boolean;
+  scale?: number;
 };
 
 export class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
@@ -40,12 +41,14 @@ export class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
     const speedY = options?.speedY ?? ENEMY_BULLET_SPEED;
     const depth = options?.depth ?? DEFAULT_DEPTH;
     const flipY = options?.flipY ?? true;
+    const scale = options?.scale ?? 1;
 
     this.setPosition(x, y);
     this.setActive(true);
     this.setVisible(true);
     this.setDepth(depth);
     this.setFlipY(flipY);
+    this.setScale(scale);
     this.setFrame(frame);
 
     body.enable = true;
@@ -68,6 +71,7 @@ export class EnemyBullet extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(false);
     this.anims.stop();
     this.damage = 1;
+    this.setScale(1);
 
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (body) {

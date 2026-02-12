@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { EnemyBullet, type EnemyProjectileFireOptions } from "./EnemyBullet";
 import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES } from "../config";
 
-export type EnemyKind = "scout" | "fighter" | "torpedo";
+export type EnemyKind = "scout" | "fighter" | "torpedo" | "frigate";
 
 const FIGHTER_HP = 2;
 const FIGHTER_SHIELD_HP = 2;
@@ -19,12 +19,37 @@ const TORPEDO_SHIP_ENGINE_EDGE_MARGIN_PX = 6;
 const TORPEDO_SHIP_ENGINE_SCALE = 0.7; // -30%
 const ENEMY_ENGINE_OFFSET_Y = 28;
 
+const FRIGATE_HP = 3;
+const FRIGATE_SHIELD_HP = 3;
+const FRIGATE_BULLET_DAMAGE = 2;
+const FRIGATE_BULLET_DEPTH = 5;
+const FRIGATE_SALVO_BASE_Y_FACTOR = 0.15;
+const FRIGATE_BIG_BULLET_SCALE = 0.6;
+
+type FrigateShotConfig = {
+  frameIndex: number;
+  offsetX: number;
+  offsetY: number;
+};
+
+// Later you can tune each shot position (offsetX/offsetY) and sync frameIndex independently.
+const FRIGATE_SALVO_SHOTS: FrigateShotConfig[] = [
+  // Left side (2 shots)
+  { frameIndex: 1, offsetX: -14, offsetY: 0 },
+  { frameIndex: 3, offsetX: -10, offsetY: 0 },
+  // Right side (2 shots)
+  { frameIndex: 3, offsetX: 10, offsetY: 0 },
+  { frameIndex: 1, offsetX: 14, offsetY: 0 },
+];
+
 const SCOUT_SHIELD_OFFSET_X = 0;
 const SCOUT_SHIELD_OFFSET_Y = 0;
 const FIGHTER_SHIELD_OFFSET_X = 0;
 const FIGHTER_SHIELD_OFFSET_Y = 0;
 const TORPEDO_SHIP_SHIELD_OFFSET_X = 0;
 const TORPEDO_SHIP_SHIELD_OFFSET_Y = 10;
+const FRIGATE_SHIELD_OFFSET_X = 0;
+const FRIGATE_SHIELD_OFFSET_Y = 0;
 
 type TorpedoShipShotConfig = {
   frameIndex: number;
@@ -100,13 +125,24 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const isFighter = this.kind === "fighter";
     const isTorpedo = this.kind === "torpedo";
+    const isFrigate = this.kind === "frigate";
 
     this.torpedoSalvoDone = false;
 
-    this.hp = isTorpedo ? TORPEDO_SHIP_HP : isFighter ? FIGHTER_HP : 1;
-    this.shieldHp = isTorpedo ? (hasShield ? TORPEDO_SHIP_SHIELD_HP : 0) : isFighter ? (hasShield ? FIGHTER_SHIELD_HP : 0) : hasShield ? 1 : 0;
+    this.hp = isFrigate ? FRIGATE_HP : isTorpedo ? TORPEDO_SHIP_HP : isFighter ? FIGHTER_HP : 1;
+    this.shieldHp = isFrigate
+      ? (hasShield ? FRIGATE_SHIELD_HP : 0)
+      : isTorpedo
+        ? (hasShield ? TORPEDO_SHIP_SHIELD_HP : 0)
+        : isFighter
+          ? (hasShield ? FIGHTER_SHIELD_HP : 0)
+          : hasShield
+            ? 1
+            : 0;
 
-    this.setFrame(isTorpedo ? SPRITE_FRAMES.torpedoShipBase : isFighter ? SPRITE_FRAMES.fighterBase : SPRITE_FRAMES.enemyBase);
+    this.setFrame(
+      isFrigate ? SPRITE_FRAMES.frigateBase : isTorpedo ? SPRITE_FRAMES.torpedoShipBase : isFighter ? SPRITE_FRAMES.fighterBase : SPRITE_FRAMES.enemyBase,
+    );
 
     // Keep large enemies (e.g. Torpedo Ship) within bounds.
     const halfW = (this.displayWidth || this.width) * 0.5;
@@ -127,11 +163,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     body.setSize(this.width * 0.7, this.height * 0.7, true);
 
     // Engine loop.
-    const engineFrame = isTorpedo
-      ? `${SPRITE_FRAMES.torpedoShipEnginePrefix}${SPRITE_FRAMES.torpedoShipEngineStart}${SPRITE_FRAMES.torpedoShipEngineSuffix}`
-      : isFighter
-        ? `${SPRITE_FRAMES.fighterEnginePrefix}${SPRITE_FRAMES.fighterEngineStart}${SPRITE_FRAMES.fighterEngineSuffix}`
-        : `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`;
+    const engineFrame = isFrigate
+      ? `${SPRITE_FRAMES.frigateEnginePrefix}${SPRITE_FRAMES.frigateEngineStart}${SPRITE_FRAMES.frigateEngineSuffix}`
+      : isTorpedo
+        ? `${SPRITE_FRAMES.torpedoShipEnginePrefix}${SPRITE_FRAMES.torpedoShipEngineStart}${SPRITE_FRAMES.torpedoShipEngineSuffix}`
+        : isFighter
+          ? `${SPRITE_FRAMES.fighterEnginePrefix}${SPRITE_FRAMES.fighterEngineStart}${SPRITE_FRAMES.fighterEngineSuffix}`
+          : `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`;
     if (isTorpedo) {
       // Torpedo Ship has 2 engine flames at the edges.
       if (!this.engineFxL) {
@@ -171,31 +209,35 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.engineFx.setFrame(engineFrame);
       this.engineFx.setVisible(true);
       this.engineFx.setFlipY(true);
-      this.engineFx.play(isFighter ? "fighter_engine" : "enemy_engine", true);
+      this.engineFx.play(isFrigate ? "frigate_engine" : isFighter ? "fighter_engine" : "enemy_engine", true);
     }
 
     // Shield. Scout: optional (1 HP). Fighter/Torpedo Ship: optional (2 HP).
     if (this.shieldHp > 0) {
-      const shieldFrame = isTorpedo
-        ? `${SPRITE_FRAMES.torpedoShipShieldPrefix}${SPRITE_FRAMES.torpedoShipShieldStart}${SPRITE_FRAMES.torpedoShipShieldSuffix}`
-        : isFighter
-          ? `${SPRITE_FRAMES.fighterShieldPrefix}${SPRITE_FRAMES.fighterShieldStart}${SPRITE_FRAMES.fighterShieldSuffix}`
-          : `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`;
+      const shieldFrame = isFrigate
+        ? `${SPRITE_FRAMES.frigateShieldPrefix}${SPRITE_FRAMES.frigateShieldStart}${SPRITE_FRAMES.frigateShieldSuffix}`
+        : isTorpedo
+          ? `${SPRITE_FRAMES.torpedoShipShieldPrefix}${SPRITE_FRAMES.torpedoShipShieldStart}${SPRITE_FRAMES.torpedoShipShieldSuffix}`
+          : isFighter
+            ? `${SPRITE_FRAMES.fighterShieldPrefix}${SPRITE_FRAMES.fighterShieldStart}${SPRITE_FRAMES.fighterShieldSuffix}`
+            : `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`;
       this.shieldFx.setFrame(shieldFrame);
       this.shieldFx.setVisible(true);
       this.shieldFx.setFlipY(true);
-      this.shieldFx.play(isTorpedo ? "torpedo_ship_shield" : isFighter ? "fighter_shield" : "enemy_shield", true);
+      this.shieldFx.play(isFrigate ? "frigate_shield" : isTorpedo ? "torpedo_ship_shield" : isFighter ? "fighter_shield" : "enemy_shield", true);
     } else {
       this.shieldFx.setVisible(false);
       this.shieldFx.anims.stop();
     }
 
     // Weapon FX is off until firing.
-    const weaponFrame = isTorpedo
-      ? `${SPRITE_FRAMES.torpedoShipWeaponPrefix}${SPRITE_FRAMES.torpedoShipWeaponStart}${SPRITE_FRAMES.torpedoShipWeaponSuffix}`
-      : isFighter
-        ? `${SPRITE_FRAMES.fighterWeaponPrefix}${SPRITE_FRAMES.fighterWeaponStart}${SPRITE_FRAMES.fighterWeaponSuffix}`
-        : `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`;
+    const weaponFrame = isFrigate
+      ? `${SPRITE_FRAMES.frigateWeaponPrefix}${SPRITE_FRAMES.frigateWeaponStart}${SPRITE_FRAMES.frigateWeaponSuffix}`
+      : isTorpedo
+        ? `${SPRITE_FRAMES.torpedoShipWeaponPrefix}${SPRITE_FRAMES.torpedoShipWeaponStart}${SPRITE_FRAMES.torpedoShipWeaponSuffix}`
+        : isFighter
+          ? `${SPRITE_FRAMES.fighterWeaponPrefix}${SPRITE_FRAMES.fighterWeaponStart}${SPRITE_FRAMES.fighterWeaponSuffix}`
+          : `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`;
     this.weaponFx.setFrame(weaponFrame);
     // Torpedo Ship shows weapon idle (frame 0) on spawn, then hides it on first shot.
     this.weaponFx.setVisible(isTorpedo);
@@ -312,15 +354,19 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const shieldOffsetX =
       this.kind === "torpedo"
         ? TORPEDO_SHIP_SHIELD_OFFSET_X
-        : this.kind === "fighter"
-          ? FIGHTER_SHIELD_OFFSET_X
-          : SCOUT_SHIELD_OFFSET_X;
+        : this.kind === "frigate"
+          ? FRIGATE_SHIELD_OFFSET_X
+          : this.kind === "fighter"
+            ? FIGHTER_SHIELD_OFFSET_X
+            : SCOUT_SHIELD_OFFSET_X;
     const shieldOffsetY =
       this.kind === "torpedo"
         ? TORPEDO_SHIP_SHIELD_OFFSET_Y
-        : this.kind === "fighter"
-          ? FIGHTER_SHIELD_OFFSET_Y
-          : SCOUT_SHIELD_OFFSET_Y;
+        : this.kind === "frigate"
+          ? FRIGATE_SHIELD_OFFSET_Y
+          : this.kind === "fighter"
+            ? FIGHTER_SHIELD_OFFSET_Y
+            : SCOUT_SHIELD_OFFSET_Y;
     this.shieldFx.setPosition(this.x + shieldOffsetX, this.y + shieldOffsetY);
 
     // Weapon frames are trimmed differently; placing it at the same position prevents it
@@ -403,6 +449,64 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       });
 
       this.weaponFx.play("torpedo_ship_weapon", true);
+      return;
+    }
+
+    if (this.kind === "frigate") {
+      const firedShots = new Array(FRIGATE_SALVO_SHOTS.length).fill(false);
+      let playedSfx = false;
+
+      const tryPlaySfx = () => {
+        if (playedSfx) return;
+        playedSfx = true;
+        if (!this.scene.registry.get("audioUnlocked")) return;
+        try {
+          this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.45 });
+        } catch {
+          // ignore
+        }
+      };
+
+      this.weaponFx.on(
+        Phaser.Animations.Events.ANIMATION_UPDATE,
+        (_animation: Phaser.Animations.Animation, _frame: Phaser.Animations.AnimationFrame, _gameObject: Phaser.GameObjects.Sprite, frameKey: string) => {
+          if (!this.active) return;
+          if (!this.enemyBullets) return;
+
+          const baseY = this.y + (this.displayHeight || 24) * FRIGATE_SALVO_BASE_Y_FACTOR;
+          const bigBulletFrame = `${SPRITE_FRAMES.bigBulletProjectilePrefix}${SPRITE_FRAMES.bigBulletProjectileStart}${SPRITE_FRAMES.bigBulletProjectileSuffix}`;
+
+          for (let i = 0; i < FRIGATE_SALVO_SHOTS.length; i += 1) {
+            if (firedShots[i]) continue;
+            const shot = FRIGATE_SALVO_SHOTS[i];
+            const fireFrameKey = `${SPRITE_FRAMES.frigateWeaponPrefix}${shot.frameIndex}${SPRITE_FRAMES.frigateWeaponSuffix}`;
+            if (frameKey !== fireFrameKey) continue;
+
+            firedShots[i] = true;
+            const x = this.x + shot.offsetX;
+            const y = baseY + shot.offsetY;
+
+            const fired = this.spawnEnemyBulletAt(x, y, {
+              animKey: "enemy_big_bullet",
+              frame: bigBulletFrame,
+              damage: FRIGATE_BULLET_DAMAGE,
+              depth: FRIGATE_BULLET_DEPTH,
+              scale: FRIGATE_BIG_BULLET_SCALE,
+            });
+            if (fired) tryPlaySfx();
+          }
+        },
+      );
+
+      this.weaponFx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+        this.weaponFx.setVisible(false);
+        this.weaponFx.removeAllListeners();
+
+        this.isFiring = false;
+        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+      });
+
+      this.weaponFx.play("frigate_weapon", true);
       return;
     }
 

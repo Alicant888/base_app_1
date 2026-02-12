@@ -1261,13 +1261,22 @@ export class GameScene extends Phaser.Scene {
     const frame =
       kind === "fighter"
         ? `${SPRITE_FRAMES.fighterDestructionPrefix}${SPRITE_FRAMES.fighterDestructionStart}${SPRITE_FRAMES.fighterDestructionSuffix}`
+        : kind === "frigate"
+          ? `${SPRITE_FRAMES.frigateDestructionPrefix}${SPRITE_FRAMES.frigateDestructionStart}${SPRITE_FRAMES.frigateDestructionSuffix}`
         : kind === "torpedo"
           ? `${SPRITE_FRAMES.torpedoShipDestructionPrefix}${SPRITE_FRAMES.torpedoShipDestructionStart}${SPRITE_FRAMES.torpedoShipDestructionSuffix}`
           : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
 
     const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(6);
 
-    const animKey = kind === "fighter" ? "fighter_explode" : kind === "torpedo" ? "torpedo_ship_explode" : "enemy_explode";
+    const animKey =
+      kind === "fighter"
+        ? "fighter_explode"
+        : kind === "frigate"
+          ? "frigate_explode"
+          : kind === "torpedo"
+            ? "torpedo_ship_explode"
+            : "enemy_explode";
     boom.play(animKey);
     // Use negative scale instead of flipY to ensure vertical mirroring applies
     // consistently across trimmed atlas frames.
@@ -1318,6 +1327,20 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("frigate_explode")) {
+      this.anims.create({
+        key: "frigate_explode",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.frigateDestructionStart,
+          end: SPRITE_FRAMES.frigateDestructionEnd,
+          prefix: SPRITE_FRAMES.frigateDestructionPrefix,
+          suffix: SPRITE_FRAMES.frigateDestructionSuffix,
+        }),
+        frameRate: 20,
+        repeat: 0,
+      });
+    }
+
     if (!this.anims.exists("enemy_engine")) {
       this.anims.create({
         key: "enemy_engine",
@@ -1360,6 +1383,20 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("frigate_engine")) {
+      this.anims.create({
+        key: "frigate_engine",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.frigateEngineStart,
+          end: SPRITE_FRAMES.frigateEngineEnd,
+          prefix: SPRITE_FRAMES.frigateEnginePrefix,
+          suffix: SPRITE_FRAMES.frigateEngineSuffix,
+        }),
+        frameRate: 14,
+        repeat: -1,
+      });
+    }
+
     if (!this.anims.exists("enemy_weapon_flame")) {
       this.anims.create({
         key: "enemy_weapon_flame",
@@ -1384,6 +1421,20 @@ export class GameScene extends Phaser.Scene {
           suffix: SPRITE_FRAMES.fighterWeaponSuffix,
         }),
         frameRate: 22,
+        repeat: 0,
+      });
+    }
+
+    if (!this.anims.exists("frigate_weapon")) {
+      this.anims.create({
+        key: "frigate_weapon",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.frigateWeaponStart,
+          end: SPRITE_FRAMES.frigateWeaponEnd,
+          prefix: SPRITE_FRAMES.frigateWeaponPrefix,
+          suffix: SPRITE_FRAMES.frigateWeaponSuffix,
+        }),
+        frameRate: 18,
         repeat: 0,
       });
     }
@@ -1432,6 +1483,16 @@ export class GameScene extends Phaser.Scene {
       18,
     );
 
+    this.createLoopAnimIfFrames(
+      "enemy_big_bullet",
+      ATLAS_KEYS.enemy,
+      SPRITE_FRAMES.bigBulletProjectilePrefix,
+      SPRITE_FRAMES.bigBulletProjectileStart,
+      SPRITE_FRAMES.bigBulletProjectileEnd,
+      SPRITE_FRAMES.bigBulletProjectileSuffix,
+      16,
+    );
+
     if (!this.anims.exists("enemy_shield")) {
       this.anims.create({
         key: "enemy_shield",
@@ -1468,6 +1529,20 @@ export class GameScene extends Phaser.Scene {
           end: SPRITE_FRAMES.torpedoShipShieldEnd,
           prefix: SPRITE_FRAMES.torpedoShipShieldPrefix,
           suffix: SPRITE_FRAMES.torpedoShipShieldSuffix,
+        }),
+        frameRate: 18,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("frigate_shield")) {
+      this.anims.create({
+        key: "frigate_shield",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.enemy, {
+          start: SPRITE_FRAMES.frigateShieldStart,
+          end: SPRITE_FRAMES.frigateShieldEnd,
+          prefix: SPRITE_FRAMES.frigateShieldPrefix,
+          suffix: SPRITE_FRAMES.frigateShieldSuffix,
         }),
         frameRate: 18,
         repeat: -1,

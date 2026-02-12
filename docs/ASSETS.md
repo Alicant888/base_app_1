@@ -57,6 +57,15 @@ Enemy Torpedo Ship (atlas: `Enemy`)
 - `Shield/Kla'ed - Torpedo Ship - Shield/Kla'ed - Torpedo Ship - Shield-0.png` … `Shield/Kla'ed - Torpedo Ship - Shield/Kla'ed - Torpedo Ship - Shield-9.png`
 - `Destruction/Kla'ed - Torpedo Ship - Destruction/Kla'ed - Torpedo Ship - Destruction-0.png` … `Destruction/Kla'ed - Torpedo Ship - Destruction/Kla'ed - Torpedo Ship - Destruction-8.png`
 
+Enemy Frigate (atlas: `Enemy`)
+
+- `Base/Kla'ed - Frigate - Base.png`
+- `Engine/Kla'ed - Frigate - Engine/Kla'ed - Frigate - Engine-0.png` … `Engine/Kla'ed - Frigate - Engine/Kla'ed - Frigate - Engine-9.png`
+- `Weapons/Kla'ed - Frigate - Weapons/Kla'ed - Frigate - Weapons-0.png` … `Weapons/Kla'ed - Frigate - Weapons/Kla'ed - Frigate - Weapons-5.png`
+- `Projectiles/Kla'ed - Big Bullet/Kla'ed - Big Bullet-0.png` … `Projectiles/Kla'ed - Big Bullet/Kla'ed - Big Bullet-3.png`
+- `Shield/Kla'ed - Frigate - Shield/Kla'ed - Frigate - Shield-0.png` … `Shield/Kla'ed - Frigate - Shield/Kla'ed - Frigate - Shield-9.png`
+- `Destruction/Kla'ed - Frigate - Destruction/Kla'ed - Frigate - Destruction-0.png` … `Destruction/Kla'ed - Frigate - Destruction/Kla'ed - Frigate - Destruction-8.png`
+
 FX (atlas: `FX`)
 
 - `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png` … `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png`
