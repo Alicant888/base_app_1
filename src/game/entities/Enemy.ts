@@ -38,8 +38,8 @@ const BATTLECRUISER_WEAPON_FIRE_FRAME_7 = `${SPRITE_FRAMES.battlecruiserWeaponPr
 const BATTLECRUISER_WEAPON_FIRE_FRAME_15 = `${SPRITE_FRAMES.battlecruiserWeaponPrefix}15${SPRITE_FRAMES.battlecruiserWeaponSuffix}`;
 const BATTLECRUISER_WEAPON_FIRE_FRAME_22 = `${SPRITE_FRAMES.battlecruiserWeaponPrefix}22${SPRITE_FRAMES.battlecruiserWeaponSuffix}`;
 
-const DREADNOUGHT_HP = 5;
-const DREADNOUGHT_SHIELD_HP = 5;
+const DREADNOUGHT_HP = 100;
+const DREADNOUGHT_SHIELD_HP = 100;
 const DREADNOUGHT_RAY_DAMAGE = 5;
 const DREADNOUGHT_RAY_DEPTH = 3; // under ship (depth 4) and weapon FX (depth 5)
 // With dreadnought_weapon at 28fps and shots every 7 frames (0.25s),
@@ -47,6 +47,10 @@ const DREADNOUGHT_RAY_DEPTH = 3; // under ship (depth 4) and weapon FX (depth 5)
 const DREADNOUGHT_RAY_REL_SPEED_Y = 152;
 const DREADNOUGHT_FIRE_Y_FACTOR = 0.3; // spawn below the ship
 const DREADNOUGHT_ENGINE_OFFSET_Y = 1; // move engine flame closer to the ship
+const DREADNOUGHT_HOVER_Y = 160; // upper third of the screen
+const DREADNOUGHT_IDLE_DRIFT_SPEED_X = 16;
+const DREADNOUGHT_ALIGN_SPEED_X = 140; // medium speed to chase player X before firing
+const DREADNOUGHT_ALIGN_EPS_PX = 3;
 
 const DREADNOUGHT_WEAPON_FIRE_FRAME_27 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}27${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}34${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
@@ -115,6 +119,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private hp = 1;
   private shieldHp = 0;
   private torpedoSalvoDone = false;
+  private shieldSuppressed = false;
+
+  // Boss-only state (Dreadnought).
+  private dreadnoughtState: "idle" | "aligning" | "firing" = "idle";
+  private dreadnoughtDriftDir: -1 | 1 = 1;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, ATLAS_KEYS.enemy, SPRITE_FRAMES.enemyBase);
@@ -162,6 +171,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const isDreadnought = this.kind === "dreadnought";
 
     this.torpedoSalvoDone = false;
+    this.shieldSuppressed = false;
+    this.dreadnoughtState = "idle";
+    this.dreadnoughtDriftDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
 
     this.hp = isDreadnought ? DREADNOUGHT_HP : isBattlecruiser ? BATTLECRUISER_HP : isFrigate ? FRIGATE_HP : isTorpedo ? TORPEDO_SHIP_HP : isFighter ? FIGHTER_HP : 1;
     this.shieldHp = isDreadnought
@@ -196,16 +208,17 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const halfW = (this.displayWidth || this.width) * 0.5;
     const clampedX = Phaser.Math.Clamp(x, halfW + 4, GAME_WIDTH - halfW - 4);
 
-    this.setPosition(clampedX, y);
+    const spawnY = isDreadnought ? DREADNOUGHT_HOVER_Y : y;
+    this.setPosition(clampedX, spawnY);
     this.setActive(true);
     this.setVisible(true);
     this.setFlipY(true); // face downward
 
     body.enable = true;
-    body.reset(clampedX, y);
+    body.reset(clampedX, spawnY);
 
     body.allowGravity = false;
-    this.setVelocity(0, speedY);
+    this.setVelocity(0, isDreadnought ? 0 : speedY);
 
     // Smaller, forgiving hitbox.
     body.setSize(this.width * 0.7, this.height * 0.7, true);
@@ -305,8 +318,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.engineFx.play(isDreadnought ? "dreadnought_engine" : isFrigate ? "frigate_engine" : isFighter ? "fighter_engine" : "enemy_engine", true);
     }
 
-    // Shield. Scout: optional (1 HP). Fighter/Torpedo Ship: optional (2 HP).
-    if (this.shieldHp > 0) {
+    // Shield. For Dreadnought boss: always starts visible unless broken.
+    if (this.shieldHp > 0 && !this.shieldSuppressed) {
       const shieldFrame = isDreadnought
         ? `${SPRITE_FRAMES.dreadnoughtShieldPrefix}${SPRITE_FRAMES.dreadnoughtShieldStart}${SPRITE_FRAMES.dreadnoughtShieldSuffix}`
         : isBattlecruiser
@@ -360,7 +373,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.weaponFx.removeAllListeners();
 
     this.isFiring = false;
-    this.nextFireAt = this.scene.time.now + Phaser.Math.Between(850, 1400);
+    this.nextFireAt = this.scene.time.now + Phaser.Math.Between(isDreadnought ? 1200 : 850, isDreadnought ? 1900 : 1400);
 
     // IMPORTANT: This enemy is pooled and its FX sprites are separate GameObjects.
     // Sync their positions immediately on spawn to avoid a 1-frame "flicker" at the
@@ -376,6 +389,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.hp = 0;
     this.shieldHp = 0;
     this.torpedoSalvoDone = false;
+    this.shieldSuppressed = false;
+    this.dreadnoughtState = "idle";
     this.engineFx.setVisible(false);
     this.engineFx.anims.stop();
     this.engineFxL?.setVisible(false);
@@ -398,6 +413,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   update(time: number) {
     if (!this.active) return;
     this.syncFxPositions();
+
+    if (this.kind === "dreadnought") {
+      this.updateDreadnoughtBoss(time);
+      return;
+    }
 
     if (!this.isFiring && this.enemyBullets && time >= this.nextFireAt) {
       // Torpedo Ship fires only once per spawn.
@@ -425,7 +445,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     let remaining = Math.max(0, damage);
 
-    if (this.shieldHp > 0 && remaining > 0) {
+    if (this.shieldHp > 0 && remaining > 0 && !this.shieldSuppressed) {
       const shieldBefore = this.shieldHp;
       this.shieldHp = Math.max(0, this.shieldHp - remaining);
       remaining = Math.max(0, remaining - shieldBefore);
@@ -517,12 +537,162 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     });
   }
 
+  private updateDreadnoughtBoss(time: number) {
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (!body) return;
+
+    // Hover in the upper third.
+    this.setY(DREADNOUGHT_HOVER_Y);
+    body.velocity.y = 0;
+
+    const halfW = (this.displayWidth || this.width) * 0.5;
+    const minX = halfW + 4;
+    const maxX = GAME_WIDTH - halfW - 4;
+
+    if (this.dreadnoughtState === "idle") {
+      // Slow drift while shield is up.
+      if (this.shieldHp > 0 && !this.shieldSuppressed) {
+        if (!this.shieldFx.visible) {
+          this.shieldFx.setVisible(true);
+          this.shieldFx.setFlipY(true);
+          this.shieldFx.play("dreadnought_shield", true);
+        }
+      }
+
+      if (this.x <= minX) this.dreadnoughtDriftDir = 1;
+      if (this.x >= maxX) this.dreadnoughtDriftDir = -1;
+      body.velocity.x = this.dreadnoughtDriftDir * DREADNOUGHT_IDLE_DRIFT_SPEED_X;
+
+      if (!this.isFiring && this.enemyBullets && time >= this.nextFireAt) {
+        this.startFiringSequence();
+      }
+      return;
+    }
+
+    if (this.dreadnoughtState === "aligning") {
+      const playerXRaw = this.scene.registry.get("playerX");
+      const playerX = typeof playerXRaw === "number" ? playerXRaw : this.x;
+      const targetX = Phaser.Math.Clamp(playerX, minX, maxX);
+      const dx = targetX - this.x;
+
+      if (Math.abs(dx) <= DREADNOUGHT_ALIGN_EPS_PX) {
+        this.setX(targetX);
+        body.velocity.x = 0;
+        this.beginDreadnoughtVolley();
+        return;
+      }
+
+      body.velocity.x = Math.sign(dx) * DREADNOUGHT_ALIGN_SPEED_X;
+      return;
+    }
+
+    // Firing: hold position.
+    body.velocity.x = 0;
+  }
+
+  private beginDreadnoughtVolley() {
+    if (!this.enemyBullets) return;
+
+    const rayFrame = `${SPRITE_FRAMES.rayProjectilePrefix}${SPRITE_FRAMES.rayProjectileStart}${SPRITE_FRAMES.rayProjectileSuffix}`;
+    const firedFrameKeys = new Set<string>();
+    let playedSfx = false;
+
+    const tryPlaySfx = () => {
+      if (playedSfx) return;
+      playedSfx = true;
+      if (!this.scene.registry.get("audioUnlocked")) return;
+      try {
+        this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.45 });
+      } catch {
+        // ignore
+      }
+    };
+
+    const fireRay = () => {
+      if (!this.active) return;
+      if (!this.enemyBullets) return;
+
+      const x = this.x;
+      const y = this.y + (this.displayHeight || 24) * DREADNOUGHT_FIRE_Y_FACTOR;
+      const body = this.body as Phaser.Physics.Arcade.Body | null;
+      const shipSpeedY = body?.velocity?.y ?? 0;
+
+      const fired = this.spawnEnemyBulletAt(x, y, {
+        animKey: "enemy_ray",
+        frame: rayFrame,
+        damage: DREADNOUGHT_RAY_DAMAGE,
+        depth: DREADNOUGHT_RAY_DEPTH,
+        // Keep spacing consistent regardless of any vertical movement.
+        speedY: shipSpeedY + DREADNOUGHT_RAY_REL_SPEED_Y,
+      });
+      if (fired) tryPlaySfx();
+    };
+
+    this.dreadnoughtState = "firing";
+    this.weaponFx.setVisible(true);
+    this.weaponFx.removeAllListeners();
+
+    // Sync 5 shots to specific weapon frames.
+    this.weaponFx.on(
+      Phaser.Animations.Events.ANIMATION_UPDATE,
+      (_animation: Phaser.Animations.Animation, _frame: Phaser.Animations.AnimationFrame, _gameObject: Phaser.GameObjects.Sprite, frameKey: string) => {
+        if (!this.active) return;
+        if (!this.enemyBullets) return;
+
+        const shouldFire =
+          frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_27 ||
+          frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_34 ||
+          frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_41 ||
+          frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_48 ||
+          frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_55;
+
+        if (!shouldFire) return;
+        if (firedFrameKeys.has(frameKey)) return;
+
+        firedFrameKeys.add(frameKey);
+        fireRay();
+      },
+    );
+
+    this.weaponFx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      this.weaponFx.setVisible(false);
+      this.weaponFx.removeAllListeners();
+
+      // Shield back up after salvo (but keep remaining shield HP).
+      this.shieldSuppressed = false;
+      if (this.shieldHp > 0) {
+        this.shieldFx.setVisible(true);
+        this.shieldFx.setFlipY(true);
+        this.shieldFx.play("dreadnought_shield", true);
+      }
+
+      this.isFiring = false;
+      this.dreadnoughtState = "idle";
+      this.nextFireAt = this.scene.time.now + Phaser.Math.Between(1400, 2200);
+    });
+
+    this.weaponFx.play("dreadnought_weapon", true);
+  }
+
   private startFiringSequence() {
     if (!this.enemyBullets) return;
 
     this.isFiring = true;
     this.weaponFx.setVisible(true);
     this.weaponFx.removeAllListeners();
+
+    if (this.kind === "dreadnought") {
+      // Boss behavior:
+      // - Shield down during the whole salvo (incl. alignment)
+      // - Move to player X first, then play weapon animation and fire
+      this.shieldSuppressed = true;
+      this.shieldFx.setVisible(false);
+      this.shieldFx.anims.stop();
+
+      this.weaponFx.setVisible(false); // show only when actually firing
+      this.dreadnoughtState = "aligning";
+      return;
+    }
 
     if (this.kind === "torpedo") {
       const firedShots = new Array(TORPEDO_SHIP_SALVO_SHOTS.length).fill(false);
@@ -650,77 +820,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       });
 
       this.weaponFx.play("battlecruiser_weapon", true);
-      return;
-    }
-
-    if (this.kind === "dreadnought") {
-      const rayFrame = `${SPRITE_FRAMES.rayProjectilePrefix}${SPRITE_FRAMES.rayProjectileStart}${SPRITE_FRAMES.rayProjectileSuffix}`;
-      const firedFrameKeys = new Set<string>();
-      let playedSfx = false;
-
-      const tryPlaySfx = () => {
-        if (playedSfx) return;
-        playedSfx = true;
-        if (!this.scene.registry.get("audioUnlocked")) return;
-        try {
-          this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.45 });
-        } catch {
-          // ignore
-        }
-      };
-
-      const fireRay = () => {
-        if (!this.active) return;
-        if (!this.enemyBullets) return;
-
-        const x = this.x;
-        const y = this.y + (this.displayHeight || 24) * DREADNOUGHT_FIRE_Y_FACTOR;
-        const body = this.body as Phaser.Physics.Arcade.Body | null;
-        const shipSpeedY = body?.velocity?.y ?? 0;
-
-        const fired = this.spawnEnemyBulletAt(x, y, {
-          animKey: "enemy_ray",
-          frame: rayFrame,
-          damage: DREADNOUGHT_RAY_DAMAGE,
-          depth: DREADNOUGHT_RAY_DEPTH,
-          // Add the ship's falling speed so the distance between shots stays consistent
-          // even when different Dreadnought instances spawn with different speedY.
-          speedY: shipSpeedY + DREADNOUGHT_RAY_REL_SPEED_Y,
-        });
-        if (fired) tryPlaySfx();
-      };
-
-      // Sync 5 shots to specific weapon frames.
-      this.weaponFx.on(
-        Phaser.Animations.Events.ANIMATION_UPDATE,
-        (_animation: Phaser.Animations.Animation, _frame: Phaser.Animations.AnimationFrame, _gameObject: Phaser.GameObjects.Sprite, frameKey: string) => {
-          if (!this.active) return;
-          if (!this.enemyBullets) return;
-
-          const shouldFire =
-            frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_27 ||
-            frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_34 ||
-            frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_41 ||
-            frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_48 ||
-            frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_55;
-
-          if (!shouldFire) return;
-          if (firedFrameKeys.has(frameKey)) return;
-
-          firedFrameKeys.add(frameKey);
-          fireRay();
-        },
-      );
-
-      this.weaponFx.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
-        this.weaponFx.setVisible(false);
-        this.weaponFx.removeAllListeners();
-
-        this.isFiring = false;
-        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
-      });
-
-      this.weaponFx.play("dreadnought_weapon", true);
       return;
     }
 

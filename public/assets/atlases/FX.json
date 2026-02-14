@@ -4,11 +4,158 @@
 			"image": "FX.png",
 			"format": "RGBA8888",
 			"size": {
-				"w": 124,
-				"h": 623
+				"w": 898,
+				"h": 127
 			},
 			"scale": 1,
 			"frames": [
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 1,
+						"y": 2,
+						"w": 94,
+						"h": 94
+					},
+					"frame": {
+						"x": 1,
+						"y": 1,
+						"w": 94,
+						"h": 94
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 91,
+						"h": 88
+					},
+					"frame": {
+						"x": 97,
+						"y": 1,
+						"w": 91,
+						"h": 88
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 12,
+						"w": 80,
+						"h": 77
+					},
+					"frame": {
+						"x": 190,
+						"y": 1,
+						"w": 80,
+						"h": 77
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 14,
+						"y": 22,
+						"w": 67,
+						"h": 62
+					},
+					"frame": {
+						"x": 272,
+						"y": 1,
+						"w": 67,
+						"h": 62
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 25,
+						"y": 29,
+						"w": 48,
+						"h": 41
+					},
+					"frame": {
+						"x": 341,
+						"y": 1,
+						"w": 48,
+						"h": 41
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 Base.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 28,
+						"y": 31,
+						"w": 40,
+						"h": 35
+					},
+					"frame": {
+						"x": 97,
+						"y": 91,
+						"w": 40,
+						"h": 35
+					}
+				},
+				{
+					"filename": "Asteroid/Asteroid 01 - Explode-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 96,
+						"h": 96
+					},
+					"spriteSourceSize": {
+						"x": 28,
+						"y": 31,
+						"w": 40,
+						"h": 35
+					},
+					"frame": {
+						"x": 139,
+						"y": 91,
+						"w": 40,
+						"h": 35
+					}
+				},
 				{
 					"filename": "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-3.png",
 					"rotated": false,
@@ -24,7 +171,7 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
+						"x": 391,
 						"y": 1,
 						"w": 32,
 						"h": 32
@@ -45,7 +192,7 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
+						"x": 391,
 						"y": 1,
 						"w": 32,
 						"h": 32
@@ -66,7 +213,7 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 35,
+						"x": 425,
 						"y": 1,
 						"w": 32,
 						"h": 32
@@ -87,7 +234,7 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 35,
+						"x": 425,
 						"y": 1,
 						"w": 32,
 						"h": 32
@@ -108,7 +255,7 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
+						"x": 459,
 						"y": 1,
 						"w": 32,
 						"h": 30
@@ -129,7 +276,7 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
+						"x": 459,
 						"y": 1,
 						"w": 32,
 						"h": 30
@@ -150,94 +297,10 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
+						"x": 459,
 						"y": 1,
 						"w": 32,
 						"h": 30
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 1,
-						"w": 20,
-						"h": 23
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 1,
-						"w": 20,
-						"h": 23
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 1,
-						"w": 20,
-						"h": 23
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 26,
-						"w": 20,
-						"h": 23
 					}
 				},
 				{
@@ -255,31 +318,10 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
-						"y": 33,
+						"x": 493,
+						"y": 1,
 						"w": 32,
 						"h": 30
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 51,
-						"w": 20,
-						"h": 23
 					}
 				},
 				{
@@ -297,8 +339,8 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 1,
-						"y": 35,
+						"x": 527,
+						"y": 1,
 						"w": 32,
 						"h": 30
 					}
@@ -318,8 +360,8 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 35,
-						"y": 35,
+						"x": 561,
+						"y": 1,
 						"w": 32,
 						"h": 30
 					}
@@ -339,31 +381,10 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
-						"y": 65,
+						"x": 595,
+						"y": 1,
 						"w": 32,
 						"h": 30
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 76,
-						"w": 20,
-						"h": 23
 					}
 				},
 				{
@@ -381,8 +402,8 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 1,
-						"y": 67,
+						"x": 629,
+						"y": 1,
 						"w": 32,
 						"h": 30
 					}
@@ -402,8 +423,8 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 35,
-						"y": 67,
+						"x": 663,
+						"y": 1,
 						"w": 32,
 						"h": 30
 					}
@@ -423,52 +444,10 @@
 						"h": 30
 					},
 					"frame": {
-						"x": 69,
-						"y": 97,
+						"x": 697,
+						"y": 1,
 						"w": 32,
 						"h": 30
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 101,
-						"w": 20,
-						"h": 23
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 103,
-						"y": 126,
-						"w": 20,
-						"h": 23
 					}
 				},
 				{
@@ -486,8 +465,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
-						"y": 99,
+						"x": 731,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -507,8 +486,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
-						"y": 99,
+						"x": 731,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -528,8 +507,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
-						"y": 99,
+						"x": 731,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -549,8 +528,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 31,
-						"y": 99,
+						"x": 761,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -570,94 +549,10 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 61,
-						"y": 129,
+						"x": 791,
+						"y": 1,
 						"w": 28,
 						"h": 32
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 91,
-						"y": 129,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 151,
-						"w": 22,
-						"h": 24
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 151,
-						"w": 22,
-						"h": 24
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 151,
-						"w": 22,
-						"h": 24
 					}
 				},
 				{
@@ -675,8 +570,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 1,
-						"y": 133,
+						"x": 821,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -696,113 +591,8 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 31,
-						"y": 133,
-						"w": 28,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 2,
-						"y": 0,
-						"w": 28,
-						"h": 32
-					},
-					"frame": {
-						"x": 61,
-						"y": 163,
-						"w": 28,
-						"h": 32
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 91,
-						"y": 163,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 177,
-						"w": 22,
-						"h": 24
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 2,
-						"y": 0,
-						"w": 28,
-						"h": 32
-					},
-					"frame": {
-						"x": 1,
-						"y": 167,
-						"w": 28,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 2,
-						"y": 0,
-						"w": 28,
-						"h": 32
-					},
-					"frame": {
-						"x": 31,
-						"y": 167,
+						"x": 851,
+						"y": 1,
 						"w": 28,
 						"h": 32
 					}
@@ -822,8 +612,8 @@
 						"h": 28
 					},
 					"frame": {
-						"x": 61,
-						"y": 197,
+						"x": 1,
+						"y": 97,
 						"w": 28,
 						"h": 28
 					}
@@ -843,73 +633,10 @@
 						"h": 28
 					},
 					"frame": {
-						"x": 61,
-						"y": 197,
+						"x": 1,
+						"y": 97,
 						"w": 28,
 						"h": 28
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 91,
-						"y": 197,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 203,
-						"w": 22,
-						"h": 24
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 101,
-						"y": 229,
-						"w": 22,
-						"h": 24
 					}
 				},
 				{
@@ -927,8 +654,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 201,
+						"x": 31,
+						"y": 97,
 						"w": 26,
 						"h": 26
 					}
@@ -948,8 +675,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 201,
+						"x": 31,
+						"y": 97,
 						"w": 26,
 						"h": 26
 					}
@@ -969,8 +696,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 201,
+						"x": 31,
+						"y": 97,
 						"w": 26,
 						"h": 26
 					}
@@ -990,10 +717,73 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 29,
-						"y": 201,
+						"x": 59,
+						"y": 97,
 						"w": 26,
 						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 28,
+						"h": 32
+					},
+					"frame": {
+						"x": 341,
+						"y": 44,
+						"w": 28,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 28,
+						"h": 32
+					},
+					"frame": {
+						"x": 371,
+						"y": 44,
+						"w": 28,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Zapper/Pickup Icon - Weapons - Zapper-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 2,
+						"y": 0,
+						"w": 28,
+						"h": 32
+					},
+					"frame": {
+						"x": 401,
+						"y": 35,
+						"w": 28,
+						"h": 32
 					}
 				},
 				{
@@ -1011,94 +801,10 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 57,
-						"y": 227,
+						"x": 431,
+						"y": 35,
 						"w": 26,
 						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 10,
-						"y": 7,
-						"w": 12,
-						"h": 19
-					},
-					"frame": {
-						"x": 85,
-						"y": 231,
-						"w": 12,
-						"h": 19
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 10,
-						"y": 7,
-						"w": 12,
-						"h": 19
-					},
-					"frame": {
-						"x": 85,
-						"y": 252,
-						"w": 12,
-						"h": 19
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 4,
-						"w": 24,
-						"h": 24
-					},
-					"frame": {
-						"x": 99,
-						"y": 255,
-						"w": 24,
-						"h": 24
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 4,
-						"y": 4,
-						"w": 24,
-						"h": 24
-					},
-					"frame": {
-						"x": 99,
-						"y": 255,
-						"w": 24,
-						"h": 24
 					}
 				},
 				{
@@ -1116,8 +822,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 229,
+						"x": 459,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1137,8 +843,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 29,
-						"y": 229,
+						"x": 487,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1158,52 +864,10 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 57,
-						"y": 255,
+						"x": 515,
+						"y": 33,
 						"w": 26,
 						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 10,
-						"y": 7,
-						"w": 12,
-						"h": 18
-					},
-					"frame": {
-						"x": 85,
-						"y": 273,
-						"w": 12,
-						"h": 18
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 99,
-						"y": 281,
-						"w": 22,
-						"h": 24
 					}
 				},
 				{
@@ -1221,8 +885,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 257,
+						"x": 543,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1242,8 +906,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 29,
-						"y": 257,
+						"x": 571,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1263,52 +927,10 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 57,
-						"y": 283,
+						"x": 599,
+						"y": 33,
 						"w": 26,
 						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 10,
-						"y": 7,
-						"w": 12,
-						"h": 18
-					},
-					"frame": {
-						"x": 85,
-						"y": 293,
-						"w": 12,
-						"h": 18
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 5,
-						"y": 4,
-						"w": 22,
-						"h": 24
-					},
-					"frame": {
-						"x": 99,
-						"y": 307,
-						"w": 22,
-						"h": 24
 					}
 				},
 				{
@@ -1326,8 +948,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 1,
-						"y": 285,
+						"x": 627,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1347,8 +969,8 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 29,
-						"y": 285,
+						"x": 655,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
@@ -1368,14 +990,14 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 57,
-						"y": 311,
+						"x": 683,
+						"y": 33,
 						"w": 26,
 						"h": 26
 					}
 				},
 				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-3.png",
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-0.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -1389,8 +1011,29 @@
 						"h": 32
 					},
 					"frame": {
-						"x": 85,
-						"y": 313,
+						"x": 881,
+						"y": 1,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 181,
+						"y": 91,
 						"w": 8,
 						"h": 32
 					}
@@ -1410,1102 +1053,10 @@
 						"h": 26
 					},
 					"frame": {
-						"x": 95,
-						"y": 333,
+						"x": 191,
+						"y": 80,
 						"w": 26,
 						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Health/Pickup Icon - Health- 5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 1,
-						"y": 313,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Health/Pickup Icon - Health- 6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 313,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Health/Pickup Icon - Health- 7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 57,
-						"y": 339,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 85,
-						"y": 347,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Health/Pickup Icon - Health- 8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 95,
-						"y": 361,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Health/Pickup Icon - Health- 9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 1,
-						"y": 341,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 341,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 341,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 341,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 341,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 57,
-						"y": 367,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 85,
-						"y": 381,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 95,
-						"y": 389,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 1,
-						"y": 369,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 29,
-						"y": 369,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 57,
-						"y": 395,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 85,
-						"y": 415,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 3,
-						"w": 26,
-						"h": 26
-					},
-					"frame": {
-						"x": 95,
-						"y": 417,
-						"w": 26,
-						"h": 26
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 95,
-						"y": 445,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 95,
-						"y": 445,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 95,
-						"y": 445,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 1,
-						"y": 397,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 29,
-						"y": 397,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 57,
-						"y": 423,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 0,
-						"w": 8,
-						"h": 32
-					},
-					"frame": {
-						"x": 85,
-						"y": 449,
-						"w": 8,
-						"h": 32
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 95,
-						"y": 472,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 1,
-						"y": 424,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 29,
-						"y": 424,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 5,
-						"w": 26,
-						"h": 25
-					},
-					"frame": {
-						"x": 57,
-						"y": 450,
-						"w": 26,
-						"h": 25
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 451,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 451,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 451,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 451,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 451,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 472,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 472,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 57,
-						"y": 477,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 9,
-						"w": 7,
-						"h": 20
-					},
-					"frame": {
-						"x": 85,
-						"y": 483,
-						"w": 7,
-						"h": 20
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 94,
-						"y": 499,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 7,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 493,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 493,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-8.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 493,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-9.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 493,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 57,
-						"y": 498,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-1.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 9,
-						"w": 7,
-						"h": 19
-					},
-					"frame": {
-						"x": 85,
-						"y": 505,
-						"w": 7,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-2.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 94,
-						"y": 520,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-3.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 514,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-4.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 29,
-						"y": 514,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-5.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 57,
-						"y": 519,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-0.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 12,
-						"y": 9,
-						"w": 7,
-						"h": 17
-					},
-					"frame": {
-						"x": 85,
-						"y": 526,
-						"w": 7,
-						"h": 17
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-6.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 94,
-						"y": 541,
-						"w": 26,
-						"h": 19
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 3,
-						"y": 8,
-						"w": 26,
-						"h": 19
-					},
-					"frame": {
-						"x": 1,
-						"y": 535,
-						"w": 26,
-						"h": 19
 					}
 				},
 				{
@@ -2523,8 +1074,8 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 29,
-						"y": 535,
+						"x": 191,
+						"y": 108,
 						"w": 26,
 						"h": 18
 					}
@@ -2544,10 +1095,31 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 29,
-						"y": 535,
+						"x": 191,
+						"y": 108,
 						"w": 26,
 						"h": 18
+					}
+				},
+				{
+					"filename": "PickupsPack/Health/Pickup Icon - Health- 5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 219,
+						"y": 80,
+						"w": 26,
+						"h": 26
 					}
 				},
 				{
@@ -2565,10 +1137,31 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 57,
-						"y": 540,
+						"x": 219,
+						"y": 108,
 						"w": 26,
 						"h": 18
+					}
+				},
+				{
+					"filename": "PickupsPack/Health/Pickup Icon - Health- 6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 247,
+						"y": 80,
+						"w": 26,
+						"h": 26
 					}
 				},
 				{
@@ -2586,14 +1179,182 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 29,
-						"y": 555,
+						"x": 247,
+						"y": 108,
 						"w": 26,
 						"h": 18
 					}
 				},
 				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-3.png",
+					"filename": "PickupsPack/Health/Pickup Icon - Health- 7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 275,
+						"y": 65,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Health/Pickup Icon - Health- 8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 275,
+						"y": 93,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Health/Pickup Icon - Health- 9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 303,
+						"y": 65,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 303,
+						"y": 93,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 303,
+						"y": 93,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 303,
+						"y": 93,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 303,
+						"y": 93,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 331,
+						"y": 65,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-0.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -2604,17 +1365,17 @@
 						"x": 3,
 						"y": 7,
 						"w": 26,
-						"h": 18
+						"h": 19
 					},
 					"frame": {
-						"x": 1,
-						"y": 556,
+						"x": 341,
+						"y": 78,
 						"w": 26,
-						"h": 18
+						"h": 19
 					}
 				},
 				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-4.png",
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-7.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -2625,17 +1386,17 @@
 						"x": 3,
 						"y": 7,
 						"w": 26,
-						"h": 18
+						"h": 19
 					},
 					"frame": {
-						"x": 57,
-						"y": 560,
+						"x": 341,
+						"y": 78,
 						"w": 26,
-						"h": 18
+						"h": 19
 					}
 				},
 				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-5.png",
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-8.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -2646,17 +1407,17 @@
 						"x": 3,
 						"y": 7,
 						"w": 26,
-						"h": 18
+						"h": 19
 					},
 					"frame": {
-						"x": 29,
-						"y": 575,
+						"x": 341,
+						"y": 78,
 						"w": 26,
-						"h": 18
+						"h": 19
 					}
 				},
 				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-6.png",
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-9.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -2667,13 +1428,685 @@
 						"x": 3,
 						"y": 7,
 						"w": 26,
-						"h": 18
+						"h": 19
 					},
 					"frame": {
-						"x": 1,
-						"y": 576,
+						"x": 341,
+						"y": 78,
 						"w": 26,
-						"h": 18
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 331,
+						"y": 99,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 369,
+						"y": 78,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 359,
+						"y": 99,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 711,
+						"y": 33,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 721,
+						"y": 33,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 731,
+						"y": 35,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 759,
+						"y": 35,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 787,
+						"y": 35,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 3,
+						"w": 26,
+						"h": 26
+					},
+					"frame": {
+						"x": 815,
+						"y": 35,
+						"w": 26,
+						"h": 26
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 843,
+						"y": 35,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 843,
+						"y": 35,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 843,
+						"y": 35,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 871,
+						"y": 35,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 401,
+						"y": 69,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 387,
+						"y": 99,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 415,
+						"y": 90,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 425,
+						"y": 90,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 431,
+						"y": 63,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 459,
+						"y": 61,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 487,
+						"y": 61,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 515,
+						"y": 61,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Auto Cannons/Pickup Icon - Weapons - Auto Cannons-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 5,
+						"w": 26,
+						"h": 25
+					},
+					"frame": {
+						"x": 543,
+						"y": 61,
+						"w": 26,
+						"h": 25
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 4,
+						"w": 24,
+						"h": 24
+					},
+					"frame": {
+						"x": 571,
+						"y": 61,
+						"w": 24,
+						"h": 24
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Big Space Gun/Main ship weapon - Projectile - Big Space Gun-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 4,
+						"y": 4,
+						"w": 24,
+						"h": 24
+					},
+					"frame": {
+						"x": 571,
+						"y": 61,
+						"w": 24,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 435,
+						"y": 90,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 435,
+						"y": 90,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 435,
+						"y": 90,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 459,
+						"y": 88,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 597,
+						"y": 61,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 483,
+						"y": 88,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 621,
+						"y": 61,
+						"w": 22,
+						"h": 24
+					}
+				},
+				{
+					"filename": "PickupsPack/Weapons/Pickup Icon - Weapons - Big Space Gun 2000/Pickup Icon - Weapons - Big Space Gun 2000-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 5,
+						"y": 4,
+						"w": 22,
+						"h": 24
+					},
+					"frame": {
+						"x": 507,
+						"y": 88,
+						"w": 22,
+						"h": 24
 					}
 				},
 				{
@@ -2691,8 +2124,8 @@
 						"h": 24
 					},
 					"frame": {
-						"x": 1,
-						"y": 596,
+						"x": 645,
+						"y": 61,
 						"w": 22,
 						"h": 24
 					}
@@ -2712,14 +2145,56 @@
 						"h": 24
 					},
 					"frame": {
-						"x": 25,
-						"y": 596,
+						"x": 531,
+						"y": 88,
 						"w": 22,
 						"h": 24
 					}
 				},
 				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-6.png",
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 669,
+						"y": 61,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 10,
+						"y": 7,
+						"w": 12,
+						"h": 19
+					},
+					"frame": {
+						"x": 697,
+						"y": 61,
+						"w": 12,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-0.png",
 					"rotated": false,
 					"trimmed": true,
 					"sourceSize": {
@@ -2733,10 +2208,535 @@
 						"h": 23
 					},
 					"frame": {
-						"x": 49,
-						"y": 595,
+						"x": 555,
+						"y": 88,
 						"w": 20,
 						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 555,
+						"y": 88,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 555,
+						"y": 88,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 577,
+						"y": 87,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 18
+					},
+					"frame": {
+						"x": 577,
+						"y": 108,
+						"w": 26,
+						"h": 18
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 605,
+						"y": 87,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 18
+					},
+					"frame": {
+						"x": 605,
+						"y": 108,
+						"w": 26,
+						"h": 18
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Base Engine/Pickup Icon - Engines - Base Engine-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 633,
+						"y": 87,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 18
+					},
+					"frame": {
+						"x": 633,
+						"y": 108,
+						"w": 26,
+						"h": 18
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Zapper/Main ship weapon - Projectile - Zapper-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 0,
+						"w": 8,
+						"h": 32
+					},
+					"frame": {
+						"x": 661,
+						"y": 87,
+						"w": 8,
+						"h": 32
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 671,
+						"y": 82,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-8.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 671,
+						"y": 82,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-9.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 671,
+						"y": 82,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 671,
+						"y": 103,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 693,
+						"y": 103,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 699,
+						"y": 82,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 715,
+						"y": 103,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 731,
+						"y": 63,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 759,
+						"y": 63,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 787,
+						"y": 63,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 815,
+						"y": 63,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 843,
+						"y": 62,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Burst Engine/Pickup Icon - Engines - Burst Engine-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 8,
+						"w": 26,
+						"h": 19
+					},
+					"frame": {
+						"x": 871,
+						"y": 62,
+						"w": 26,
+						"h": 19
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-0.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 9,
+						"w": 7,
+						"h": 17
+					},
+					"frame": {
+						"x": 727,
+						"y": 84,
+						"w": 7,
+						"h": 17
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 9,
+						"w": 7,
+						"h": 20
+					},
+					"frame": {
+						"x": 87,
+						"y": 97,
+						"w": 7,
+						"h": 20
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Supercharged Engine/Pickup Icon - Engines - Supercharged Engine-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 3,
+						"y": 7,
+						"w": 26,
+						"h": 18
+					},
+					"frame": {
+						"x": 737,
+						"y": 84,
+						"w": 26,
+						"h": 18
 					}
 				},
 				{
@@ -2754,31 +2754,10 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 85,
-						"y": 562,
+						"x": 737,
+						"y": 104,
 						"w": 26,
 						"h": 18
-					}
-				},
-				{
-					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-7.png",
-					"rotated": false,
-					"trimmed": true,
-					"sourceSize": {
-						"w": 32,
-						"h": 32
-					},
-					"spriteSourceSize": {
-						"x": 6,
-						"y": 7,
-						"w": 20,
-						"h": 23
-					},
-					"frame": {
-						"x": 71,
-						"y": 582,
-						"w": 20,
-						"h": 23
 					}
 				},
 				{
@@ -2796,8 +2775,8 @@
 						"h": 18
 					},
 					"frame": {
-						"x": 93,
-						"y": 582,
+						"x": 765,
+						"y": 84,
 						"w": 26,
 						"h": 18
 					}
@@ -2817,8 +2796,8 @@
 						"h": 20
 					},
 					"frame": {
-						"x": 93,
-						"y": 602,
+						"x": 765,
+						"y": 104,
 						"w": 20,
 						"h": 20
 					}
@@ -2838,10 +2817,178 @@
 						"h": 20
 					},
 					"frame": {
-						"x": 93,
-						"y": 602,
+						"x": 765,
+						"y": 104,
 						"w": 20,
 						"h": 20
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-4.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 793,
+						"y": 84,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-5.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 815,
+						"y": 84,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-6.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 837,
+						"y": 84,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "PickupsPack/Engines/Pickup Icon - Engines - Big Pulse Engine/Pickup Icon - Engines - Big Pulse Engine-7.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 6,
+						"y": 7,
+						"w": 20,
+						"h": 23
+					},
+					"frame": {
+						"x": 859,
+						"y": 83,
+						"w": 20,
+						"h": 23
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-2.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 10,
+						"y": 7,
+						"w": 12,
+						"h": 19
+					},
+					"frame": {
+						"x": 881,
+						"y": 83,
+						"w": 12,
+						"h": 19
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 10,
+						"y": 7,
+						"w": 12,
+						"h": 18
+					},
+					"frame": {
+						"x": 859,
+						"y": 108,
+						"w": 12,
+						"h": 18
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Auto cannon bullet/Main ship weapon - Projectile - Auto cannon bullet-3.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 10,
+						"y": 7,
+						"w": 12,
+						"h": 18
+					},
+					"frame": {
+						"x": 873,
+						"y": 108,
+						"w": 12,
+						"h": 18
+					}
+				},
+				{
+					"filename": "Main ship weapons/Main ship weapon - Projectile - Rocket/Main ship weapon - Projectile - Rocket-1.png",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 32,
+						"h": 32
+					},
+					"spriteSourceSize": {
+						"x": 12,
+						"y": 9,
+						"w": 7,
+						"h": 19
+					},
+					"frame": {
+						"x": 887,
+						"y": 104,
+						"w": 7,
+						"h": 19
 					}
 				}
 			]
@@ -2850,6 +2997,6 @@
 	"meta": {
 		"app": "https://www.codeandweb.com/texturepacker",
 		"version": "3.0",
-		"smartupdate": "$TexturePacker:SmartUpdate:b9444b270f7295a62ed869b2b57f93de:aeb1d4da02645cd142f243f6d1b4b197:3a25c01fa96ae40e04fb33d4db14d544$"
+		"smartupdate": "$TexturePacker:SmartUpdate:f427b7e84b3e746955a84f690ecacb3f:8f53ac7516db2a2ef4265f57a93908de:3a25c01fa96ae40e04fb33d4db14d544$"
 	}
 }

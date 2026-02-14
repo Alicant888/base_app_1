@@ -7,6 +7,7 @@ import { BigSpaceGunPickup } from "../entities/BigSpaceGunPickup";
 import { BigSpaceGunProjectile } from "../entities/BigSpaceGunProjectile";
 import { Bullet } from "../entities/Bullet";
 import { BurstEnginePickup } from "../entities/BurstEnginePickup";
+import { Asteroid } from "../entities/Asteroid";
 import { Enemy, type EnemyKind } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
 import { FiringRatePickup } from "../entities/FiringRatePickup";
@@ -18,6 +19,7 @@ import { ZapperProjectile } from "../entities/ZapperProjectile";
 import { SuperchargedEnginePickup } from "../entities/SuperchargedEnginePickup";
 import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
+import { AsteroidSpawner } from "../systems/AsteroidSpawner";
 import { EnemySpawner } from "../systems/EnemySpawner";
 import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES, UI_FRAMES } from "../config";
 
@@ -123,6 +125,7 @@ export class GameScene extends Phaser.Scene {
   private bigSpaceGunProjectiles!: Phaser.Physics.Arcade.Group;
   private enemyBullets!: Phaser.Physics.Arcade.Group;
   private enemies!: Phaser.Physics.Arcade.Group;
+  private asteroids!: Phaser.Physics.Arcade.Group;
   private shieldPickups!: Phaser.Physics.Arcade.Group;
   private healthPickups!: Phaser.Physics.Arcade.Group;
   private firingRatePickups!: Phaser.Physics.Arcade.Group;
@@ -135,6 +138,7 @@ export class GameScene extends Phaser.Scene {
   private burstEnginePickups!: Phaser.Physics.Arcade.Group;
   private bigPulseEnginePickups!: Phaser.Physics.Arcade.Group;
   private spawner!: EnemySpawner;
+  private asteroidSpawner!: AsteroidSpawner;
 
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private draggingPointerId: number | null = null;
@@ -315,6 +319,12 @@ export class GameScene extends Phaser.Scene {
       runChildUpdate: true,
     });
 
+    this.asteroids = this.physics.add.group({
+      classType: Asteroid,
+      maxSize: 30,
+      runChildUpdate: true,
+    });
+
     // Player.
     this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT - 80);
     this.player.setDepth(DEPTH_PLAYER);
@@ -326,6 +336,7 @@ export class GameScene extends Phaser.Scene {
 
     // Spawning.
     this.spawner = new EnemySpawner(this, this.enemies, this.enemyBullets);
+    this.asteroidSpawner = new AsteroidSpawner(this, this.asteroids);
 
     // Collisions.
     this.physics.add.overlap(
@@ -364,6 +375,55 @@ export class GameScene extends Phaser.Scene {
       this.bigSpaceGunProjectiles,
       this.enemies,
       this.onBigSpaceGunHitsEnemy as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    // Asteroids (FX atlas) are hazards.
+    this.physics.add.overlap(
+      this.bullets,
+      this.asteroids,
+      this.onBulletHitsAsteroid as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.autoCannonBullets,
+      this.asteroids,
+      this.onBulletHitsAsteroid as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.rocketProjectiles,
+      this.asteroids,
+      this.onRocketHitsAsteroid as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.zapperProjectiles,
+      this.asteroids,
+      this.onZapperHitsAsteroid as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.bigSpaceGunProjectiles,
+      this.asteroids,
+      this.onBigSpaceGunHitsAsteroid as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
+    this.physics.add.overlap(
+      this.player,
+      this.asteroids,
+      this.onAsteroidHitsPlayer as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
       undefined,
       this,
     );
@@ -507,6 +567,9 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number) {
     if (this.isGameOver) return;
 
+    // Provide player X for boss AI (safe + cheap).
+    this.registry.set("playerX", this.player.x);
+
     const t = delta / 16.666;
     // Subtract to make the texture appear to move "down".
     this.bgStar.tilePositionY -= 0.5 * t;
@@ -520,6 +583,7 @@ export class GameScene extends Phaser.Scene {
       this.updateKeyboardMovement(delta);
     }
 
+    this.asteroidSpawner.update(time);
     this.spawner.update(time);
 
     if (this.shieldFx) {
@@ -874,12 +938,92 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private spawnAsteroidExplosion(x: number, y: number, scale: number, angleDeg: number) {
+    const frame = `${SPRITE_FRAMES.asteroid01ExplodePrefix}${SPRITE_FRAMES.asteroid01ExplodeStart}${SPRITE_FRAMES.asteroid01ExplodeSuffix}`;
+    const boom = this.add.sprite(x, y, ATLAS_KEYS.fx, frame).setDepth(6);
+    boom.setScale(scale);
+    boom.setAngle(angleDeg);
+    boom.play("asteroid_explode");
+    boom.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => boom.destroy());
+  }
+
+  private onBulletHitsAsteroid(bulletObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {
+    const bullet = bulletObj as unknown as { active: boolean; kill: () => void };
+    const asteroid = asteroidObj as Asteroid;
+    if (!bullet.active || !asteroid.active) return;
+
+    bullet.kill();
+    const destroyed = asteroid.takeDamage(1);
+    if (!destroyed) return;
+
+    const { x, y, scaleX, angle } = asteroid;
+    asteroid.kill();
+    this.spawnAsteroidExplosion(x, y, scaleX, angle);
+    this.playSfx(AUDIO_KEYS.explosionScout, 0.45);
+  }
+
+  private onRocketHitsAsteroid(rocketObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {
+    const rocket = rocketObj as RocketProjectile;
+    const asteroid = asteroidObj as Asteroid;
+    if (!rocket.active || !asteroid.active) return;
+
+    rocket.kill();
+    const destroyed = asteroid.takeDamage(ROCKET_DAMAGE_MULTIPLIER);
+    if (!destroyed) return;
+
+    const { x, y, scaleX, angle } = asteroid;
+    asteroid.kill();
+    this.spawnAsteroidExplosion(x, y, scaleX, angle);
+    this.playSfx(AUDIO_KEYS.explosionScout, 0.45);
+  }
+
+  private onZapperHitsAsteroid(projObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {
+    const proj = projObj as ZapperProjectile;
+    const asteroid = asteroidObj as Asteroid;
+    if (!proj.active || !asteroid.active) return;
+
+    proj.kill();
+    const destroyed = asteroid.takeDamage(ZAPPER_DAMAGE);
+    if (!destroyed) return;
+
+    const { x, y, scaleX, angle } = asteroid;
+    asteroid.kill();
+    this.spawnAsteroidExplosion(x, y, scaleX, angle);
+    this.playSfx(AUDIO_KEYS.explosionScout, 0.45);
+  }
+
+  private onBigSpaceGunHitsAsteroid(projObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {
+    const proj = projObj as BigSpaceGunProjectile;
+    const asteroid = asteroidObj as Asteroid;
+    if (!proj.active || !asteroid.active) return;
+
+    proj.kill();
+    const destroyed = asteroid.takeDamage(BIG_SPACE_GUN_DAMAGE);
+    if (!destroyed) return;
+
+    const { x, y, scaleX, angle } = asteroid;
+    asteroid.kill();
+    this.spawnAsteroidExplosion(x, y, scaleX, angle);
+    this.playSfx(AUDIO_KEYS.explosionScout, 0.45);
+  }
+
   private onEnemyHitsPlayer(_playerObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
     const enemy = enemyObj as Enemy;
     if (!enemy.active) return;
 
     enemy.kill();
     this.takeHit();
+  }
+
+  private onAsteroidHitsPlayer(_playerObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {
+    const asteroid = asteroidObj as Asteroid;
+    if (!asteroid.active) return;
+
+    const damage = asteroid.getDurability();
+    const { x, y, scaleX, angle } = asteroid;
+    asteroid.kill();
+    this.spawnAsteroidExplosion(x, y, scaleX, angle);
+    this.takeHit(damage);
   }
 
   private onEnemyBulletHitsPlayer(_playerObj: Phaser.GameObjects.GameObject, bulletObj: Phaser.GameObjects.GameObject) {
@@ -1721,6 +1865,24 @@ export class GameScene extends Phaser.Scene {
         frameRate: 18,
         repeat: -1,
       });
+    }
+
+    if (!this.anims.exists("asteroid_explode")) {
+      const tex = this.textures.get(ATLAS_KEYS.fx);
+      const frames: Array<{ key: string; frame: string }> = [];
+      for (let i = SPRITE_FRAMES.asteroid01ExplodeStart; i <= SPRITE_FRAMES.asteroid01ExplodeEnd; i += 1) {
+        const name = `${SPRITE_FRAMES.asteroid01ExplodePrefix}${i}${SPRITE_FRAMES.asteroid01ExplodeSuffix}`;
+        if (tex?.has(name)) frames.push({ key: ATLAS_KEYS.fx, frame: name });
+      }
+
+      if (frames.length > 0) {
+        this.anims.create({
+          key: "asteroid_explode",
+          frames: frames as unknown as Phaser.Types.Animations.AnimationFrame[],
+          frameRate: 20,
+          repeat: 0,
+        });
+      }
     }
 
     this.createLoopAnimIfFrames(

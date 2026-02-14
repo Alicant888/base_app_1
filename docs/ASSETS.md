@@ -86,6 +86,9 @@ Enemy Dreadnought (atlas: `Enemy`)
 
 FX (atlas: `FX`)
 
+- `Asteroid/Asteroid 01 Base.png`
+- `Asteroid/Asteroid 01 - Explode-1.png` … `Asteroid/Asteroid 01 - Explode-6.png`
+
 - `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-0.png` … `Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-9.png`
 
 Ship shield overlay (atlas: `MainShip`)

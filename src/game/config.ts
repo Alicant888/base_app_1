@@ -217,6 +217,13 @@ export const SPRITE_FRAMES = {
   rayProjectileStart: 0,
   rayProjectileEnd: 3,
 
+  // Asteroid (atlas: FX)
+  asteroid01Base: "Asteroid/Asteroid 01 Base.png",
+  asteroid01ExplodePrefix: "Asteroid/Asteroid 01 - Explode-",
+  asteroid01ExplodeSuffix: ".png",
+  asteroid01ExplodeStart: 1,
+  asteroid01ExplodeEnd: 6,
+
   // Shield pickup icon (atlas: FX)
   shieldPickupPrefix:
     "PickupsPack/Shield Generators/Pickup Icon - Shield Generator - All around shield/Pickup Icon - Shield Generator - All around shield-",
