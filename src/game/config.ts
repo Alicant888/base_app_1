@@ -28,9 +28,14 @@ export const ATLAS_KEYS = {
 
 // Background frames (from bg atlas).
 export const BG_FRAMES = {
-  starfield: "bg_starfield",
-  nebula: "bg_nebula",
-  dust: "bg_dust",
+  bcg: "BCG",
+  l0: "L0",
+  l1: "L1",
+  l2: "L2",
+  l3: "L3",
+  l4: "L4",
+  l5: "L5",
+  l6: "L6",
 } as const;
 
 // UI frames (from ui atlas).

@@ -34,6 +34,12 @@ const DEPTH_ENGINE = 6;
 const DEPTH_SHIELD = 7;
 const DEPTH_WEAPON = 4.8; // under the ship, still under the shield.
 
+// TUNE BACKGROUND SCROLL SPEEDS HERE (px per ~60fps frame).
+const BG_SCROLL_SPEED_BCG = 1;
+const BG_SCROLL_SPEED_L4 = 2;
+const BG_SCROLL_SPEED_L5 = 2;
+const BG_SCROLL_SPEED_L6 = 3;
+
 // TUNE ENGINE FX OFFSETS HERE (Base Engine):
 // - These values control where the engine sprite and the two flames appear relative to the player.
 // - Adjust them to match your art perfectly.
@@ -116,6 +122,7 @@ export class GameScene extends Phaser.Scene {
   private bgStar!: Phaser.GameObjects.TileSprite;
   private bgNebula!: Phaser.GameObjects.TileSprite;
   private bgDust!: Phaser.GameObjects.TileSprite;
+  private bgL6!: Phaser.GameObjects.TileSprite;
 
   private player!: Player;
   private bullets!: Phaser.Physics.Arcade.Group;
@@ -201,9 +208,11 @@ export class GameScene extends Phaser.Scene {
     this.destroyPlayerWeaponFx();
 
     // Background (parallax).
-    this.bgStar = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.starfield).setOrigin(0);
-    this.bgNebula = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.nebula).setOrigin(0);
-    this.bgDust = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.dust).setOrigin(0);
+    // Parallax layers (bottom → top): BCG, L4, L5, L6.
+    this.bgDust = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.bcg).setOrigin(0).setDepth(0);
+    this.bgNebula = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.l4).setOrigin(0).setDepth(1);
+    this.bgStar = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.l5).setOrigin(0).setDepth(2);
+    this.bgL6 = this.add.tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, ATLAS_KEYS.bg, BG_FRAMES.l6).setOrigin(0).setDepth(3);
 
     this.physics.world.setBounds(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
@@ -572,9 +581,10 @@ export class GameScene extends Phaser.Scene {
 
     const t = delta / 16.666;
     // Subtract to make the texture appear to move "down".
-    this.bgStar.tilePositionY -= 0.5 * t;
-    this.bgNebula.tilePositionY -= 1.1 * t;
-    this.bgDust.tilePositionY -= 2.0 * t;
+    this.bgDust.tilePositionY -= BG_SCROLL_SPEED_BCG * t; // BCG
+    this.bgNebula.tilePositionY -= BG_SCROLL_SPEED_L4 * t; // L4
+    this.bgStar.tilePositionY -= BG_SCROLL_SPEED_L5 * t; // L5
+    this.bgL6.tilePositionY -= BG_SCROLL_SPEED_L6 * t; // L6
 
     // Pointer drag takes priority; keyboard works when not dragging.
     if (this.draggingPointerId !== null && this.hasDragTarget) {

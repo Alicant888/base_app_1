@@ -1,28 +1,31 @@
 # UI + Background pack for Phaser 3 (RN WebView friendly)
 
 Files:
-- backgrounds.png / backgrounds.json  (2048x2048 atlas, 3 tiles 1024x1024)
-  Frames: bg_starfield, bg_nebula, bg_dust
+- backgrounds.json (multiatlas)
+  Images: BCG.png, L0.png, L1.png, L2.png, L3.png, L4.png, L5.png, L6.png
+  Frames: BCG, L0, L1, L2, L3, L4, L5, L6
 - ui.png / ui.json (1024x1024 atlas)
   Frames: ui_panel_window, ui_panel_header, ui_btn_large_normal/hover/pressed, ui_btn_small_normal/pressed,
           ui_icon_pause/back/sound_on/sound_off, ui_bar_hp, ui_bar_shield, ui_plate_score, ui_plate_weapon
 
 Phaser loading:
 ```ts
-this.load.atlas('bg', 'assets/atlases/backgrounds.png', 'assets/atlases/backgrounds.json');
+this.load.multiatlas('bg', 'assets/atlases/backgrounds.json', 'assets/atlases/');
 this.load.atlas('ui', 'assets/atlases/ui.png', 'assets/atlases/ui.json');
 ```
 
 Background usage (tileSprite):
 ```ts
-const star = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'bg_starfield').setOrigin(0,0);
-const neb  = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'bg_nebula').setOrigin(0,0);
-const dust = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'bg_dust').setOrigin(0,0);
+const bcg = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'BCG').setOrigin(0,0);
+const l4  = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'L4').setOrigin(0,0);
+const l5  = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'L5').setOrigin(0,0);
+const l6  = this.add.tileSprite(0,0, this.scale.width, this.scale.height, 'bg', 'L6').setOrigin(0,0);
 
 // in update(dt):
-star.tilePositionY -= 0.6;
-neb.tilePositionY  -= 0.3;
-dust.tilePositionY -= 1.0;
+bcg.tilePositionY -= 1.0;
+l4.tilePositionY  -= 2.0;
+l5.tilePositionY  -= 2.0;
+l6.tilePositionY  -= 3.0;
 ```
 
 UI usage:

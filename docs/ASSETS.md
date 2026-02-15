@@ -10,9 +10,9 @@ fx → public/assets/atlases/FX.png/json
 
 ui → public/assets/atlases/ui.png/json
 
-bg → public/assets/atlases/backgrounds.png/json
+bg → public/assets/atlases/backgrounds.json (multiatlas) + BCG.png, L0.png, L1.png, L2.png, L3.png, L4.png, L5.png, L6.png
 
-BG frames: bg_starfield, bg_nebula, bg_dust
+BG frames: BCG, L0, L1, L2, L3, L4, L5, L6
 
 UI frames: ui_btn_large_normal/hover/pressed, ui_panel_window, ui_icon_sound_on/off, etc.
 
