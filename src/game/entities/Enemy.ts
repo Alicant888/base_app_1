@@ -57,6 +57,7 @@ const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefi
 const DREADNOUGHT_WEAPON_FIRE_FRAME_41 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}41${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_48 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}48${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_55 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}55${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
+const DREADNOUGHT_WEAPON_SFX_FRAME_28 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}28${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 
 type FrigateShotConfig = {
   frameIndex: number;
@@ -595,29 +596,29 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const rayFrame = `${SPRITE_FRAMES.rayProjectilePrefix}${SPRITE_FRAMES.rayProjectileStart}${SPRITE_FRAMES.rayProjectileSuffix}`;
     const firedFrameKeys = new Set<string>();
-    let playedSfx = false;
+    let playedDnShot = false;
 
-    const tryPlaySfx = () => {
-      if (playedSfx) return;
-      playedSfx = true;
+    const playDnShotSfx = () => {
+      if (playedDnShot) return;
+      playedDnShot = true;
       if (!this.scene.registry.get("audioUnlocked")) return;
       try {
-        this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.45 });
+        this.scene.sound.play(AUDIO_KEYS.dnShot, { volume: 0.65 });
       } catch {
         // ignore
       }
     };
 
-    const fireRay = () => {
-      if (!this.active) return;
-      if (!this.enemyBullets) return;
+    const fireRay = (): boolean => {
+      if (!this.active) return false;
+      if (!this.enemyBullets) return false;
 
       const x = this.x;
       const y = this.y + (this.displayHeight || 24) * DREADNOUGHT_FIRE_Y_FACTOR;
       const body = this.body as Phaser.Physics.Arcade.Body | null;
       const shipSpeedY = body?.velocity?.y ?? 0;
 
-      const fired = this.spawnEnemyBulletAt(x, y, {
+      return this.spawnEnemyBulletAt(x, y, {
         animKey: "enemy_ray",
         frame: rayFrame,
         damage: DREADNOUGHT_RAY_DAMAGE,
@@ -625,7 +626,6 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         // Keep spacing consistent regardless of any vertical movement.
         speedY: shipSpeedY + DREADNOUGHT_RAY_REL_SPEED_Y,
       });
-      if (fired) tryPlaySfx();
     };
 
     this.dreadnoughtState = "firing";
@@ -638,6 +638,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       (_animation: Phaser.Animations.Animation, _frame: Phaser.Animations.AnimationFrame, _gameObject: Phaser.GameObjects.Sprite, frameKey: string) => {
         if (!this.active) return;
         if (!this.enemyBullets) return;
+
+        if (frameKey === DREADNOUGHT_WEAPON_SFX_FRAME_28) {
+          playDnShotSfx();
+        }
 
         const shouldFire =
           frameKey === DREADNOUGHT_WEAPON_FIRE_FRAME_27 ||

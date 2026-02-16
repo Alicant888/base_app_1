@@ -15,6 +15,7 @@ export const AUDIO_KEYS = {
   impactSmall: "sfx_impact_small",
   laserShort: "sfx_laser_short",
   laserScout: "sfx_laser_scout",
+  dnShot: "sfx_dn_shot",
 } as const;
 
 // Atlas keys (DO NOT CHANGE): required by project docs.
