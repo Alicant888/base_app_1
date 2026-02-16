@@ -51,6 +51,11 @@ const DREADNOUGHT_HOVER_Y = 160; // upper third of the screen
 const DREADNOUGHT_IDLE_DRIFT_SPEED_X = 16;
 const DREADNOUGHT_ALIGN_SPEED_X = 140; // medium speed to chase player X before firing
 const DREADNOUGHT_ALIGN_EPS_PX = 3;
+// Boss is very wide; allow its center closer to edges so the center weapon can still hit the player near screen edges.
+const DREADNOUGHT_BOSS_EDGE_PADDING_X = 4;
+// Dreadnought front has angled sides; use a narrower hitbox to avoid "early" side hits in transparent corners.
+const DREADNOUGHT_HITBOX_W_MULT = 0.55;
+const DREADNOUGHT_HITBOX_H_MULT = 0.7;
 
 const DREADNOUGHT_WEAPON_FIRE_FRAME_27 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}27${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}34${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
@@ -205,9 +210,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 : SPRITE_FRAMES.enemyBase,
     );
 
-    // Keep large enemies (e.g. Torpedo Ship) within bounds.
+    // Keep large enemies within bounds.
+    // Dreadnought is a boss: allow it to go partially off-screen so its center weapon can still reach edge players.
     const halfW = (this.displayWidth || this.width) * 0.5;
-    const clampedX = Phaser.Math.Clamp(x, halfW + 4, GAME_WIDTH - halfW - 4);
+    const minX = isDreadnought ? DREADNOUGHT_BOSS_EDGE_PADDING_X : halfW + 4;
+    const maxX = isDreadnought ? GAME_WIDTH - DREADNOUGHT_BOSS_EDGE_PADDING_X : GAME_WIDTH - halfW - 4;
+    const clampedX = Phaser.Math.Clamp(x, minX, maxX);
 
     const spawnY = isDreadnought ? DREADNOUGHT_HOVER_Y : y;
     this.setPosition(clampedX, spawnY);
@@ -222,7 +230,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(0, isDreadnought ? 0 : speedY);
 
     // Smaller, forgiving hitbox.
-    body.setSize(this.width * 0.7, this.height * 0.7, true);
+    const hitboxWMult = isDreadnought ? DREADNOUGHT_HITBOX_W_MULT : 0.7;
+    const hitboxHMult = isDreadnought ? DREADNOUGHT_HITBOX_H_MULT : 0.7;
+    body.setSize(this.width * hitboxWMult, this.height * hitboxHMult, true);
 
     // Engine loop.
     const engineFrame = isBattlecruiser
@@ -546,9 +556,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setY(DREADNOUGHT_HOVER_Y);
     body.velocity.y = 0;
 
-    const halfW = (this.displayWidth || this.width) * 0.5;
-    const minX = halfW + 4;
-    const maxX = GAME_WIDTH - halfW - 4;
+    const minX = DREADNOUGHT_BOSS_EDGE_PADDING_X;
+    const maxX = GAME_WIDTH - DREADNOUGHT_BOSS_EDGE_PADDING_X;
 
     if (this.dreadnoughtState === "idle") {
       // Slow drift while shield is up.
