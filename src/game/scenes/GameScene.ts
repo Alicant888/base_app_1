@@ -1096,8 +1096,9 @@ export class GameScene extends Phaser.Scene {
     const enemy = enemyObj as Enemy;
     if (!enemy.active) return;
 
+    const damage = enemy.getCollisionDamage();
     enemy.kill();
-    this.takeHit();
+    this.takeHit(damage);
   }
 
   private onAsteroidHitsPlayer(_playerObj: Phaser.GameObjects.GameObject, asteroidObj: Phaser.GameObjects.GameObject) {

@@ -488,6 +488,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     return this.kind;
   }
 
+  getCollisionDamage(): number {
+    // Collision should hurt based on remaining enemy durability.
+    // Shield only counts if it's currently active (not suppressed).
+    const shield = this.shieldSuppressed ? 0 : this.shieldHp;
+    return Math.max(1, this.hp + shield);
+  }
+
   private syncFxPositions() {
     // Anchor engine FX close to the enemy body.
     // Engine frames are trimmed inside a larger "real" frame, so we position
@@ -805,14 +812,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       const waveFrame = `${SPRITE_FRAMES.waveProjectilePrefix}${SPRITE_FRAMES.waveProjectileStart}${SPRITE_FRAMES.waveProjectileSuffix}`;
       const firedFrameKeys = new Set<string>();
       let firedAfter29 = false;
-      let playedSfx = false;
 
-      const tryPlaySfx = () => {
-        if (playedSfx) return;
-        playedSfx = true;
+      const playShotSfx = () => {
         if (!this.scene.registry.get("audioUnlocked")) return;
         try {
-          this.scene.sound.play(AUDIO_KEYS.laserScout, { volume: 0.45 });
+          this.scene.sound.play(AUDIO_KEYS.bcShot, { volume: 0.55 });
         } catch {
           // ignore
         }
@@ -831,7 +835,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
           damage: BATTLECRUISER_WAVE_DAMAGE,
           depth: BATTLECRUISER_WAVE_DEPTH,
         });
-        if (fired) tryPlaySfx();
+        if (fired) playShotSfx();
       };
 
       // Sync 3 shots to specific weapon frames, and 1 more after the final frame (29).
