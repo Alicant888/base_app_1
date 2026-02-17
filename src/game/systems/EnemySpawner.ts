@@ -2,6 +2,13 @@ import Phaser from "phaser";
 import type { Enemy, EnemyKind } from "../entities/Enemy";
 import { GAME_WIDTH } from "../config";
 
+// Enemy spawn chances (per spawn tick).
+const DREADNOUGHT_SPAWN_CHANCE = 0.0001; // 0.01%
+const BATTLECRUISER_SPAWN_CHANCE = 0.2; // 20%
+const FRIGATE_SPAWN_CHANCE = 0.01; // 1%
+const TORPEDO_SPAWN_CHANCE = 0.01; // 1%
+const FIGHTER_SPAWN_CHANCE = 0.01; // 1%
+
 export class EnemySpawner {
   private nextSpawnAt = 0;
   private bossSpawned = false;
@@ -17,20 +24,22 @@ export class EnemySpawner {
     // Boss fight: while the Dreadnought is alive, pause other spawns.
     if (this.boss?.active) return;
 
-    // Spawn the boss once.
-    if (!this.bossSpawned) {
-      this.spawnBoss();
-      this.bossSpawned = true;
-      return;
-    }
-
     if (time < this.nextSpawnAt) return;
+
+    // Very rare boss spawn (once per run).
+    if (!this.bossSpawned && Phaser.Math.FloatBetween(0, 1) < DREADNOUGHT_SPAWN_CHANCE) {
+      const spawned = this.spawnBoss();
+      if (spawned) {
+        this.bossSpawned = true;
+        return;
+      }
+    }
 
     this.spawnOne();
     this.nextSpawnAt = time + Phaser.Math.Between(600, 1000);
   }
 
-  private spawnBoss() {
+  private spawnBoss(): boolean {
     const x = GAME_WIDTH * 0.5;
     const y = -24;
     const speedY = 0;
@@ -38,19 +47,28 @@ export class EnemySpawner {
     const hasShield = true;
 
     const enemy = this.enemies.get(x, y) as Enemy | null;
-    if (!enemy) return;
+    if (!enemy) return false;
     enemy.spawn(x, y, speedY, this.enemyBullets, kind, hasShield);
     this.boss = enemy;
+    return true;
   }
 
   private spawnOne() {
     const x = Phaser.Math.Between(24, GAME_WIDTH - 24);
     const y = -24;
     const speedY = Phaser.Math.Between(90, 160);
-    // Regular enemies (boss is spawned separately).
+    // Regular enemies (boss is spawned separately and very rarely).
     const r = Phaser.Math.FloatBetween(0, 1);
     const kind: EnemyKind =
-      r < 0.01 ? "battlecruiser" : r < 0.02 ? "frigate" : r < 0.03 ? "torpedo" : r < 0.04 ? "fighter" : "scout";
+      r < BATTLECRUISER_SPAWN_CHANCE
+        ? "battlecruiser"
+        : r < BATTLECRUISER_SPAWN_CHANCE + FRIGATE_SPAWN_CHANCE
+          ? "frigate"
+          : r < BATTLECRUISER_SPAWN_CHANCE + FRIGATE_SPAWN_CHANCE + TORPEDO_SPAWN_CHANCE
+            ? "torpedo"
+            : r < BATTLECRUISER_SPAWN_CHANCE + FRIGATE_SPAWN_CHANCE + TORPEDO_SPAWN_CHANCE + FIGHTER_SPAWN_CHANCE
+              ? "fighter"
+              : "scout";
 
     const hasShield =
       kind === "battlecruiser"

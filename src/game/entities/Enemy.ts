@@ -26,13 +26,17 @@ const FRIGATE_BULLET_DEPTH = 5;
 const FRIGATE_SALVO_BASE_Y_FACTOR = 0.15;
 const FRIGATE_BIG_BULLET_SCALE = 0.6;
 
-const BATTLECRUISER_HP = 4;
-const BATTLECRUISER_SHIELD_HP = 4;
+const BATTLECRUISER_HP = 30;
+const BATTLECRUISER_SHIELD_HP = 30;
 const BATTLECRUISER_WAVE_DAMAGE = 3;
 const BATTLECRUISER_WAVE_DEPTH = 5;
 const BATTLECRUISER_FIRE_Y_FACTOR = 0.28;
 const BATTLECRUISER_ENGINE_EDGE_MARGIN_PX = 32;
 const BATTLECRUISER_ENGINE_OFFSET_Y = 12;
+// TUNE HITBOX MULTIPLIER HERE (Battlecruiser):
+// Reduce height to better match the visible ship.
+const BATTLECRUISER_HITBOX_W_MULT = 0.6;
+const BATTLECRUISER_HITBOX_H_MULT = 0.1;
 
 const BATTLECRUISER_WEAPON_FIRE_FRAME_7 = `${SPRITE_FRAMES.battlecruiserWeaponPrefix}7${SPRITE_FRAMES.battlecruiserWeaponSuffix}`;
 const BATTLECRUISER_WEAPON_FIRE_FRAME_15 = `${SPRITE_FRAMES.battlecruiserWeaponPrefix}15${SPRITE_FRAMES.battlecruiserWeaponSuffix}`;
@@ -233,8 +237,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(0, isDreadnought ? 0 : speedY);
 
     // Smaller, forgiving hitbox.
-    const hitboxWMult = isDreadnought ? DREADNOUGHT_HITBOX_W_MULT : 0.7;
-    const hitboxHMult = isDreadnought ? DREADNOUGHT_HITBOX_H_MULT : 0.7;
+    const hitboxWMult = isDreadnought ? DREADNOUGHT_HITBOX_W_MULT : isBattlecruiser ? BATTLECRUISER_HITBOX_W_MULT : 0.7;
+    const hitboxHMult = isDreadnought ? DREADNOUGHT_HITBOX_H_MULT : isBattlecruiser ? BATTLECRUISER_HITBOX_H_MULT : 0.7;
     body.setSize(this.width * hitboxWMult, this.height * hitboxHMult, true);
     this.syncDreadnoughtCollisionBody();
 
