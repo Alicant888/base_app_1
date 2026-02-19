@@ -44,6 +44,7 @@ export default function RootLayout({
     <Providers>
       <html lang="en">
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
+          <div style={{ fontFamily: 'Orbitron', visibility: 'hidden', position: 'absolute', pointerEvents: 'none' }}>.</div>
           <SafeArea>{children}</SafeArea>
         </body>
       </html>

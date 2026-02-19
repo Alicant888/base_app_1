@@ -12,8 +12,8 @@ export class PreloadScene extends Phaser.Scene {
 
     const loadingText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "LOADING...", {
-        fontFamily: "monospace",
-        fontSize: "16px",
+        fontFamily: "Orbitron",
+        fontSize: "20px",
         color: "#ffffff",
       })
       .setOrigin(0.5);
@@ -33,7 +33,15 @@ export class PreloadScene extends Phaser.Scene {
     // Menu background (static) + menu music.
     this.load.image(IMAGE_KEYS.menuBackground, "/assets/start.webp");
     this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.wav");
-    this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/2.wav");
+    this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/1.wav"); // Default to 1.wav
+    this.load.audio(AUDIO_KEYS.music1, "/assets/audio/music/1.wav");
+    this.load.audio(AUDIO_KEYS.music2, "/assets/audio/music/2.wav");
+    this.load.audio(AUDIO_KEYS.music3, "/assets/audio/music/3.wav");
+    this.load.audio(AUDIO_KEYS.music4, "/assets/audio/music/4.wav");
+    this.load.audio(AUDIO_KEYS.music5, "/assets/audio/music/5.wav");
+    this.load.audio(AUDIO_KEYS.music6, "/assets/audio/music/6.wav");
+    this.load.audio(AUDIO_KEYS.music7, "/assets/audio/music/7.wav");
+    this.load.audio(AUDIO_KEYS.music8, "/assets/audio/music/8.wav");
 
     // SFX
     this.load.audio(AUDIO_KEYS.click, "/assets/audio/sfx/click.wav");

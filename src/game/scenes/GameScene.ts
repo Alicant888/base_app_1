@@ -202,7 +202,10 @@ export class GameScene extends Phaser.Scene {
   private kills = 0;
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
-  private pauseBackButton!: Phaser.GameObjects.Image;
+  private menuBtn!: Phaser.GameObjects.Container;
+  private pauseBtn!: Phaser.GameObjects.Container;
+  private bottomUIButtons: Phaser.GameObjects.GameObject[] = [];
+  private isMusicOn = true;
   private isGameOver = false;
   private shieldHits = 0;
   private shieldFx?: Phaser.GameObjects.Sprite;
@@ -217,6 +220,9 @@ export class GameScene extends Phaser.Scene {
   private lifeIcons: Phaser.GameObjects.Image[] = [];
   private fireEvent?: Phaser.Time.TimerEvent;
   private gameMusic?: Phaser.Sound.BaseSound;
+  private musicTracks: string[] = [];
+  private currentTrackIndex = 0;
+  private pauseUIContainer?: Phaser.GameObjects.Container;
 
   private hasAutoCannons = false;
   private hasRockets = false;
@@ -256,6 +262,28 @@ export class GameScene extends Phaser.Scene {
     this.hasRockets = false;
     this.hasZapper = false;
     this.hasBigSpaceGun = false;
+
+    // Reset pause state
+    this.isPausedByInput = false;
+    this.pauseUIContainer = undefined;
+    this.bottomUIButtons = [];
+    this.physics.resume();
+    this.anims.resumeAll();
+    this.tweens.resumeAll();
+    this.time.paused = false;
+
+    // Music tracks.
+    this.musicTracks = [
+      AUDIO_KEYS.music1,
+      AUDIO_KEYS.music2,
+      AUDIO_KEYS.music3,
+      AUDIO_KEYS.music4,
+      AUDIO_KEYS.music5,
+      AUDIO_KEYS.music6,
+      AUDIO_KEYS.music7,
+      AUDIO_KEYS.music8,
+    ];
+    this.currentTrackIndex = 0;
 
     this.destroyPlayerEngineFx();
     this.destroyPlayerWeaponFx();
@@ -412,7 +440,8 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Player.
-    this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT - 80);
+    // Start higher (20% margin from bottom = 80% of height).
+    this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT * 0.8);
     this.player.setDepth(DEPTH_PLAYER);
     this.updatePlayerDamageAppearance();
 
@@ -625,10 +654,9 @@ export class GameScene extends Phaser.Scene {
     this.updateLivesUI();
 
     // Game music (starts after START click / audio unlock).
-    if (this.registry.get("audioUnlocked")) {
+    if (this.registry.get("audioUnlocked") && this.isMusicOn) {
       try {
-        this.gameMusic = this.sound.add(AUDIO_KEYS.gameMusic, { loop: true, volume: 0.5 });
-        this.gameMusic.play();
+        this.playMusicTrack(this.currentTrackIndex);
       } catch {
         // ignore
       }
@@ -641,7 +669,6 @@ export class GameScene extends Phaser.Scene {
 
       this.cameras.main.setViewport(0, 0, width, height);
 
-      const scaleX = width / GAME_WIDTH;
       const scaleY = height / GAME_HEIGHT;
       
       // User requested to remove "resize by width" in game scene, so we scale by height only.
@@ -656,9 +683,6 @@ export class GameScene extends Phaser.Scene {
     resize(this.scale.gameSize);
 
     this.scale.on(Phaser.Scale.Events.RESIZE, resize);
-
-    // Start game in paused state until user touches screen.
-    this.pauseGame();
 
     // Cleanup on scene shutdown.
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -730,6 +754,48 @@ export class GameScene extends Phaser.Scene {
     this.syncPlayerEngineFx();
   }
 
+  private playMusicTrack(index: number) {
+    if (this.gameMusic) {
+      this.gameMusic.stop();
+      this.gameMusic.destroy();
+    }
+    const key = this.musicTracks[index];
+    this.gameMusic = this.sound.add(key, { loop: true, volume: 0.5 });
+    if (this.isMusicOn) {
+      this.gameMusic.play();
+    }
+  }
+
+  private playPrevTrack() {
+    this.currentTrackIndex = (this.currentTrackIndex - 1 + this.musicTracks.length) % this.musicTracks.length;
+    this.playMusicTrack(this.currentTrackIndex);
+  }
+
+  private playNextTrack() {
+    this.currentTrackIndex = (this.currentTrackIndex + 1) % this.musicTracks.length;
+    this.playMusicTrack(this.currentTrackIndex);
+  }
+
+  private toggleMusic() {
+    this.isMusicOn = !this.isMusicOn;
+    if (this.isMusicOn) {
+      if (!this.gameMusic) {
+        this.playMusicTrack(this.currentTrackIndex);
+      } else if (!this.gameMusic.isPlaying) {
+        this.gameMusic.play(); // Use play() to restart if needed, or resume if paused?
+        // Logic in playMusicTrack handles new instance.
+        // If track exists but stopped/paused:
+        // Actually playMusicTrack destroys and recreates.
+        // But if I just toggle, I might want to resume?
+        // User said "button disables music...".
+        // If I toggle off, I pause/stop.
+        // If I toggle on, I resume/play.
+      }
+    } else {
+      this.gameMusic?.pause();
+    }
+  }
+
   private playSfx(key: string, volume = 1) {
     if (!this.registry.get("audioUnlocked")) return;
     try {
@@ -741,13 +807,14 @@ export class GameScene extends Phaser.Scene {
 
   private setupPointerDrag() {
     const onPointerDown = (pointer: Phaser.Input.Pointer) => {
-      // Ignore clicks on UI elements (like the back button)
+      // Ignore clicks on UI elements
       const gameObjects = this.input.hitTestPointer(pointer);
-      const clickedUI = gameObjects.some((obj) => obj === this.pauseBackButton);
+      const clickedUI = gameObjects.some((obj) => this.bottomUIButtons.includes(obj));
 
       if (clickedUI) return;
+      if (this.isPausedByInput) return;
 
-      this.resumeGame();
+      // Auto-resume removed. Use the specific Pause/Resume button.
       if (this.draggingPointerId !== null) return;
       this.draggingPointerId = pointer.id;
       this.dragOffset.set(pointer.x - this.player.x, pointer.y - this.player.y);
@@ -760,7 +827,7 @@ export class GameScene extends Phaser.Scene {
       if (pointer.id === this.draggingPointerId) {
         this.draggingPointerId = null;
         this.hasDragTarget = false;
-        this.pauseGame();
+        // Auto-pause removed
       }
     };
 
@@ -1482,6 +1549,9 @@ export class GameScene extends Phaser.Scene {
 
     this.disableShield();
 
+    // Hide pause button
+    if (this.pauseBtn) this.pauseBtn.setVisible(false);
+
     const depth = 100;
     const padding = 18;
     const buttonGap = 14;
@@ -1493,19 +1563,20 @@ export class GameScene extends Phaser.Scene {
 
     this.add
       .text(GAME_WIDTH / 2, panel.y - panel.displayHeight / 2 + 36, "GAME OVER", {
-        fontFamily: "monospace",
-        fontSize: "28px",
-        color: "#ffffff",
+        fontFamily: "Orbitron",
+        fontSize: "32px",
+        color: "#ff0000",
         stroke: "#000000",
-        strokeThickness: 8,
+        strokeThickness: 6,
+        shadow: { color: "#ff0000", blur: 10, fill: true, stroke: true }
       })
       .setOrigin(0.5)
       .setDepth(depth + 2);
 
     this.add
       .text(GAME_WIDTH / 2, panel.y + 10, `ENEMIES DESTROYED: ${this.kills}`, {
-        fontFamily: "monospace",
-        fontSize: "16px",
+        fontFamily: "Orbitron",
+        fontSize: "18px",
         color: "#ffffff",
         stroke: "#000000",
         strokeThickness: 4,
@@ -1531,22 +1602,22 @@ export class GameScene extends Phaser.Scene {
 
     this.add
       .text(playAgainBtn.x, playAgainBtn.y, "PLAY AGAIN", {
-        fontFamily: "monospace",
-        fontSize: "12px",
+        fontFamily: "Orbitron",
+        fontSize: "14px",
         color: "#ffffff",
         stroke: "#000000",
-        strokeThickness: 6,
+        strokeThickness: 4,
       })
       .setOrigin(0.5)
       .setDepth(depth + 2);
 
     this.add
       .text(exitBtn.x, exitBtn.y, "EXIT", {
-        fontFamily: "monospace",
-        fontSize: "12px",
+        fontFamily: "Orbitron",
+        fontSize: "14px",
         color: "#ffffff",
         stroke: "#000000",
-        strokeThickness: 6,
+        strokeThickness: 4,
       })
       .setOrigin(0.5)
       .setDepth(depth + 2);
@@ -2378,7 +2449,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createUI() {
-    const uiDepth = 20;
+    const uiDepth = 120;
 
     this.pausedText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "PAUSED", {
@@ -2392,18 +2463,7 @@ export class GameScene extends Phaser.Scene {
       .setDepth(uiDepth + 1)
       .setVisible(false);
 
-    // Pause Back Button (below PAUSED)
-    this.pauseBackButton = this.add
-      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80, ATLAS_KEYS.ui, UI_FRAMES.iconBack)
-      .setOrigin(0.5)
-      .setDepth(uiDepth + 1)
-      .setVisible(false)
-      .setInteractive({ useHandCursor: true });
-
-    this.pauseBackButton.on("pointerup", () => {
-      this.playSfx(AUDIO_KEYS.click, 0.7);
-      this.scene.start("MenuScene");
-    });
+    this.createBottomUI();
 
     // Lives: 5 mini ship icons. One disappears per hit (HP loss).
     const startX = 20;
@@ -2434,6 +2494,55 @@ export class GameScene extends Phaser.Scene {
       })
       .setOrigin(1, 0)
       .setDepth(uiDepth);
+  }
+
+  private createBottomUI() {
+    const depth = 120;
+    const btnY = GAME_HEIGHT - 40;
+    
+    // Center Pause button
+    const rightX = GAME_WIDTH / 2;
+
+    // Helper for creating buttons
+    const createBtn = (x: number, frame: string, onClick: () => void) => {
+      const container = this.add.container(x, btnY).setDepth(depth);
+      // Scale background to fit buttons (128 * 0.6 = ~77px width)
+      const bg = this.add.image(0, 0, ATLAS_KEYS.ui, UI_FRAMES.btnSmallNormal).setScale(0.6, 1);
+      const icon = this.add.image(0, 0, ATLAS_KEYS.ui, frame).setScale(0.8);
+      container.add([bg, icon]);
+      // Set size based on scaled background
+      container.setSize(bg.width * 0.6, bg.height);
+      container.setInteractive({ useHandCursor: true });
+
+      const press = () => {
+        bg.setFrame(UI_FRAMES.btnSmallPressed);
+        icon.y = 2;
+      };
+      const release = () => {
+        bg.setFrame(UI_FRAMES.btnSmallNormal);
+        icon.y = 0;
+      };
+
+      container.on("pointerdown", press);
+      container.on("pointerout", release);
+      container.on("pointerup", () => {
+        release();
+        onClick();
+      });
+
+      this.bottomUIButtons.push(container);
+      return container;
+    };
+
+    // Pause (Center)
+    this.pauseBtn = createBtn(rightX, UI_FRAMES.iconPause, () => {
+      this.playSfx(AUDIO_KEYS.click, 0.7);
+      if (this.isPausedByInput) {
+        this.resumeGame();
+      } else {
+        this.pauseGame();
+      }
+    });
   }
 
   private updateLivesUI() {
@@ -2926,6 +3035,204 @@ export class GameScene extends Phaser.Scene {
     this.activeEngineType = null;
   }
 
+  private createConfirmationDialog(text: string, onYes: () => void, onNo: () => void) {
+    const depth = 200;
+    const container = this.add.container(0, 0).setDepth(depth);
+
+    // Blocker
+    const blocker = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
+      .setOrigin(0)
+      .setInteractive();
+    container.add(blocker);
+
+    // Dialog Box
+    const dialogX = GAME_WIDTH / 2;
+    const dialogY = GAME_HEIGHT / 2;
+    const dialogWidth = 400;
+    const dialogHeight = 250;
+
+    const dialogBg = this.add.rectangle(dialogX, dialogY, dialogWidth, dialogHeight, 0x000000)
+      .setStrokeStyle(4, 0xffffff);
+    container.add(dialogBg);
+
+    const message = this.add.text(dialogX, dialogY - 40, text, {
+      fontFamily: "Orbitron",
+      fontSize: "32px",
+      color: "#ffffff",
+      align: "center"
+    }).setOrigin(0.5);
+    container.add(message);
+
+    // Helper for dialog buttons
+    const createDialogBtn = (x: number, y: number, label: string, onClick: () => void) => {
+      const btnContainer = this.add.container(x, y);
+      const bg = this.add.image(0, 0, ATLAS_KEYS.ui, UI_FRAMES.btnSmallNormal).setScale(1.2, 0.8);
+      const lbl = this.add.text(0, 0, label, {
+        fontFamily: "Orbitron",
+        fontSize: "20px",
+        color: "#ffffff"
+      }).setOrigin(0.5);
+
+      btnContainer.add([bg, lbl]);
+      btnContainer.setSize(bg.width * 1.2, bg.height * 0.8);
+      btnContainer.setInteractive({ useHandCursor: true });
+
+      const press = () => { bg.setFrame(UI_FRAMES.btnSmallPressed); lbl.y = 2; };
+      const release = () => { bg.setFrame(UI_FRAMES.btnSmallNormal); lbl.y = 0; };
+
+      btnContainer.on("pointerdown", press);
+      btnContainer.on("pointerout", release);
+      btnContainer.on("pointerup", () => {
+        release();
+        onClick();
+      });
+      return btnContainer;
+    };
+
+    const yesBtn = createDialogBtn(dialogX - 80, dialogY + 50, "YES", () => {
+      onYes();
+      container.destroy();
+    });
+
+    const noBtn = createDialogBtn(dialogX + 80, dialogY + 50, "NO", () => {
+      onNo();
+      container.destroy();
+    });
+
+    container.add([yesBtn, noBtn]);
+  }
+
+  private createPauseUI() {
+    const depth = 100;
+    // Music controls at 25% from bottom (GAME_HEIGHT * 0.75).
+    const y = GAME_HEIGHT * 0.75;
+    const spacing = 80;
+
+    this.pauseUIContainer = this.add.container(0, 0).setDepth(depth);
+
+    // Dim background
+    const dim = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5).setOrigin(0).setInteractive();
+    this.pauseUIContainer.add(dim);
+
+    const pausedText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "PAUSED", {
+        fontFamily: "Orbitron",
+        fontSize: "48px",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 6,
+    }).setOrigin(0.5);
+    this.pauseUIContainer.add(pausedText);
+
+    const createControlBtn = (x: number, frame: string, onClick: () => void) => {
+        const container = this.add.container(x, y);
+        const bg = this.add.image(0, 0, ATLAS_KEYS.ui, UI_FRAMES.btnSmallNormal).setScale(0.6, 1);
+        const icon = this.add.image(0, 0, ATLAS_KEYS.ui, frame).setScale(0.8);
+        container.add([bg, icon]);
+        container.setSize(bg.width * 0.6, bg.height);
+        container.setInteractive({ useHandCursor: true });
+
+        const press = () => {
+            bg.setFrame(UI_FRAMES.btnSmallPressed);
+            icon.y = 2;
+        };
+        const release = () => {
+            bg.setFrame(UI_FRAMES.btnSmallNormal);
+            icon.y = 0;
+        };
+
+        container.on("pointerdown", press);
+        container.on("pointerout", release);
+        container.on("pointerup", () => {
+            release();
+            onClick();
+        });
+        return container;
+    };
+
+    // Prev Button (Left)
+    const prevBtn = createControlBtn(GAME_WIDTH / 2 - spacing, UI_FRAMES.iconBack, () => {
+       this.playSfx(AUDIO_KEYS.click, 0.7);
+       this.playPrevTrack();
+    });
+    this.pauseUIContainer.add(prevBtn);
+
+    // Toggle Button (Center)
+    const toggleBtn = createControlBtn(GAME_WIDTH / 2, this.isMusicOn ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff, () => {
+       this.playSfx(AUDIO_KEYS.click, 0.7);
+       this.toggleMusic();
+       const icon = toggleBtn.getAt(1) as Phaser.GameObjects.Image;
+       icon.setFrame(this.isMusicOn ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff);
+    });
+    // Add Note icon in middle (using text for now as requested)
+    const note = this.add.text(0, 0, "♫", { 
+        fontFamily: "Orbitron", 
+        fontSize: "24px", 
+        color: "#00ffff",
+        stroke: "#000000",
+        strokeThickness: 2
+    }).setOrigin(0.5);
+    toggleBtn.add(note);
+    this.pauseUIContainer.add(toggleBtn);
+
+    // Next Button (Right)
+    const nextBtn = createControlBtn(GAME_WIDTH / 2 + spacing, UI_FRAMES.iconBack, () => {
+       this.playSfx(AUDIO_KEYS.click, 0.7);
+       this.playNextTrack();
+    });
+    const nextIcon = nextBtn.getAt(1) as Phaser.GameObjects.Image;
+    nextIcon.setFlipX(true); // Flip back arrow for Next
+    this.pauseUIContainer.add(nextBtn);
+
+    // Menu Button (Below controls, centered, wide)
+    const menuBtnY = y + 80;
+    const menuBtn = this.add.container(GAME_WIDTH / 2, menuBtnY);
+    // 3 buttons width (spacing is 80, so -80 to +80 is 160. Each button is ~77px. 
+    // Total width roughly 160 + 77 = ~240px.
+    // Let's make it 240px wide.
+    const menuBg = this.add.image(0, 0, ATLAS_KEYS.ui, UI_FRAMES.btnSmallNormal).setScale(1.8, 1);
+    const menuText = this.add.text(0, 0, "MENU", {
+        fontFamily: "Orbitron",
+        fontSize: "24px",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 4,
+    }).setOrigin(0.5);
+    menuBtn.add([menuBg, menuText]);
+    menuBtn.setSize(menuBg.width * 1.8, menuBg.height);
+    menuBtn.setInteractive({ useHandCursor: true });
+
+    const menuPress = () => {
+        menuBg.setFrame(UI_FRAMES.btnSmallPressed);
+        menuText.y = 2;
+    };
+    const menuRelease = () => {
+        menuBg.setFrame(UI_FRAMES.btnSmallNormal);
+        menuText.y = 0;
+    };
+
+    menuBtn.on("pointerdown", menuPress);
+    menuBtn.on("pointerout", menuRelease);
+    menuBtn.on("pointerup", () => {
+        menuRelease();
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+
+        this.createConfirmationDialog("Are you sure?", () => {
+            this.gameMusic?.stop();
+            this.scene.start("MenuScene");
+        }, () => {
+            // Do nothing, just close dialog
+        });
+    });
+    this.pauseUIContainer.add(menuBtn);
+  }
+
+  private destroyPauseUI() {
+      if (this.pauseUIContainer) {
+          this.pauseUIContainer.destroy();
+          this.pauseUIContainer = undefined;
+      }
+  }
+
   private pauseGame() {
     if (this.isGameOver) return;
     if (this.isPausedByInput) return;
@@ -2934,8 +3241,7 @@ export class GameScene extends Phaser.Scene {
     this.anims.pauseAll();
     this.tweens.pauseAll();
     this.time.paused = true;
-    this.pausedText?.setVisible(true);
-    this.pauseBackButton?.setVisible(true);
+    this.createPauseUI();
   }
 
   private resumeGame() {
@@ -2946,7 +3252,6 @@ export class GameScene extends Phaser.Scene {
     this.anims.resumeAll();
     this.tweens.resumeAll();
     this.time.paused = false;
-    this.pausedText?.setVisible(false);
-    this.pauseBackButton?.setVisible(false);
+    this.destroyPauseUI();
   }
 }

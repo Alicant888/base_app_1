@@ -33,11 +33,12 @@ export class MenuScene extends Phaser.Scene {
 
     const startLabel = this.add
       .text(0, 0, "START", {
-        fontFamily: "monospace",
-        fontSize: "20px",
+        fontFamily: "Orbitron",
+        fontSize: "24px",
         color: "#ffffff",
         stroke: "#000000",
-        strokeThickness: 6,
+        strokeThickness: 4,
+        shadow: { color: "#00ffff", blur: 10, fill: true, stroke: true }
       })
       .setOrigin(0.5)
       .setDepth(3);
@@ -74,10 +75,18 @@ export class MenuScene extends Phaser.Scene {
 
     this.startButton.on("pointerdown", () => {
       this.startButton.setFrame(UI_FRAMES.btnLargePressed);
+      startLabel.y += 2;
     });
     this.startButton.on("pointerup", () => {
       this.startButton.setFrame(UI_FRAMES.btnLargeNormal);
+      startLabel.y -= 2;
       this.onStart();
+    });
+    this.startButton.on("pointerover", () => {
+      this.startButton.setFrame(UI_FRAMES.btnLargeHover);
+    });
+    this.startButton.on("pointerout", () => {
+      this.startButton.setFrame(UI_FRAMES.btnLargeNormal);
     });
 
     // Cleanup on scene shutdown.
