@@ -3105,16 +3105,27 @@ export class GameScene extends Phaser.Scene {
     const depth = 100;
     this.pauseUIContainer = this.add.container(0, 0).setDepth(depth);
 
-    // Dim background
-    const dim = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5)
-      .setOrigin(0)
-      .setInteractive();
-    this.pauseUIContainer.add(dim);
+    // Pause Menu Background (replaces dimming)
+    // Center the background image without scaling
+    const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, IMAGE_KEYS.pauseBackground)
+      .setOrigin(0.5, 0.5)
+      .setInteractive(); // Blocks clicks to the game behind
+
+    // Scale background to fit height 100% while maintaining aspect ratio
+    bg.displayHeight = GAME_HEIGHT;
+    bg.scaleX = bg.scaleY;
     
-    // Add blur effect for Pause Menu
+    // Scale background to cover the screen - REMOVED as requested
+    // bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
+    
+    this.pauseUIContainer.add(bg);
+    
+    // Add blur effect for Pause Menu - REMOVED as requested (no dimming/blur)
+    /*
     if (this.cameras.main.postFX) {
       this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
     }
+    */
 
     const centerX = GAME_WIDTH / 2;
     const centerY = GAME_HEIGHT / 2;

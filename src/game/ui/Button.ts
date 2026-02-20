@@ -118,23 +118,23 @@ export class Button extends Phaser.GameObjects.Container {
     const r = 12; // Rounded corners
 
     // Colors based on state and type
-    let fillColor = UI_COLORS.mainBg;
-    let strokeColor = UI_COLORS.mainOutline;
+    let fillColor: number = UI_COLORS.mainBg;
+    let strokeColor: number = UI_COLORS.mainOutline;
     let alpha = 0.9;
 
     if (this.options.type === "danger") {
-      strokeColor = UI_COLORS.danger;
+      strokeColor = Number(UI_COLORS.danger);
     } else if (this.options.type === "ok") {
-      strokeColor = UI_COLORS.ok;
+      strokeColor = Number(UI_COLORS.ok);
     }
 
     if (this.isPressed) {
-      strokeColor = UI_COLORS.pressedOutline;
-      fillColor = UI_COLORS.pressedOutline;
+      strokeColor = Number(UI_COLORS.pressedOutline);
+      fillColor = Number(UI_COLORS.pressedOutline);
       alpha = 0.3;
     } else if (this.isHovered) {
-      strokeColor = UI_COLORS.hoverOutline;
-      fillColor = UI_COLORS.hoverOutline;
+      strokeColor = Number(UI_COLORS.hoverOutline);
+      fillColor = Number(UI_COLORS.hoverOutline);
       alpha = 0.1;
     }
 

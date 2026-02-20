@@ -48,6 +48,7 @@ export class PreloadScene extends Phaser.Scene {
 
     // Menu background (static) + menu music.
     this.load.image(IMAGE_KEYS.menuBackground, "/assets/start.webp");
+    this.load.image(IMAGE_KEYS.pauseBackground, "/assets/menu.webp");
     this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.wav");
     this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/1.wav"); // Default to 1.wav
     this.load.audio(AUDIO_KEYS.music1, "/assets/audio/music/1.wav");

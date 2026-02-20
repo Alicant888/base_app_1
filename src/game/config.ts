@@ -5,6 +5,7 @@ export const UI_SCALE = 0.5; // Global scale for UI buttons
 // Non-atlas assets served from /public/assets/.
 export const IMAGE_KEYS = {
   menuBackground: "start_bcg",
+  pauseBackground: "pause_bcg",
   uiStart: "ui_start",
   uiHome: "ui_home",
   uiResume: "ui_resume",
