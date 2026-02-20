@@ -30,6 +30,22 @@ export class PreloadScene extends Phaser.Scene {
     // Backgrounds: multi-atlas (BCG.png + L0..L6.png).
     this.load.multiatlas(ATLAS_KEYS.bg, "/assets/atlases/backgrounds.json", "/assets/atlases/");
 
+    // Load new UI buttons (loose PNGs)
+    this.load.image(IMAGE_KEYS.uiStart, "/assets/atlases/UI/start.png");
+    this.load.image(IMAGE_KEYS.uiHome, "/assets/atlases/UI/home.png");
+    this.load.image(IMAGE_KEYS.uiResume, "/assets/atlases/UI/resume.png");
+    this.load.image(IMAGE_KEYS.uiRestart, "/assets/atlases/UI/restart.png");
+    this.load.image(IMAGE_KEYS.uiPlay, "/assets/atlases/UI/play.png");
+    this.load.image(IMAGE_KEYS.uiPause, "/assets/atlases/UI/pause.png");
+    this.load.image(IMAGE_KEYS.uiPrev, "/assets/atlases/UI/prev.png");
+    this.load.image(IMAGE_KEYS.uiNext, "/assets/atlases/UI/next.png");
+    this.load.image(IMAGE_KEYS.uiExit, "/assets/atlases/UI/exit.png");
+    this.load.image(IMAGE_KEYS.uiYes, "/assets/atlases/UI/yes.png");
+    this.load.image(IMAGE_KEYS.uiNo, "/assets/atlases/UI/no.png");
+    this.load.image(IMAGE_KEYS.ui1d, "/assets/atlases/UI/1d.png"); // Dialog "Are you sure?"
+    this.load.image(IMAGE_KEYS.ui2d, "/assets/atlases/UI/2d.png"); // Game Over text
+    this.load.image(IMAGE_KEYS.uiXp, "/assets/atlases/UI/XP.png");
+
     // Menu background (static) + menu music.
     this.load.image(IMAGE_KEYS.menuBackground, "/assets/start.webp");
     this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.wav");

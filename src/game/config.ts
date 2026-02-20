@@ -1,9 +1,24 @@
 export const GAME_WIDTH = 360;
 export const GAME_HEIGHT = 800;
+export const UI_SCALE = 0.5; // Global scale for UI buttons
 
 // Non-atlas assets served from /public/assets/.
 export const IMAGE_KEYS = {
   menuBackground: "start_bcg",
+  uiStart: "ui_start",
+  uiHome: "ui_home",
+  uiResume: "ui_resume",
+  uiRestart: "ui_restart",
+  uiPlay: "ui_play",
+  uiPause: "ui_pause",
+  uiPrev: "ui_prev",
+  uiNext: "ui_next",
+  uiExit: "ui_exit",
+  uiYes: "ui_yes",
+  uiNo: "ui_no",
+  ui1d: "ui_1d",
+  ui2d: "ui_2d",
+  uiXp: "ui_xp",
 } as const;
 
 export const AUDIO_KEYS = {

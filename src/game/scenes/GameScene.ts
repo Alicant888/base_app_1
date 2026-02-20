@@ -21,7 +21,7 @@ import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
 import { AsteroidSpawner } from "../systems/AsteroidSpawner";
 import { EnemySpawner } from "../systems/EnemySpawner";
-import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES, UI_FRAMES } from "../config";
+import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS, SPRITE_FRAMES, UI_FRAMES, UI_SCALE } from "../config";
 import { Button } from "../ui/Button";
 
 const BASE_FIRE_RATE_MS = 375; // ~2.67 shots/sec
@@ -1554,71 +1554,62 @@ export class GameScene extends Phaser.Scene {
     if (this.pauseBtn) this.pauseBtn.setVisible(false);
 
     const depth = 100;
-    const padding = 18;
 
     // Interactive dim blocks clicks to underlying UI (e.g. back button).
     const dim = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.65).setOrigin(0).setDepth(depth).setInteractive();
 
-    const panel = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, ATLAS_KEYS.ui, UI_FRAMES.panelWindow).setDepth(depth + 1);
+    // 2d.png (Game Over)
+    const centerX = GAME_WIDTH / 2;
+    const centerY = GAME_HEIGHT / 2;
+    
+    const gameOverImg = this.add.image(centerX, centerY - 60, IMAGE_KEYS.ui2d).setDepth(depth + 1).setScale(UI_SCALE);
 
+    const btnY = centerY + 120;
+    
+    // Position text exactly between the image and the buttons
+    // Image Y = centerY - 60
+    // Buttons Y = centerY + 120
+    // Midpoint = (centerY - 60 + centerY + 120) / 2 = centerY + 30
     this.add
-      .text(GAME_WIDTH / 2, panel.y - panel.displayHeight / 2 + 36, "GAME OVER", {
-        fontFamily: "Orbitron",
-        fontSize: "32px",
-        color: "#ff0000",
+      .text(centerX, centerY + 30, `ENEMIES DESTROYED: ${this.kills}`, {
+        fontFamily: "Pixel Operator 8 Regular",
+        fontSize: "48px",
+        color: "#CFE9F2",
         stroke: "#000000",
         strokeThickness: 6,
-        shadow: { color: "#ff0000", blur: 10, fill: true, stroke: true }
-      })
-      .setOrigin(0.5)
-      .setDepth(depth + 2);
-
-    this.add
-      .text(GAME_WIDTH / 2, panel.y + 10, `ENEMIES DESTROYED: ${this.kills}`, {
-        fontFamily: "Orbitron",
-        fontSize: "18px",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 4,
+        align: "center",
+        wordWrap: { width: GAME_WIDTH - 40 },
         padding: { x: 8, y: 6 },
       })
       .setOrigin(0.5)
       .setDepth(depth + 2);
 
-    const btnY = GAME_HEIGHT - padding - 80; // Moved up a bit
-
-    const playAgainBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2 - 80, // Offset left
-      y: btnY,
-      text: "RETRY",
-      width: 140,
-      height: 50,
-      type: "ok",
-      onClick: () => {
+    // Exit (Left) - Swapped with Restart
+    const exitBtn = this.add.image(centerX - 80, btnY, IMAGE_KEYS.uiExit)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(depth + 2)
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         dim.destroy();
-        panel.destroy();
-        this.scene.restart();
-      }
-    }).setDepth(depth + 2);
-
-    const exitBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2 + 80, // Offset right
-      y: btnY,
-      text: "EXIT",
-      width: 140,
-      height: 50,
-      type: "danger",
-      onClick: () => {
-        this.playSfx(AUDIO_KEYS.click, 0.7);
-        dim.destroy();
-        panel.destroy();
         this.gameMusic?.stop();
         this.scene.start("MenuScene");
-      }
-    }).setDepth(depth + 2);
+      });
+    exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
+    exitBtn.on("pointerout", () => exitBtn.clearTint());
+
+    // Restart (Right) - Swapped with Exit
+    const restartBtn = this.add.image(centerX + 80, btnY, IMAGE_KEYS.uiRestart)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(depth + 2)
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        dim.destroy();
+        this.scene.restart();
+      });
+    restartBtn.on("pointerover", () => restartBtn.setTint(0xcccccc));
+    restartBtn.on("pointerout", () => restartBtn.clearTint());
   }
 
   private spawnExplosion(x: number, y: number, kind: EnemyKind) {
@@ -2461,7 +2452,7 @@ export class GameScene extends Phaser.Scene {
     // Score Text (Top Right)
     this.scoreText = this.add
       .text(GAME_WIDTH - 20, 20, "0", {
-        fontFamily: "Orbitron",
+        fontFamily: "Pixel Operator 8 Regular",
         fontSize: "24px",
         color: "#ffffff",
         stroke: "#000000",
@@ -2473,29 +2464,36 @@ export class GameScene extends Phaser.Scene {
 
   private createBottomUI() {
     const depth = 120;
-    const btnY = GAME_HEIGHT - 40;
     
-    // Center Pause button
-    const rightX = GAME_WIDTH / 2;
-
-    // Pause (Center)
-    this.pauseBtn = new Button({
-      scene: this,
-      x: rightX,
-      y: btnY,
-      icon: UI_FRAMES.iconPause,
-      width: 80,
-      height: 60,
-      iconScale: 0.8,
-      onClick: () => {
+    // Home/Pause Button (Bottom Left)
+    // 5px padding from left and bottom
+    const padding = 5;
+    
+    this.pauseBtn = this.add.container(0, 0);
+    
+    const homeBtn = this.add.image(0, 0, IMAGE_KEYS.uiHome)
+      .setInteractive({ useHandCursor: true })
+      .setOrigin(0, 1) // Anchor to bottom-left
+      .setScale(UI_SCALE) // Reduce size by 20%
+      .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         if (this.isPausedByInput) {
           this.resumeGame();
         } else {
           this.pauseGame();
         }
-      }
-    });
+      });
+      
+    // Position container at padding, GAME_HEIGHT - padding
+    // Since button origin is (0,1), placing it at (padding, GAME_HEIGHT - padding)
+    // will put its bottom-left corner exactly there.
+    homeBtn.setPosition(padding, GAME_HEIGHT - padding);
+
+    // Add simple hover effect
+    homeBtn.on("pointerover", () => homeBtn.setTint(0xcccccc));
+    homeBtn.on("pointerout", () => homeBtn.clearTint());
+
+    this.pauseBtn.add(homeBtn);
     this.pauseBtn.setDepth(depth);
     this.bottomUIButtons.push(this.pauseBtn);
   }
@@ -2990,176 +2988,247 @@ export class GameScene extends Phaser.Scene {
     this.activeEngineType = null;
   }
 
-  private createConfirmationDialog(text: string, onYes: () => void, onNo: () => void) {
+  private createExitConfirmation() {
     const depth = 200;
     const container = this.add.container(0, 0).setDepth(depth);
 
-    // Blocker
+    // Blocker/Dimmer with Blur
     const blocker = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
       .setOrigin(0)
       .setInteractive();
     container.add(blocker);
 
-    // Dialog Box
+    // Add blur effect to the camera
+    if (this.cameras.main.postFX) {
+      this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
+    }
+
+    // 1d.png (Are you sure?)
     const dialogX = GAME_WIDTH / 2;
     const dialogY = GAME_HEIGHT / 2;
-    const dialogWidth = 320;
-    const dialogHeight = 250;
-
-    const dialogBg = this.add.rectangle(dialogX, dialogY, dialogWidth, dialogHeight, 0x000000)
-      .setStrokeStyle(4, 0xffffff);
-    container.add(dialogBg);
-
-    const message = this.add.text(dialogX, dialogY - 40, text, {
-      fontFamily: "Orbitron",
-      fontSize: "28px",
-      color: "#ffffff",
-      align: "center"
-    }).setOrigin(0.5);
+    
+    const message = this.add.image(dialogX, dialogY - 50, IMAGE_KEYS.ui1d);
+    // Note: 1d.png might need scaling too if it's considered a "button" or UI element, 
+    // but the prompt said "reduce buttons". Let's scale it too for consistency or leave as is?
+    // "reduce buttons by 20%". 1d is text/dialog. I'll leave it 1.0 unless it looks huge.
+    // Actually, let's scale it 0.8 to match the style if it's large.
+    message.setScale(UI_SCALE);
     container.add(message);
 
-    const yesBtn = new Button({
-      scene: this,
-      x: dialogX - 70, // Slightly closer to center
-      y: dialogY + 50,
-      text: "YES",
-      width: 120,
-      height: 50,
-      type: "ok",
-      fontSize: 20,
-      onClick: () => {
-        onYes();
+    // No Button (Return to Pause)
+    const noBtn = this.add.image(dialogX - 80, dialogY + 60, IMAGE_KEYS.uiNo)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
         container.destroy();
-      }
-    });
+      });
+    noBtn.on("pointerover", () => noBtn.setTint(0xcccccc));
+    noBtn.on("pointerout", () => noBtn.clearTint());
+    container.add(noBtn);
 
-    const noBtn = new Button({
-      scene: this,
-      x: dialogX + 70, // Slightly closer to center
-      y: dialogY + 50,
-      text: "NO",
-      width: 120,
-      height: 50,
-      type: "danger",
-      fontSize: 20,
-      onClick: () => {
-        onNo();
+    // Yes Button (Exit Game)
+    const yesBtn = this.add.image(dialogX + 80, dialogY + 60, IMAGE_KEYS.uiYes)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
+        this.gameMusic?.stop();
+        this.scene.start("MenuScene");
+      });
+    yesBtn.on("pointerover", () => yesBtn.setTint(0xcccccc));
+    yesBtn.on("pointerout", () => yesBtn.clearTint());
+    container.add(yesBtn);
+  }
+
+  private createRestartConfirmation() {
+    const depth = 200;
+    const container = this.add.container(0, 0).setDepth(depth);
+
+    // Blocker/Dimmer with Blur
+    const blocker = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
+      .setOrigin(0)
+      .setInteractive();
+    container.add(blocker);
+
+    // Add blur effect to the camera
+    if (this.cameras.main.postFX) {
+      this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
+    }
+
+    // 1d.png (Are you sure?) - Reusing generic confirmation dialog image
+    const dialogX = GAME_WIDTH / 2;
+    const dialogY = GAME_HEIGHT / 2;
+    
+    const message = this.add.image(dialogX, dialogY - 50, IMAGE_KEYS.ui1d);
+    message.setScale(UI_SCALE);
+    container.add(message);
+
+    // No Button (Return to Pause)
+    const noBtn = this.add.image(dialogX - 80, dialogY + 60, IMAGE_KEYS.uiNo)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
         container.destroy();
-      }
-    });
+      });
+    noBtn.on("pointerover", () => noBtn.setTint(0xcccccc));
+    noBtn.on("pointerout", () => noBtn.clearTint());
+    container.add(noBtn);
 
-    container.add([yesBtn, noBtn]);
+    // Yes Button (Restart Game)
+    const yesBtn = this.add.image(dialogX + 80, dialogY + 60, IMAGE_KEYS.uiYes)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
+        this.scene.restart();
+      });
+    yesBtn.on("pointerover", () => yesBtn.setTint(0xcccccc));
+    yesBtn.on("pointerout", () => yesBtn.clearTint());
+    container.add(yesBtn);
   }
 
   private createPauseUI() {
     const depth = 100;
-    // Music controls at 25% from bottom (GAME_HEIGHT * 0.75).
-    const y = GAME_HEIGHT * 0.75;
-    const spacing = 80;
-
     this.pauseUIContainer = this.add.container(0, 0).setDepth(depth);
 
     // Dim background
-    const dim = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5).setOrigin(0).setInteractive();
+    const dim = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.5)
+      .setOrigin(0)
+      .setInteractive();
     this.pauseUIContainer.add(dim);
+    
+    // Add blur effect for Pause Menu
+    if (this.cameras.main.postFX) {
+      this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
+    }
 
-    const pausedText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "PAUSED", {
-        fontFamily: "Orbitron",
-        fontSize: "48px",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 6,
-    }).setOrigin(0.5);
-    this.pauseUIContainer.add(pausedText);
+    const centerX = GAME_WIDTH / 2;
+    const centerY = GAME_HEIGHT / 2;
+    const spacing = 20; // Vertical spacing between elements
 
-    // Prev Button (Left)
-    const prevBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2 - spacing,
-      y: y,
-      icon: UI_FRAMES.iconBack,
-      width: 77,
-      height: 60,
-      iconScale: 0.8,
-      onClick: () => {
-         this.playSfx(AUDIO_KEYS.click, 0.7);
-         this.playPrevTrack();
-      }
-    });
+    // Resume (Center)
+    const resumeBtn = this.add.image(centerX, centerY - 120, IMAGE_KEYS.uiResume)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        this.resumeGame();
+      });
+    resumeBtn.on("pointerover", () => resumeBtn.setTint(0xcccccc));
+    resumeBtn.on("pointerout", () => resumeBtn.clearTint());
+    this.pauseUIContainer.add(resumeBtn);
+
+    // Restart (Below Resume)
+    // Adjust position based on scaled height if needed, but spacing is fixed number.
+    const restartBtn = this.add.image(centerX, resumeBtn.y + (resumeBtn.height * 0.8) + spacing, IMAGE_KEYS.uiRestart)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        // Clear blur temporarily for the confirmation dialog (optional, but confirmation adds its own blur)
+        // Actually, if we add blur on top of blur it might look weird or be fine.
+        // Let's clear it first to avoid stacking issues, or just let the confirmation handle it.
+        // Since createRestartConfirmation adds blur, we should probably clear this one first?
+        // Or better: pass a flag or handle it. 
+        // If I clear it here, the background will become sharp for a split second? No.
+        // Let's assume createRestartConfirmation will add its own blur or just keep the current one.
+        // BUT createRestartConfirmation creates a NEW container and adds NEW blur.
+        // If I clear it here, the "pause menu" blur is gone.
+        // Let's try to clear it before opening confirmation, because confirmation will add its own.
+        if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
+        this.createRestartConfirmation();
+      });
+    restartBtn.on("pointerover", () => restartBtn.setTint(0xcccccc));
+    restartBtn.on("pointerout", () => restartBtn.clearTint());
+    this.pauseUIContainer.add(restartBtn);
+
+    // Music Controls (Below Restart)
+    // User wants: spacing from Restart to Music == spacing from Music to Exit
+    // Previously: const musicY = restartBtn.y + (restartBtn.height * 0.8) + spacing + 20;
+    // Exit was: musicY + 100
+    // So distance Music->Exit was 100.
+    // Let's make Restart->Music also 100? Or make Music->Exit smaller?
+    // "Spacing from restart to music controls is different, make it the same as between exit and music controls"
+    // Let's define a standard spacing "sectionSpacing".
+    const sectionSpacing = 100; // Value used for Music->Exit previously
+    
+    const musicY = restartBtn.y + sectionSpacing;
+    const musicSpacing = 80; // Horizontal spacing between music buttons
+
+    // Prev
+    const prevBtn = this.add.image(centerX - musicSpacing, musicY, IMAGE_KEYS.uiPrev)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        this.playPrevTrack();
+      });
+    prevBtn.on("pointerover", () => prevBtn.setTint(0xcccccc));
+    prevBtn.on("pointerout", () => prevBtn.clearTint());
     this.pauseUIContainer.add(prevBtn);
 
-    // Toggle Button (Center)
-    const toggleBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2,
-      y: y,
-      icon: this.isMusicOn ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff,
-      width: 77,
-      height: 60,
-      iconScale: 0.8,
-      onClick: () => {
-         this.playSfx(AUDIO_KEYS.click, 0.7);
-         this.toggleMusic();
-         toggleBtn.setIcon(this.isMusicOn ? UI_FRAMES.iconSoundOn : UI_FRAMES.iconSoundOff);
-      }
-    });
-    // Add Note icon in middle (using text for now as requested)
-    const note = this.add.text(0, 0, "♫", { 
-        fontFamily: "Orbitron", 
-        fontSize: "24px", 
-        color: "#00ffff",
-        stroke: "#000000",
-        strokeThickness: 2
-    }).setOrigin(0.5);
-    toggleBtn.add(note);
+    // Play/Pause Toggle
+    const toggleBtn = this.add.image(centerX, musicY, this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        this.toggleMusic();
+        toggleBtn.setTexture(this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay);
+      });
+    toggleBtn.on("pointerover", () => toggleBtn.setTint(0xcccccc));
+    toggleBtn.on("pointerout", () => toggleBtn.clearTint());
     this.pauseUIContainer.add(toggleBtn);
 
-    // Next Button (Right)
-    const nextBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2 + spacing,
-      y: y,
-      icon: UI_FRAMES.iconBack,
-      width: 77,
-      height: 60,
-      iconScale: 0.8,
-      onClick: () => {
-         this.playSfx(AUDIO_KEYS.click, 0.7);
-         this.playNextTrack();
-      }
-    });
-    const nextIcon = nextBtn.getIcon();
-    if (nextIcon) nextIcon.setFlipX(true); // Flip back arrow for Next
+    // Next
+    const nextBtn = this.add.image(centerX + musicSpacing, musicY, IMAGE_KEYS.uiNext)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        this.playNextTrack();
+      });
+    nextBtn.on("pointerover", () => nextBtn.setTint(0xcccccc));
+    nextBtn.on("pointerout", () => nextBtn.clearTint());
     this.pauseUIContainer.add(nextBtn);
 
-    // Menu Button (Below controls, centered, wide)
-    const menuBtnY = y + 80;
-    const menuBtn = new Button({
-      scene: this,
-      x: GAME_WIDTH / 2,
-      y: menuBtnY,
-      text: "MENU",
-      width: 240,
-      height: 60,
-      fontSize: 24,
-      onClick: () => {
+    // Exit (Bottom)
+    // Spacing Music->Exit should be sectionSpacing
+    const exitBtn = this.add.image(centerX, musicY + sectionSpacing, IMAGE_KEYS.uiExit)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
-
-        this.createConfirmationDialog("Are you sure?", () => {
-            this.gameMusic?.stop();
-            this.scene.start("MenuScene");
-        }, () => {
-            // Do nothing, just close dialog
-        });
-      }
-    });
-    this.pauseUIContainer.add(menuBtn);
+        if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
+        this.createExitConfirmation();
+      });
+    exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
+    exitBtn.on("pointerout", () => exitBtn.clearTint());
+    this.pauseUIContainer.add(exitBtn);
   }
 
   private destroyPauseUI() {
       if (this.pauseUIContainer) {
           this.pauseUIContainer.destroy();
           this.pauseUIContainer = undefined;
+      }
+      // Clear blur when closing pause menu (Resume)
+      if (this.cameras.main.postFX) {
+        this.cameras.main.postFX.clear();
       }
   }
 
@@ -3171,6 +3240,19 @@ export class GameScene extends Phaser.Scene {
     this.anims.pauseAll();
     this.tweens.pauseAll();
     this.time.paused = true;
+
+    // Blur and dim the home button
+    if (this.pauseBtn) {
+      this.pauseBtn.setAlpha(0.5);
+      // Disable interaction on the home button image (first child)
+      const homeBtn = this.pauseBtn.getAt(0) as Phaser.GameObjects.Image;
+      if (homeBtn) homeBtn.disableInteractive();
+
+      if (this.pauseBtn.postFX) {
+        this.pauseBtn.postFX.addBlur(2, 0, 0, 1);
+      }
+    }
+
     this.createPauseUI();
   }
 
@@ -3182,6 +3264,19 @@ export class GameScene extends Phaser.Scene {
     this.anims.resumeAll();
     this.tweens.resumeAll();
     this.time.paused = false;
+
+    // Restore the home button
+    if (this.pauseBtn) {
+      this.pauseBtn.setAlpha(1);
+      // Re-enable interaction on the home button image
+      const homeBtn = this.pauseBtn.getAt(0) as Phaser.GameObjects.Image;
+      if (homeBtn) homeBtn.setInteractive();
+
+      if (this.pauseBtn.postFX) {
+        this.pauseBtn.postFX.clear();
+      }
+    }
+
     this.destroyPauseUI();
   }
 }
