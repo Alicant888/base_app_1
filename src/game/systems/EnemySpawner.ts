@@ -138,5 +138,13 @@ export class EnemySpawner {
     const enemy = this.enemies.get(x, y) as Enemy | null;
     if (!enemy) return;
     enemy.spawn(x, y, speedY, this.enemyBullets, kind, hasShield);
+
+    // Some shielded heavy enemies hover + drift like a mini-boss.
+    if (hasShield && (kind === "battlecruiser" || kind === "frigate")) {
+      const chance = kind === "battlecruiser" ? 0.8 : 0.3;
+      if (Phaser.Math.FloatBetween(0, 1) < chance) {
+        enemy.setMiniBoss(true);
+      }
+    }
   }
 }

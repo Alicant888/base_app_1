@@ -83,6 +83,13 @@ const DREADNOUGHT_WEAPON_FIRE_FRAME_48 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefi
 const DREADNOUGHT_WEAPON_FIRE_FRAME_55 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}55${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_SFX_FRAME_28 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}28${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 
+// Mini-boss behaviour for shielded heavy enemies.
+const MINI_BOSS_HOVER_Y = 160;
+const MINI_BOSS_DRIFT_SPEED = 25;
+
+// Scout / Fighter / Frigate bullet speed (+50% over default 240).
+const SCOUT_FIGHTER_FRIGATE_BULLET_SPEED = 360;
+
 type FrigateShotConfig = {
   frameIndex: number;
   offsetX: number;
@@ -151,6 +158,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   public getKind(): EnemyKind {
     return this.kind;
   }
+  /** Whether the enemy was spawned with a shield (read-only). */
+  public get spawnedWithShield() { return this._spawnedWithShield; }
+
   private engineFx: Phaser.GameObjects.Sprite;
   private engineFxL?: Phaser.GameObjects.Sprite;
   private engineFxR?: Phaser.GameObjects.Sprite;
@@ -165,6 +175,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private shieldHp = 0;
   private torpedoSalvoDone = false;
   private shieldSuppressed = false;
+  private _spawnedWithShield = false;
+  private _isMiniBoss = false;
 
   // Boss-only state (Dreadnought).
   private dreadnoughtState: "idle" | "aligning" | "firing" = "idle";
@@ -239,6 +251,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 ? 1
                 : 0;
     this.shieldHp = shieldHpOverride ?? defaultShieldHp;
+    this._spawnedWithShield = hasShield || (shieldHpOverride ?? 0) > 0;
+    this._isMiniBoss = false;
 
     this.setFrame(
       isDreadnought
@@ -466,6 +480,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.shieldHp = 0;
     this.torpedoSalvoDone = false;
     this.shieldSuppressed = false;
+    this._spawnedWithShield = false;
+    this._isMiniBoss = false;
     this.dreadnoughtState = "idle";
     this.engineFx.setVisible(false);
     this.engineFx.anims.stop();
@@ -492,6 +508,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     if (this.kind === "dreadnought") {
       this.updateDreadnoughtBoss(time);
+      return;
+    }
+
+    if (this._isMiniBoss) {
+      this.updateMiniBoss(time);
       return;
     }
 
@@ -639,6 +660,39 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       if (!this.active) return;
       this.clearTint();
     });
+  }
+
+  /** Whether this enemy behaves as a mini-boss. */
+  public get isMiniBoss() { return this._isMiniBoss; }
+
+  /** Mark this enemy as a mini-boss (hover + drift like Dreadnought). */
+  public setMiniBoss(value: boolean) {
+    this._isMiniBoss = value;
+  }
+
+  private updateMiniBoss(time: number) {
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (!body) return;
+
+    // Once at hover Y, stop descending and drift horizontally.
+    if (this.y >= MINI_BOSS_HOVER_Y) {
+      body.velocity.y = 0;
+      this.setY(MINI_BOSS_HOVER_Y);
+
+      const halfW = (this.displayWidth || this.width) * 0.5;
+      const minX = halfW + 4;
+      const maxX = GAME_WIDTH - halfW - 4;
+      if (this.x <= minX) this.dreadnoughtDriftDir = 1;
+      if (this.x >= maxX) this.dreadnoughtDriftDir = -1;
+      body.velocity.x = this.dreadnoughtDriftDir * MINI_BOSS_DRIFT_SPEED;
+    }
+
+    // Fire normally.
+    if (!this.isFiring && this.enemyBullets && time >= this.nextFireAt) {
+      if (this.kind !== "torpedo" || !this.torpedoSalvoDone) {
+        this.startFiringSequence();
+      }
+    }
   }
 
   private updateDreadnoughtBoss(time: number) {
@@ -965,6 +1019,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
               damage: FRIGATE_BULLET_DAMAGE,
               depth: FRIGATE_BULLET_DEPTH,
               scale: FRIGATE_BIG_BULLET_SCALE,
+              speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED,
             });
             if (fired) tryPlaySfx();
           }
@@ -1008,14 +1063,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
           if (frameKey === FIGHTER_WEAPON_FIRE_RIGHT_FRAME && !firedRight) {
             firedRight = true;
-            const fired = this.spawnEnemyBulletAt(x + FIGHTER_BULLET_OFFSET_X, y);
+            const fired = this.spawnEnemyBulletAt(x + FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
             if (fired) playShotSfx();
             return;
           }
 
           if (frameKey === FIGHTER_WEAPON_FIRE_LEFT_FRAME && !firedLeft) {
             firedLeft = true;
-            const fired = this.spawnEnemyBulletAt(x - FIGHTER_BULLET_OFFSET_X, y);
+            const fired = this.spawnEnemyBulletAt(x - FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
             if (fired) playShotSfx();
           }
         },
@@ -1059,7 +1114,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const x = this.x;
     const y = this.y + (this.displayHeight || 24) * 0.15;
-    const firedAny = this.spawnEnemyBulletAt(x, y);
+    const firedAny = this.spawnEnemyBulletAt(x, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
 
     if (firedAny && this.scene.registry.get("audioUnlocked")) {
       try {

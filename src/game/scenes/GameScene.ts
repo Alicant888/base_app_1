@@ -47,12 +47,12 @@ const DEPTH_WEAPON = 4.8; // under the ship, still under the shield.
 const DEFAULT_BG_SET: BgSet = "asteroids";
 
 // Base background (always visible).
-const BG_SCROLL_SPEED_BCG = 0.01;
+const BG_SCROLL_SPEED_BCG = 0.015;
 
 // Asteroids set (reserved for certain levels).
-const ASTEROIDS_SCROLL_SPEED_L4 = 0.2;
-const ASTEROIDS_SCROLL_SPEED_L5 = 0.4;
-const ASTEROIDS_SCROLL_SPEED_L6 = 0.8;
+const ASTEROIDS_SCROLL_SPEED_L4 = 0.3;
+const ASTEROIDS_SCROLL_SPEED_L5 = 0.6;
+const ASTEROIDS_SCROLL_SPEED_L6 = 0.12;
 
 
 const PLANETS_SCROLL_SPEED_L0 = 0.02;
@@ -144,7 +144,7 @@ const ZAPPER_PROJECTILE_FROM_WEAPON_OFFSET_X_R = 7;
 const ZAPPER_WEAPON_FIRE_FRAME = `${SPRITE_FRAMES.zapperWeaponPrefix}7${SPRITE_FRAMES.zapperWeaponSuffix}`;
 
 // TUNE WEAPON OFFSETS HERE (Big Space Gun):
-const BIG_SPACE_GUN_DAMAGE = 5;
+const BIG_SPACE_GUN_DAMAGE = 7;
 const BIG_SPACE_GUN_WEAPON_OFFSET_X = 0;
 const BIG_SPACE_GUN_WEAPON_OFFSET_Y = -2;
 const BIG_SPACE_GUN_PROJECTILE_FROM_WEAPON_OFFSET_X = 0;
@@ -242,10 +242,9 @@ export class GameScene extends Phaser.Scene {
   private currentLevel = 1;
   private levelConfig!: LevelConfig;
   private activeBgSet: BgSet = "none";
-  private levelStartTime = 0;
   private isLevelComplete = false;
-  private levelTimerText?: Phaser.GameObjects.Text;
-  private levelText?: Phaser.GameObjects.Text;
+  private distanceTraveled = 0;
+  private levelProgressText?: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
@@ -279,6 +278,7 @@ export class GameScene extends Phaser.Scene {
     this.score = 0;
     this.isGameOver = false;
     this.isLevelComplete = false;
+    this.distanceTraveled = 0;
     this.shieldHits = 0;
     this.fireRateMultiplier = 1;
     this.moveSpeedMultiplier = 1;
@@ -289,7 +289,6 @@ export class GameScene extends Phaser.Scene {
     this.hasRockets = false;
     this.hasZapper = false;
     this.hasBigSpaceGun = false;
-    this.levelStartTime = 0;
 
     // Reset pause state
     this.isPausedByInput = false;
@@ -311,7 +310,8 @@ export class GameScene extends Phaser.Scene {
       AUDIO_KEYS.music7,
       AUDIO_KEYS.music8,
     ];
-    this.currentTrackIndex = 0;
+    // Start on a random track each level.
+    this.currentTrackIndex = Phaser.Math.Between(0, this.musicTracks.length - 1);
 
     this.destroyPlayerEngineFx();
     this.destroyPlayerWeaponFx();
@@ -492,8 +492,8 @@ export class GameScene extends Phaser.Scene {
     this.asteroidSpawner = new AsteroidSpawner(this, this.asteroids);
     this.asteroidSpawner.setMultiplier(this.levelConfig.asteroidMultiplier);
 
-    // Record level start time (for survival timer).
-    this.levelStartTime = 0; // will be set to this.time.now in first update() tick
+    // Reset distance counter for new level.
+    this.distanceTraveled = 0;
 
     // Collisions.
     this.physics.add.overlap(
@@ -696,24 +696,21 @@ export class GameScene extends Phaser.Scene {
     this.updateLivesUI();
 
     // ----- Level UI -----
-    // Level indicator (top-left area).
-    this.levelText = this.add.text(10, 8, `LEVEL ${this.currentLevel}`, {
+    // Level number + distance progress (bottom-right corner, 10px padding).
+    this.levelProgressText = this.add.text(GAME_WIDTH - 10, GAME_HEIGHT - 10, "", {
       fontFamily: "Pixel Operator 8 Regular",
-      fontSize: "28px",
-      color: "#CFE9F2",
+      fontSize: "24px",
+      color: "#00FF9C",
       stroke: "#000000",
-      strokeThickness: 4,
-    }).setDepth(50).setScrollFactor(0);
+      strokeThickness: 3,
+      align: "right",
+    }).setOrigin(1, 1).setDepth(50).setScrollFactor(0);
 
-    // Survival timer (below level indicator).
-    if (this.levelConfig.durationSec > 0) {
-      this.levelTimerText = this.add.text(10, 36, "", {
-        fontFamily: "Pixel Operator 8 Regular",
-        fontSize: "24px",
-        color: "#00FF9C",
-        stroke: "#000000",
-        strokeThickness: 3,
-      }).setDepth(50).setScrollFactor(0);
+    // Set initial level text (boss levels show only "LV X BOSS").
+    if (this.levelConfig.isBossLevel) {
+      this.levelProgressText.setText(`LV ${this.currentLevel}  BOSS`);
+    } else {
+      this.levelProgressText.setText(`LV ${this.currentLevel}  0%`);
     }
 
     // ----- Restore saved weapons / engine -----
@@ -785,25 +782,21 @@ export class GameScene extends Phaser.Scene {
     if (this.isLevelComplete) return;
     if (this.isPausedByInput) return;
 
-    // Initialise levelStartTime on the very first tick.
-    if (this.levelStartTime === 0) this.levelStartTime = time;
-
-    // --- Level timer / boss check ---
+    // --- Level distance / boss check ---
     if (this.levelConfig.isBossLevel) {
       // Boss level ends when boss is defeated.
       if (this.spawner.isBossDefeated()) {
         this.onLevelComplete();
         return;
       }
-    } else if (this.levelConfig.durationSec > 0) {
-      const elapsed = (time - this.levelStartTime) / 1000;
-      const remaining = Math.max(0, this.levelConfig.durationSec - elapsed);
-      if (this.levelTimerText) {
-        const m = Math.floor(remaining / 60);
-        const s = Math.floor(remaining % 60);
-        this.levelTimerText.setText(`${m}:${s.toString().padStart(2, "0")}`);
+    } else if (this.levelConfig.distanceGoal > 0) {
+      const t0 = delta / 16.666;
+      this.distanceTraveled += BG_SCROLL_SPEED_BCG * t0;
+      const pct = Math.min(100, Math.floor((this.distanceTraveled / this.levelConfig.distanceGoal) * 100));
+      if (this.levelProgressText) {
+        this.levelProgressText.setText(`LV ${this.currentLevel}  ${pct}%`);
       }
-      if (remaining <= 0) {
+      if (this.distanceTraveled >= this.levelConfig.distanceGoal) {
         this.onLevelComplete();
         return;
       }
@@ -1186,6 +1179,8 @@ export class GameScene extends Phaser.Scene {
     const destroyed = enemy.onPlayerBulletHit();
 
     if (destroyed) {
+      const hadShield = enemy.spawnedWithShield;
+      const wasMiniBoss = enemy.isMiniBoss;
       enemy.kill();
 
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
@@ -1194,7 +1189,11 @@ export class GameScene extends Phaser.Scene {
       this.score += getEnemyXp(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
-      this.maybeSpawnPickup(enemy.x, enemy.y);
+      if (wasMiniBoss) {
+        this.spawnHealthPickup(enemy.x, enemy.y);
+      } else {
+        this.maybeSpawnPickup(enemy.x, enemy.y, hadShield);
+      }
     }
   }
 
@@ -1208,6 +1207,8 @@ export class GameScene extends Phaser.Scene {
     const destroyed = enemy.onPlayerBulletHit(ROCKET_DAMAGE_MULTIPLIER);
 
     if (destroyed) {
+      const hadShield = enemy.spawnedWithShield;
+      const wasMiniBoss = enemy.isMiniBoss;
       enemy.kill();
 
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
@@ -1216,7 +1217,11 @@ export class GameScene extends Phaser.Scene {
       this.score += getEnemyXp(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
-      this.maybeSpawnPickup(enemy.x, enemy.y);
+      if (wasMiniBoss) {
+        this.spawnHealthPickup(enemy.x, enemy.y);
+      } else {
+        this.maybeSpawnPickup(enemy.x, enemy.y, hadShield);
+      }
     }
   }
 
@@ -1230,6 +1235,8 @@ export class GameScene extends Phaser.Scene {
     const destroyed = enemy.onPlayerBulletHit(ZAPPER_DAMAGE);
 
     if (destroyed) {
+      const hadShield = enemy.spawnedWithShield;
+      const wasMiniBoss = enemy.isMiniBoss;
       enemy.kill();
 
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
@@ -1238,7 +1245,11 @@ export class GameScene extends Phaser.Scene {
       this.score += getEnemyXp(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
-      this.maybeSpawnPickup(enemy.x, enemy.y);
+      if (wasMiniBoss) {
+        this.spawnHealthPickup(enemy.x, enemy.y);
+      } else {
+        this.maybeSpawnPickup(enemy.x, enemy.y, hadShield);
+      }
     }
   }
 
@@ -1252,6 +1263,8 @@ export class GameScene extends Phaser.Scene {
     const destroyed = enemy.onPlayerBulletHit(BIG_SPACE_GUN_DAMAGE);
 
     if (destroyed) {
+      const hadShield = enemy.spawnedWithShield;
+      const wasMiniBoss = enemy.isMiniBoss;
       enemy.kill();
 
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
@@ -1260,7 +1273,11 @@ export class GameScene extends Phaser.Scene {
       this.score += getEnemyXp(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
-      this.maybeSpawnPickup(enemy.x, enemy.y);
+      if (wasMiniBoss) {
+        this.spawnHealthPickup(enemy.x, enemy.y);
+      } else {
+        this.maybeSpawnPickup(enemy.x, enemy.y, hadShield);
+      }
     }
   }
 
@@ -1385,9 +1402,9 @@ export class GameScene extends Phaser.Scene {
     if (!pickup.active) return;
 
     pickup.kill();
-    // Stack firing rate increase up to 100% (double speed => 0.5 delay multiplier).
+    // Stack firing rate increase up to 200% (triple speed => 0.333 delay multiplier).
     // Each pickup reduces delay by 0.1 (10%).
-    const newMultiplier = Math.max(0.5, this.fireRateMultiplier - 0.1);
+    const newMultiplier = Math.max(1 / 3, this.fireRateMultiplier - 0.1);
     this.setFireRateMultiplier(newMultiplier);
   }
 
@@ -1600,7 +1617,7 @@ export class GameScene extends Phaser.Scene {
     pickup.spawn(x, y);
   }
 
-  private maybeSpawnPickup(x: number, y: number) {
+  private maybeSpawnPickup(x: number, y: number, hadShield = false) {
     if (this.isGameOver) return;
 
     const d = this.levelConfig?.drops ?? DEFAULT_DROPS;
@@ -1640,7 +1657,10 @@ export class GameScene extends Phaser.Scene {
     if (r < threshold) return this.spawnFiringRatePickup(x, y);
 
     threshold += d.shield;
-    if (r < threshold) return this.spawnShieldPickup(x, y);
+    if (r < threshold) {
+      if (hadShield) this.spawnShieldPickup(x, y);
+      return;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -1674,56 +1694,62 @@ export class GameScene extends Phaser.Scene {
     const centerY = GAME_HEIGHT / 2;
 
     const isLastLevel = this.currentLevel >= TOTAL_LEVELS;
-    const titleText = isLastLevel ? "YOU WIN!" : "LEVEL COMPLETE!";
+    const titleText = isLastLevel ? "YOU WIN!" : `LEVEL ${this.currentLevel} COMPLETE!`;
 
     this.add.text(centerX, centerY - 60, titleText, {
       fontFamily: "Pixel Operator 8 Regular",
-      fontSize: "48px",
+      fontSize: "56px",
       color: "#00FF9C",
       stroke: "#000000",
       strokeThickness: 6,
       align: "center",
+      wordWrap: { width: GAME_WIDTH - 20 },
     }).setOrigin(0.5).setDepth(depth + 1);
 
-    this.add.text(centerX, centerY, `ENEMIES DESTROYED: ${this.kills}`, {
+    this.add.text(centerX, centerY + 10, `ENEMIES DESTROYED: ${this.kills}`, {
       fontFamily: "Pixel Operator 8 Regular",
-      fontSize: "36px",
+      fontSize: "42px",
       color: "#CFE9F2",
       stroke: "#000000",
       strokeThickness: 4,
       align: "center",
     }).setOrigin(0.5).setDepth(depth + 1);
 
-    const btnY = centerY + 120;
-
     if (!isLastLevel) {
-      // Next Level button.
-      const nextBtn = this.add.image(centerX, btnY, IMAGE_KEYS.uiNext)
-        .setInteractive({ useHandCursor: true })
-        .setDepth(depth + 2)
-        .setScale(UI_SCALE)
-        .on("pointerdown", () => {
-          this.playSfx(AUDIO_KEYS.click, 0.7);
-          dim.destroy();
-          this.gameMusic?.stop();
-          this.scene.start("GameScene", { level: this.currentLevel + 1, save });
-        });
-      nextBtn.on("pointerover", () => nextBtn.setTint(0xcccccc));
-      nextBtn.on("pointerout", () => nextBtn.clearTint());
+      // "Tap to continue" hint.
+      this.add.text(centerX, centerY + 80, "TAP TO CONTINUE", {
+        fontFamily: "Pixel Operator 8 Regular",
+        fontSize: "28px",
+        color: "#CFE9F2",
+        stroke: "#000000",
+        strokeThickness: 4,
+        align: "center",
+      }).setOrigin(0.5).setDepth(depth + 1);
+
+      // Tap anywhere progresses to next level.
+      dim.on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        dim.destroy();
+        this.gameMusic?.stop();
+        this.scene.start("GameScene", { level: this.currentLevel + 1, save });
+      });
     } else {
-      // Back to menu after winning.
-      const exitBtn = this.add.image(centerX, btnY, IMAGE_KEYS.uiHome)
-        .setInteractive({ useHandCursor: true })
-        .setDepth(depth + 2)
-        .setScale(UI_SCALE)
-        .on("pointerdown", () => {
-          this.playSfx(AUDIO_KEYS.click, 0.7);
-          dim.destroy();
-          this.gameMusic?.stop();
-          this.scene.start("MenuScene");
-        });
-      exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
-      exitBtn.on("pointerout", () => exitBtn.clearTint());
+      // "Tap to continue" – back to menu after winning.
+      this.add.text(centerX, centerY + 80, "TAP TO CONTINUE", {
+        fontFamily: "Pixel Operator 8 Regular",
+        fontSize: "28px",
+        color: "#CFE9F2",
+        stroke: "#000000",
+        strokeThickness: 4,
+        align: "center",
+      }).setOrigin(0.5).setDepth(depth + 1);
+
+      dim.on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        dim.destroy();
+        this.gameMusic?.stop();
+        this.scene.start("MenuScene");
+      });
     }
   }
 

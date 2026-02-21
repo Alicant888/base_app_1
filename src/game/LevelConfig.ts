@@ -39,8 +39,8 @@ export interface DropChances {
 /** Full configuration for a single level. */
 export interface LevelConfig {
   level: number;
-  /** How long the player must survive (seconds). 0 = boss fight (ends on boss death). */
-  durationSec: number;
+  /** Distance the ship must fly to complete the level (scroll units). 0 = boss fight. */
+  distanceGoal: number;
   bgSet: BgSet;
   /** Asteroid spawn-frequency multiplier (0 = off, 1 = base rate, max 4). */
   asteroidMultiplier: number;
@@ -73,7 +73,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 1,
-    durationSec: 60,
+    distanceGoal: 36,
     bgSet: "none",
     asteroidMultiplier: 0,
     spawnInterval: [800, 1200],
@@ -82,7 +82,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 1.0, shieldChance: 0 },
     ],
     drops: {
-      health: 0.05, shield: 0.03, firingRate: 0.03,
+      health: 0, shield: 0, firingRate: 0,
       autoCannons: 0, rocket: 0, zapper: 0, bigSpaceGun: 0,
       baseEngine: 0, superchargedEngine: 0, burstEngine: 0, bigPulseEngine: 0,
     },
@@ -94,7 +94,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 2,
-    durationSec: 70,
+    distanceGoal: 42,
     bgSet: "none",
     asteroidMultiplier: 0,
     spawnInterval: [750, 1100],
@@ -116,7 +116,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 3,
-    durationSec: 80,
+    distanceGoal: 48,
     bgSet: "none",
     asteroidMultiplier: 0,
     spawnInterval: [700, 1050],
@@ -138,7 +138,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 4,
-    durationSec: 90,
+    distanceGoal: 54,
     bgSet: "asteroids",
     asteroidMultiplier: 1.0,
     spawnInterval: [650, 1000],
@@ -162,7 +162,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 5,
-    durationSec: 100,
+    distanceGoal: 60,
     bgSet: "asteroids",
     asteroidMultiplier: 1.5,
     spawnInterval: [600, 950],
@@ -186,7 +186,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 6,
-    durationSec: 110,
+    distanceGoal: 66,
     bgSet: "asteroids",
     asteroidMultiplier: 2.0,
     spawnInterval: [600, 900],
@@ -210,7 +210,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 7,
-    durationSec: 120,
+    distanceGoal: 72,
     bgSet: "asteroids",
     asteroidMultiplier: 2.5,
     spawnInterval: [550, 850],
@@ -224,8 +224,8 @@ export const LEVELS: LevelConfig[] = [
     ],
     drops: {
       health: 0.05, shield: 0.05, firingRate: 0.03,
-      autoCannons: 0.02, rocket: 0.03, zapper: 0.02, bigSpaceGun: 0,
-      baseEngine: 0, superchargedEngine: 0.02, burstEngine: 0.02, bigPulseEngine: 0,
+      autoCannons: 0.02, rocket: 0.03, zapper: 0.02, bigSpaceGun: 0.02,
+      baseEngine: 0, superchargedEngine: 0.02, burstEngine: 0.02, bigPulseEngine: 0.02,
     },
     isBossLevel: false,
   },
@@ -235,7 +235,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 8,
-    durationSec: 130,
+    distanceGoal: 78,
     bgSet: "asteroids",
     asteroidMultiplier: 3.0,
     spawnInterval: [500, 800],
@@ -249,7 +249,7 @@ export const LEVELS: LevelConfig[] = [
     ],
     drops: {
       health: 0.05, shield: 0.05, firingRate: 0.03,
-      autoCannons: 0, rocket: 0.03, zapper: 0.03, bigSpaceGun: 0,
+      autoCannons: 0, rocket: 0.03, zapper: 0.03, bigSpaceGun: 0.02,
       baseEngine: 0, superchargedEngine: 0.02, burstEngine: 0, bigPulseEngine: 0.02,
     },
     isBossLevel: false,
@@ -260,7 +260,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 9,
-    durationSec: 140,
+    distanceGoal: 84,
     bgSet: "asteroids",
     asteroidMultiplier: 3.5,
     spawnInterval: [500, 750],
@@ -285,7 +285,7 @@ export const LEVELS: LevelConfig[] = [
   // -----------------------------------------------------------------------
   {
     level: 10,
-    durationSec: 0, // no timer – fight ends when Dreadnought dies
+    distanceGoal: 0, // no distance – fight ends when Dreadnought dies
     bgSet: "planets",
     asteroidMultiplier: 4.0,
     spawnInterval: [800, 1200],
