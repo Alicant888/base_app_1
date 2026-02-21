@@ -46,9 +46,9 @@ const ACTIVE_BG_SET: "asteroids" | "planets" = "asteroids";
 const BG_SCROLL_SPEED_BCG = 0.01;
 
 // Asteroids set (reserved for certain levels).
-const ASTEROIDS_SCROLL_SPEED_L4 = 0.1;
-const ASTEROIDS_SCROLL_SPEED_L5 = 0.2;
-const ASTEROIDS_SCROLL_SPEED_L6 = 0.4;
+const ASTEROIDS_SCROLL_SPEED_L4 = 0.2;
+const ASTEROIDS_SCROLL_SPEED_L5 = 0.4;
+const ASTEROIDS_SCROLL_SPEED_L6 = 0.8;
 
 
 const PLANETS_SCROLL_SPEED_L0 = 0.02;
@@ -671,7 +671,7 @@ export class GameScene extends Phaser.Scene {
       this.cameras.main.setViewport(0, 0, width, height);
 
       const scaleY = height / GAME_HEIGHT;
-      
+
       // User requested to remove "resize by width" in game scene, so we scale by height only.
       // This ensures the game always fills the vertical space, even if it means cropping width on very narrow screens.
       const scale = scaleY;
@@ -1561,11 +1561,11 @@ export class GameScene extends Phaser.Scene {
     // 2d.png (Game Over)
     const centerX = GAME_WIDTH / 2;
     const centerY = GAME_HEIGHT / 2;
-    
+
     const gameOverImg = this.add.image(centerX, centerY - 60, IMAGE_KEYS.ui2d).setDepth(depth + 1).setScale(UI_SCALE);
 
     const btnY = centerY + 120;
-    
+
     // Position text exactly between the image and the buttons
     // Image Y = centerY - 60
     // Buttons Y = centerY + 120
@@ -1618,13 +1618,13 @@ export class GameScene extends Phaser.Scene {
         ? `${SPRITE_FRAMES.fighterDestructionPrefix}${SPRITE_FRAMES.fighterDestructionStart}${SPRITE_FRAMES.fighterDestructionSuffix}`
         : kind === "dreadnought"
           ? `${SPRITE_FRAMES.dreadnoughtDestructionPrefix}${SPRITE_FRAMES.dreadnoughtDestructionStart}${SPRITE_FRAMES.dreadnoughtDestructionSuffix}`
-        : kind === "battlecruiser"
-          ? `${SPRITE_FRAMES.battlecruiserDestructionPrefix}${SPRITE_FRAMES.battlecruiserDestructionStart}${SPRITE_FRAMES.battlecruiserDestructionSuffix}`
-        : kind === "frigate"
-          ? `${SPRITE_FRAMES.frigateDestructionPrefix}${SPRITE_FRAMES.frigateDestructionStart}${SPRITE_FRAMES.frigateDestructionSuffix}`
-        : kind === "torpedo"
-          ? `${SPRITE_FRAMES.torpedoShipDestructionPrefix}${SPRITE_FRAMES.torpedoShipDestructionStart}${SPRITE_FRAMES.torpedoShipDestructionSuffix}`
-          : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
+          : kind === "battlecruiser"
+            ? `${SPRITE_FRAMES.battlecruiserDestructionPrefix}${SPRITE_FRAMES.battlecruiserDestructionStart}${SPRITE_FRAMES.battlecruiserDestructionSuffix}`
+            : kind === "frigate"
+              ? `${SPRITE_FRAMES.frigateDestructionPrefix}${SPRITE_FRAMES.frigateDestructionStart}${SPRITE_FRAMES.frigateDestructionSuffix}`
+              : kind === "torpedo"
+                ? `${SPRITE_FRAMES.torpedoShipDestructionPrefix}${SPRITE_FRAMES.torpedoShipDestructionStart}${SPRITE_FRAMES.torpedoShipDestructionSuffix}`
+                : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
 
     const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(6);
 
@@ -1633,13 +1633,13 @@ export class GameScene extends Phaser.Scene {
         ? "fighter_explode"
         : kind === "dreadnought"
           ? "dreadnought_explode"
-        : kind === "battlecruiser"
-          ? "battlecruiser_explode"
-        : kind === "frigate"
-          ? "frigate_explode"
-          : kind === "torpedo"
-            ? "torpedo_ship_explode"
-            : "enemy_explode";
+          : kind === "battlecruiser"
+            ? "battlecruiser_explode"
+            : kind === "frigate"
+              ? "frigate_explode"
+              : kind === "torpedo"
+                ? "torpedo_ship_explode"
+                : "enemy_explode";
     boom.play(animKey);
     // Use negative scale instead of flipY to ensure vertical mirroring applies
     // consistently across trimmed atlas frames.
@@ -1931,11 +1931,11 @@ export class GameScene extends Phaser.Scene {
 
       if (torpedoWeaponFrames.length > 0) {
         this.anims.create({
-        key: "torpedo_ship_weapon",
-        // Play after idle (Weapons-0), so start at Weapons-1.
-        frames: torpedoWeaponFrames as unknown as Phaser.Types.Animations.AnimationFrame[],
-        frameRate: 18,
-        repeat: 0,
+          key: "torpedo_ship_weapon",
+          // Play after idle (Weapons-0), so start at Weapons-1.
+          frames: torpedoWeaponFrames as unknown as Phaser.Types.Animations.AnimationFrame[],
+          frameRate: 18,
+          repeat: 0,
         });
       }
     }
@@ -2464,13 +2464,13 @@ export class GameScene extends Phaser.Scene {
 
   private createBottomUI() {
     const depth = 120;
-    
+
     // Home/Pause Button (Bottom Left)
     // 5px padding from left and bottom
     const padding = 5;
-    
+
     this.pauseBtn = this.add.container(0, 0);
-    
+
     const homeBtn = this.add.image(0, 0, IMAGE_KEYS.uiHome)
       .setInteractive({ useHandCursor: true })
       .setOrigin(0, 1) // Anchor to bottom-left
@@ -2483,7 +2483,7 @@ export class GameScene extends Phaser.Scene {
           this.pauseGame();
         }
       });
-      
+
     // Position container at padding, GAME_HEIGHT - padding
     // Since button origin is (0,1), placing it at (padding, GAME_HEIGHT - padding)
     // will put its bottom-left corner exactly there.
@@ -3006,7 +3006,7 @@ export class GameScene extends Phaser.Scene {
     // 1d.png (Are you sure?)
     const dialogX = GAME_WIDTH / 2;
     const dialogY = GAME_HEIGHT / 2;
-    
+
     const message = this.add.image(dialogX, dialogY - 50, IMAGE_KEYS.ui1d);
     // Note: 1d.png might need scaling too if it's considered a "button" or UI element, 
     // but the prompt said "reduce buttons". Let's scale it too for consistency or leave as is?
@@ -3065,7 +3065,7 @@ export class GameScene extends Phaser.Scene {
     // 1d.png (Are you sure?) - Reusing generic confirmation dialog image
     const dialogX = GAME_WIDTH / 2;
     const dialogY = GAME_HEIGHT / 2;
-    
+
     const message = this.add.image(dialogX, dialogY - 50, IMAGE_KEYS.ui1d);
     message.setScale(UI_SCALE);
     container.add(message);
@@ -3114,12 +3114,12 @@ export class GameScene extends Phaser.Scene {
     // Scale background to fit height 100% while maintaining aspect ratio
     bg.displayHeight = GAME_HEIGHT;
     bg.scaleX = bg.scaleY;
-    
+
     // Scale background to cover the screen - REMOVED as requested
     // bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-    
+
     this.pauseUIContainer.add(bg);
-    
+
     // Add blur effect for Pause Menu - REMOVED as requested (no dimming/blur)
     /*
     if (this.cameras.main.postFX) {
@@ -3176,7 +3176,7 @@ export class GameScene extends Phaser.Scene {
     // "Spacing from restart to music controls is different, make it the same as between exit and music controls"
     // Let's define a standard spacing "sectionSpacing".
     const sectionSpacing = 100; // Value used for Music->Exit previously
-    
+
     const musicY = restartBtn.y + sectionSpacing;
     const musicSpacing = 80; // Horizontal spacing between music buttons
 
@@ -3233,14 +3233,14 @@ export class GameScene extends Phaser.Scene {
   }
 
   private destroyPauseUI() {
-      if (this.pauseUIContainer) {
-          this.pauseUIContainer.destroy();
-          this.pauseUIContainer = undefined;
-      }
-      // Clear blur when closing pause menu (Resume)
-      if (this.cameras.main.postFX) {
-        this.cameras.main.postFX.clear();
-      }
+    if (this.pauseUIContainer) {
+      this.pauseUIContainer.destroy();
+      this.pauseUIContainer = undefined;
+    }
+    // Clear blur when closing pause menu (Resume)
+    if (this.cameras.main.postFX) {
+      this.cameras.main.postFX.clear();
+    }
   }
 
   private pauseGame() {
