@@ -3633,6 +3633,130 @@ export class GameScene extends Phaser.Scene {
     exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
     exitBtn.on("pointerout", () => exitBtn.clearTint());
     this.pauseUIContainer.add(exitBtn);
+
+    // ------------------------------------------------------------------ //
+    //  Score display + Shop pack buttons                                   //
+    // ------------------------------------------------------------------ //
+    this.buildShopUI(this.pauseUIContainer, exitBtn.y);
+  }
+
+  /**
+   * Creates score text and shop-pack buttons below the given yAnchor
+   * (typically the EXIT button y) inside the pause-menu container.
+   */
+  private buildShopUI(container: Phaser.GameObjects.Container, yAnchor: number) {
+    const centerX = GAME_WIDTH / 2;
+
+    // --- Score display ---
+    const scoreY = yAnchor + 50;
+    const scoreTxt = this.add.text(centerX, scoreY, "", {
+      fontFamily: "Orbitron",
+      fontSize: "14px",
+      color: "#FFD700",
+      stroke: "#000000",
+      strokeThickness: 3,
+      align: "center",
+    }).setOrigin(0.5);
+    container.add(scoreTxt);
+
+    // --- Pack definitions ---
+    interface PackInfo {
+      key: string;
+      cost: number;
+      reqLevel: number;
+      saveFlag: keyof import("../systems/SaveManager").SaveData;
+    }
+    const PACKS: PackInfo[] = [
+      { key: IMAGE_KEYS.uiPackBase,   cost: 200,  reqLevel: 2,  saveFlag: "packBase"   },
+      { key: IMAGE_KEYS.uiPackMedium, cost: 600,  reqLevel: 5,  saveFlag: "packMedium" },
+      { key: IMAGE_KEYS.uiPackBig,    cost: 1800, reqLevel: 9,  saveFlag: "packBig"    },
+      { key: IMAGE_KEYS.uiPackMaxi,   cost: 5400, reqLevel: 12, saveFlag: "packMaxi"   },
+      { key: IMAGE_KEYS.uiPackXp,     cost: 100,  reqLevel: 1,  saveFlag: "packXp"     },
+    ];
+
+    // Measure button half-dims at UI_SCALE.
+    const probe = this.add.image(-9999, -9999, PACKS[0].key).setScale(UI_SCALE);
+    const halfW = probe.displayWidth  / 2;
+    const halfH = probe.displayHeight / 2;
+    probe.destroy();
+
+    const gap = 5;
+    const lx  = centerX - halfW - gap / 2;
+    const rx  = centerX + halfW + gap / 2;
+    const firstRowY = scoreY + 35;
+    const rowGap    = halfH * 2 + 14;
+    const rowY = [firstRowY, firstRowY + rowGap, firstRowY + rowGap * 2];
+
+    // Grid: [basep, mediump], [bigp, maxip], [xpp centred]
+    const grid = [
+      { pi: 0, x: lx,      y: rowY[0] },
+      { pi: 1, x: rx,      y: rowY[0] },
+      { pi: 2, x: lx,      y: rowY[1] },
+      { pi: 3, x: rx,      y: rowY[1] },
+      { pi: 4, x: centerX, y: rowY[2] },
+    ];
+
+    type Entry = { img: Phaser.GameObjects.Image; lbl: Phaser.GameObjects.Text; pack: PackInfo };
+    const entries: Entry[] = [];
+
+    const refreshAll = () => {
+      const sv = SaveManager.load();
+      scoreTxt.setText(`SCORE: ${sv.score}`);
+      for (const { img, lbl, pack } of entries) {
+        const owned  = sv[pack.saveFlag] as boolean;
+        const reqMet = sv.currentLevel >= pack.reqLevel;
+
+        img.setAlpha(1);
+        img.removeInteractive();
+        img.off("pointerdown").off("pointerover").off("pointerout");
+
+        if (owned) {
+          lbl.setText("OWNED").setColor("#44ff44");
+          img.setTint(0x44ff44);
+        } else if (!reqMet) {
+          lbl.setText(`LVL ${pack.reqLevel}`).setColor("#888888");
+          img.setTint(0x444444).setAlpha(0.4);
+        } else {
+          const canAfford = sv.score >= pack.cost;
+          lbl.setText(`${pack.cost} pts`).setColor(canAfford ? "#FFD700" : "#888888");
+          img.clearTint().setInteractive({ useHandCursor: true });
+          img.on("pointerover", () => img.setTint(0xcccccc));
+          img.on("pointerout",  () => img.clearTint());
+          img.on("pointerdown", () => {
+            const sv2 = SaveManager.load();
+            if ((sv2[pack.saveFlag] as boolean) || sv2.score < pack.cost) return;
+            this.playSfx(AUDIO_KEYS.click, 0.7);
+            (sv2 as unknown as Record<string, unknown>)[pack.saveFlag as string] = true;
+            sv2.score -= pack.cost;
+            SaveManager.save(sv2);
+            // Update runtime pack flags so drops take effect immediately.
+            this.packXp    = sv2.packXp;
+            this.packBase  = sv2.packBase;
+            this.packMedium = sv2.packMedium;
+            this.packBig   = sv2.packBig;
+            this.packMaxi  = sv2.packMaxi;
+            refreshAll();
+          });
+        }
+      }
+    };
+
+    for (const { pi, x, y } of grid) {
+      const pack = PACKS[pi];
+      const img = this.add.image(x, y, pack.key).setScale(UI_SCALE);
+      const lbl = this.add.text(x, y + halfH + 9, "", {
+        fontFamily: "Orbitron",
+        fontSize: "8px",
+        color: "#FFFFFF",
+        stroke: "#000000",
+        strokeThickness: 2,
+        align: "center",
+      }).setOrigin(0.5);
+      container.add([img, lbl]);
+      entries.push({ img, lbl, pack });
+    }
+
+    refreshAll();
   }
 
   private destroyPauseUI() {
