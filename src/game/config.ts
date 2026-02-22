@@ -15,6 +15,7 @@ export const IMAGE_KEYS = {
   uiPrev: "ui_prev",
   uiNext: "ui_next",
   uiExit: "ui_exit",
+  uiMenu: "ui_menu",
   uiYes: "ui_yes",
   uiNo: "ui_no",
   ui1d: "ui_1d",

@@ -41,6 +41,7 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image(IMAGE_KEYS.uiPrev, "/assets/atlases/UI/prev.png");
     this.load.image(IMAGE_KEYS.uiNext, "/assets/atlases/UI/next.png");
     this.load.image(IMAGE_KEYS.uiExit, "/assets/atlases/UI/exit.png");
+    this.load.image(IMAGE_KEYS.uiMenu, "/assets/atlases/UI/menu.png");
     this.load.image(IMAGE_KEYS.uiYes, "/assets/atlases/UI/yes.png");
     this.load.image(IMAGE_KEYS.uiNo, "/assets/atlases/UI/no.png");
     this.load.image(IMAGE_KEYS.ui1d, "/assets/atlases/UI/1d.png"); // Dialog "Are you sure?"

@@ -38,7 +38,7 @@ export class MenuScene extends Phaser.Scene {
     this.startButton.on("pointerdown", () => {
       this.startButton.setTint(0x888888);
       SaveManager.clear();
-      this.onStart(1);
+      this.onStart(1, undefined, true);
     });
 
     // CONTINUE button (only shown when a save exists)
@@ -54,7 +54,7 @@ export class MenuScene extends Phaser.Scene {
       this.continueButton.on("pointerdown", () => {
         this.continueButton?.setTint(0x888888);
         const save = SaveManager.load();
-        this.onStart(save.currentLevel, save);
+        this.onStart(save.currentLevel, save, true);
       });
     }
 
@@ -94,7 +94,7 @@ export class MenuScene extends Phaser.Scene {
     });
   }
 
-  private onStart(level: number, save?: import("../systems/SaveManager").SaveData) {
+  private onStart(level: number, save?: import("../systems/SaveManager").SaveData, showMenu = false) {
     // IMPORTANT: unlock audio only after START click (user gesture).
     this.unlockAudioOnce();
     this.playClick();
@@ -104,7 +104,7 @@ export class MenuScene extends Phaser.Scene {
     this.menuMusic?.destroy();
     this.menuMusic = undefined;
 
-    this.scene.start("GameScene", { level, save });
+    this.scene.start("GameScene", { level, save, showMenu });
   }
 
   private playClick() {

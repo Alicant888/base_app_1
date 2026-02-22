@@ -255,10 +255,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** Phaser init callback – receives scene data (e.g. { level: 3, save: SaveData }). */
-  init(data?: { level?: number; save?: SaveData }) {
+  init(data?: { level?: number; save?: SaveData; showMenu?: boolean }) {
     this.currentLevel = data?.level ?? 1;
     this.levelConfig = getLevelConfig(this.currentLevel);
     this.activeBgSet = this.levelConfig.bgSet;
+
+    // Track whether to open the main menu overlay immediately.
+    this._openMenuOnStart = data?.showMenu === true;
+    // Show play.png (not resume.png) when it's a fresh game with no save.
+    this._showPlayBtn = data?.showMenu === true && !data?.save;
 
     // Restore weapons / engine from save data if provided.
     if (data?.save) {
@@ -270,6 +275,10 @@ export class GameScene extends Phaser.Scene {
 
   /** Temporary storage for save data to apply in create(). */
   private _pendingSave?: SaveData;
+  /** When true: open pause menu immediately on create() (launched from MenuScene). */
+  private _openMenuOnStart = false;
+  /** When true: show play.png instead of resume.png in the pause (main) menu. */
+  private _showPlayBtn = false;
 
   create() {
     this.scale.scaleMode = Phaser.Scale.FIT;
@@ -816,6 +825,12 @@ export class GameScene extends Phaser.Scene {
       this.destroyPlayerEngineFx();
       this.destroyPlayerWeaponFx();
     });
+
+    // If launched from the main menu, show the main menu overlay immediately.
+    if (this._openMenuOnStart) {
+      this._openMenuOnStart = false;
+      this.pauseGame();
+    }
   }
 
   update(time: number, delta: number) {
@@ -1490,8 +1505,8 @@ export class GameScene extends Phaser.Scene {
     if (!pickup.active) return;
 
     pickup.kill();
-    // Boost secondary weapon animation speed (+20% per pickup, max +100% = 2.0).
-    const MAX_WEAPON_BONUS = 2; // +100%
+    // Boost secondary weapon animation speed (+20% per pickup, max +200% = 3.0).
+    const MAX_WEAPON_BONUS = 3; // +200%
     if (this.weaponBonusRate < MAX_WEAPON_BONUS) {
       this.weaponBonusRate = Math.min(MAX_WEAPON_BONUS, this.weaponBonusRate + 0.2);
       this.applyWeaponBonusRate();
@@ -1894,8 +1909,8 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setDepth(depth + 2);
 
-    // Exit (Left) - Swapped with Restart
-    const exitBtn = this.add.image(centerX - 80, btnY, IMAGE_KEYS.uiExit)
+    // Menu (Left) — returns to main menu
+    const exitBtn = this.add.image(centerX - 80, btnY, IMAGE_KEYS.uiMenu)
       .setInteractive({ useHandCursor: true })
       .setDepth(depth + 2)
       .setScale(UI_SCALE)
@@ -1908,9 +1923,9 @@ export class GameScene extends Phaser.Scene {
     exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
     exitBtn.on("pointerout", () => exitBtn.clearTint());
 
-    // Restart (Right) – restart current level, restoring saved weapons/engine
+    // Resume (Right) – restart current level, restoring saved weapons/engine
     const savedProgress = SaveManager.load();
-    const restartBtn = this.add.image(centerX + 80, btnY, IMAGE_KEYS.uiRestart)
+    const restartBtn = this.add.image(centerX + 80, btnY, IMAGE_KEYS.uiResume)
       .setInteractive({ useHandCursor: true })
       .setDepth(depth + 2)
       .setScale(UI_SCALE)
@@ -3462,11 +3477,13 @@ export class GameScene extends Phaser.Scene {
     const centerY = GAME_HEIGHT / 2;
     const spacing = 20; // Vertical spacing between elements
 
-    // Resume (Center)
-    const resumeBtn = this.add.image(centerX, centerY - 120, IMAGE_KEYS.uiResume)
+    // Resume / Play (top button — shows play.png on first open, resume.png otherwise)
+    const resumeKey = this._showPlayBtn ? IMAGE_KEYS.uiPlay : IMAGE_KEYS.uiResume;
+    const resumeBtn = this.add.image(centerX, centerY - 120, resumeKey)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
       .on("pointerdown", () => {
+        this._showPlayBtn = false; // next pause shows resume.png
         this.playSfx(AUDIO_KEYS.click, 0.7);
         this.resumeGame();
       });
@@ -3548,15 +3565,15 @@ export class GameScene extends Phaser.Scene {
     nextBtn.on("pointerout", () => nextBtn.clearTint());
     this.pauseUIContainer.add(nextBtn);
 
-    // Exit (Bottom)
-    // Spacing Music->Exit should be sectionSpacing
+    // Exit (Bottom) — closes directly to MenuScene without confirmation
     const exitBtn = this.add.image(centerX, musicY + sectionSpacing, IMAGE_KEYS.uiExit)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
-        this.createExitConfirmation();
+        this.gameMusic?.stop();
+        this.scene.start("MenuScene");
       });
     exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
     exitBtn.on("pointerout", () => exitBtn.clearTint());
