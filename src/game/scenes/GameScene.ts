@@ -158,7 +158,7 @@ const BIG_SPACE_GUN_WEAPON_FIRE_FRAME = `${SPRITE_FRAMES.bigSpaceGunWeaponPrefix
 const DEFAULT_DROPS = {
   bigSpaceGun: 0.01, zapper: 0.01, rocket: 0.01, autoCannons: 0.01,
   baseEngine: 0.01, superchargedEngine: 0.01, burstEngine: 0.01, bigPulseEngine: 0.01,
-  health: 0.03, firingRate: 0.05, shield: 0.04, firingRate2: 0,
+  health: 0.03, firingRate: 0.05, shield: 0.20, firingRate2: 0.04,
 } as const;
 
 export class GameScene extends Phaser.Scene {
@@ -218,8 +218,11 @@ export class GameScene extends Phaser.Scene {
   private engineFlameR?: Phaser.GameObjects.Sprite;
   private activeEngineType: "base" | "supercharged" | "burst" | "bigPulse" | null = null;
   private fireRateMultiplier = 1;
-  /** Bonus weapon animation speed multiplier (stacks after fire-rate cap). */
-  private weaponBonusRate = 1;
+  /** Per-weapon animation speed multipliers (stacks after fire-rate cap). */
+  private weaponBonusRateAutoCannons = 1;
+  private weaponBonusRateRockets = 1;
+  private weaponBonusRateZapper = 1;
+  private weaponBonusRateBigSpaceGun = 1;
 
   private lifeIcons: Phaser.GameObjects.Image[] = [];
   private fireEvent?: Phaser.Time.TimerEvent;
@@ -303,7 +306,10 @@ export class GameScene extends Phaser.Scene {
     this.distanceTraveled = 0;
     this.shieldHits = 0;
     this.fireRateMultiplier = 1;
-    this.weaponBonusRate = 1;
+    this.weaponBonusRateAutoCannons = 1;
+    this.weaponBonusRateRockets = 1;
+    this.weaponBonusRateZapper = 1;
+    this.weaponBonusRateBigSpaceGun = 1;
     this.moveSpeedMultiplier = 1;
     this.draggingPointerId = null;
     this.hasDragTarget = false;
@@ -781,10 +787,11 @@ export class GameScene extends Phaser.Scene {
         this.fireRateMultiplier = this._pendingSave.fireRateMultiplier;
         this.setFireRateMultiplier(this.fireRateMultiplier);
       }
-      if (this._pendingSave.weaponBonusRate > 1) {
-        this.weaponBonusRate = this._pendingSave.weaponBonusRate;
-        this.applyWeaponBonusRate();
-      }
+      this.weaponBonusRateAutoCannons = this._pendingSave.weaponBonusRateAutoCannons;
+      this.weaponBonusRateRockets = this._pendingSave.weaponBonusRateRockets;
+      this.weaponBonusRateZapper = this._pendingSave.weaponBonusRateZapper;
+      this.weaponBonusRateBigSpaceGun = this._pendingSave.weaponBonusRateBigSpaceGun;
+      this.applyWeaponBonusRate();
       this._pendingSave = undefined;
     }
 
@@ -1254,6 +1261,11 @@ export class GameScene extends Phaser.Scene {
     this.fireRocketsPair();
   }
 
+  /** XP earned when killing an enemy. Includes packXp bonus (+5) when purchased. */
+  private getXpForKill(kind: EnemyKind): number {
+    return getEnemyXp(kind) + (this.packXp ? 5 : 0);
+  }
+
   private onBulletHitsEnemy(bulletObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
     const bullet = bulletObj as unknown as { active: boolean; kill: () => void };
     const enemy = enemyObj as Enemy;
@@ -1271,7 +1283,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += getEnemyXp(enemy.getKind());
+      this.score += this.getXpForKill(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1299,7 +1311,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += getEnemyXp(enemy.getKind());
+      this.score += this.getXpForKill(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1355,7 +1367,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += getEnemyXp(enemy.getKind());
+      this.score += this.getXpForKill(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1477,7 +1489,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += getEnemyXp(enemy.getKind());
+      this.score += this.getXpForKill(enemy.getKind());
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1520,11 +1532,12 @@ export class GameScene extends Phaser.Scene {
     if (!pickup.active) return;
 
     pickup.kill();
-    // Stack firing rate increase up to 300% (4x speed => 0.25 delay multiplier).
-    // Each pickup reduces delay by 0.1 (10%).
-    const MIN_FIRE_RATE = 0.25; // 300% bonus = 4x speed
-    if (this.fireRateMultiplier > MIN_FIRE_RATE) {
-      const newMultiplier = Math.max(MIN_FIRE_RATE, this.fireRateMultiplier - 0.1);
+    // Additive +10% from base (1.0) per pickup.
+    // fireRateMultiplier goes from 1.0 down; lower = faster.
+    // Cap depends on current level tier.
+    const minMultiplier = this.getFireRateFloor();
+    if (this.fireRateMultiplier > minMultiplier) {
+      const newMultiplier = Math.max(minMultiplier, this.fireRateMultiplier - 0.1);
       this.setFireRateMultiplier(newMultiplier);
     }
   }
@@ -1534,10 +1547,11 @@ export class GameScene extends Phaser.Scene {
     if (!pickup.active) return;
 
     pickup.kill();
-    // Boost secondary weapon animation speed (+20% per pickup, max +200% = 3.0).
+    // Boost active weapon animation speed (+20% per pickup, max +200% = 3.0).
     const MAX_WEAPON_BONUS = 3; // +200%
-    if (this.weaponBonusRate < MAX_WEAPON_BONUS) {
-      this.weaponBonusRate = Math.min(MAX_WEAPON_BONUS, this.weaponBonusRate + 0.2);
+    const currentRate = this.getActiveWeaponBonusRate();
+    if (currentRate < MAX_WEAPON_BONUS) {
+      this.setActiveWeaponBonusRate(Math.min(MAX_WEAPON_BONUS, currentRate + 0.2));
       this.applyWeaponBonusRate();
     }
   }
@@ -1797,11 +1811,9 @@ export class GameScene extends Phaser.Scene {
     threshold += d.firingRate;
     if (r < threshold) return this.spawnFiringRatePickup(x, y);
 
-    // firingRate2 requires XP pack
-    if (this.packXp) {
-      threshold += 0.03;
-      if (r < threshold) return this.spawnFiringRate2Pickup(x, y);
-    }
+    // firingRate2 — always available (not gated by packXp)
+    threshold += d.firingRate2;
+    if (r < threshold) return this.spawnFiringRate2Pickup(x, y);
 
     threshold += d.shield;
     if (r < threshold) {
@@ -1833,7 +1845,10 @@ export class GameScene extends Phaser.Scene {
       highScore: Math.max(this.score, SaveManager.load().highScore),
       score: this.score,
       fireRateMultiplier: this.fireRateMultiplier,
-      weaponBonusRate: this.weaponBonusRate,
+      weaponBonusRateAutoCannons: this.weaponBonusRateAutoCannons,
+      weaponBonusRateRockets: this.weaponBonusRateRockets,
+      weaponBonusRateZapper: this.weaponBonusRateZapper,
+      weaponBonusRateBigSpaceGun: this.weaponBonusRateBigSpaceGun,
       packXp: this.packXp,
       packBase: this.packBase,
       packMedium: this.packMedium,
@@ -1907,6 +1922,29 @@ export class GameScene extends Phaser.Scene {
   private triggerGameOver() {
     if (this.isGameOver) return;
     this.isGameOver = true;
+
+    // Persist current progress so score earned this level is not lost.
+    const deathSave: SaveData = {
+      currentLevel: this.currentLevel,
+      hasAutoCannons: this.hasAutoCannons,
+      hasRockets: this.hasRockets,
+      hasZapper: this.hasZapper,
+      hasBigSpaceGun: this.hasBigSpaceGun,
+      activeEngineType: this.activeEngineType,
+      highScore: Math.max(this.score, SaveManager.load().highScore),
+      score: this.score,
+      fireRateMultiplier: this.fireRateMultiplier,
+      weaponBonusRateAutoCannons: this.weaponBonusRateAutoCannons,
+      weaponBonusRateRockets: this.weaponBonusRateRockets,
+      weaponBonusRateZapper: this.weaponBonusRateZapper,
+      weaponBonusRateBigSpaceGun: this.weaponBonusRateBigSpaceGun,
+      packXp: this.packXp,
+      packBase: this.packBase,
+      packMedium: this.packMedium,
+      packBig: this.packBig,
+      packMaxi: this.packMaxi,
+    };
+    SaveManager.save(deathSave);
 
     // Freeze gameplay systems.
     this.physics.world.pause();
@@ -2918,20 +2956,49 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setFireRateMultiplier(multiplier: number) {
-    this.fireRateMultiplier = Phaser.Math.Clamp(multiplier, 0.25, 2);
+    const floor = this.getFireRateFloor();
+    this.fireRateMultiplier = Phaser.Math.Clamp(multiplier, floor, 1);
 
     if (this.isGameOver) return;
     this.configureWeaponFireEvents();
   }
 
-  /** Apply bonus timeScale to all weapon animations (after fire-rate cap). */
+  /**
+   * Returns the minimum fireRateMultiplier allowed for the current level.
+   * L1-5:  +100% max bonus => multiplier floor 0.50  (2x speed)
+   * L6-10: +200% max bonus => multiplier floor 0.333 (3x speed)
+   * L11-16:+300% max bonus => multiplier floor 0.25  (4x speed)
+   */
+  private getFireRateFloor(): number {
+    if (this.currentLevel <= 5)  return 0.50;    // +100%
+    if (this.currentLevel <= 10) return 1 / 3;   // +200%
+    return 0.25;                                  // +300%
+  }
+
+  /** Return the bonus rate of whichever weapon is currently active. */
+  private getActiveWeaponBonusRate(): number {
+    if (this.hasAutoCannons) return this.weaponBonusRateAutoCannons;
+    if (this.hasRockets) return this.weaponBonusRateRockets;
+    if (this.hasZapper) return this.weaponBonusRateZapper;
+    if (this.hasBigSpaceGun) return this.weaponBonusRateBigSpaceGun;
+    return 1;
+  }
+
+  /** Set the bonus rate of whichever weapon is currently active. */
+  private setActiveWeaponBonusRate(rate: number) {
+    if (this.hasAutoCannons) this.weaponBonusRateAutoCannons = rate;
+    else if (this.hasRockets) this.weaponBonusRateRockets = rate;
+    else if (this.hasZapper) this.weaponBonusRateZapper = rate;
+    else if (this.hasBigSpaceGun) this.weaponBonusRateBigSpaceGun = rate;
+  }
+
+  /** Apply per-weapon bonus timeScale to each weapon animation. */
   private applyWeaponBonusRate() {
-    const ts = this.weaponBonusRate;
-    if (this.autoCannonWeaponSprite?.anims) this.autoCannonWeaponSprite.anims.timeScale = ts;
-    if (this.rocketWeaponL?.anims) this.rocketWeaponL.anims.timeScale = ts;
-    if (this.rocketWeaponR?.anims) this.rocketWeaponR.anims.timeScale = ts;
-    if (this.zapperWeaponSprite?.anims) this.zapperWeaponSprite.anims.timeScale = ts;
-    if (this.bigSpaceGunWeaponSprite?.anims) this.bigSpaceGunWeaponSprite.anims.timeScale = ts;
+    if (this.autoCannonWeaponSprite?.anims) this.autoCannonWeaponSprite.anims.timeScale = this.weaponBonusRateAutoCannons;
+    if (this.rocketWeaponL?.anims) this.rocketWeaponL.anims.timeScale = this.weaponBonusRateRockets;
+    if (this.rocketWeaponR?.anims) this.rocketWeaponR.anims.timeScale = this.weaponBonusRateRockets;
+    if (this.zapperWeaponSprite?.anims) this.zapperWeaponSprite.anims.timeScale = this.weaponBonusRateZapper;
+    if (this.bigSpaceGunWeaponSprite?.anims) this.bigSpaceGunWeaponSprite.anims.timeScale = this.weaponBonusRateBigSpaceGun;
   }
 
   private spawnBaseEnginePickup(x: number, y: number) {
@@ -3506,39 +3573,34 @@ export class GameScene extends Phaser.Scene {
     const depth = 100;
     this.pauseUIContainer = this.add.container(0, 0).setDepth(depth);
 
-    // Pause Menu Background (replaces dimming)
-    // Center the background image without scaling
+    // Pause Menu Background
     const bg = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, IMAGE_KEYS.pauseBackground)
       .setOrigin(0.5, 0.5)
-      .setInteractive(); // Blocks clicks to the game behind
-
-    // Scale background to fit height 100% while maintaining aspect ratio
+      .setInteractive();
     bg.displayHeight = GAME_HEIGHT;
     bg.scaleX = bg.scaleY;
-
-    // Scale background to cover the screen - REMOVED as requested
-    // bg.setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-
     this.pauseUIContainer.add(bg);
 
-    // Add blur effect for Pause Menu - REMOVED as requested (no dimming/blur)
-    /*
-    if (this.cameras.main.postFX) {
-      this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
-    }
-    */
-
     const centerX = GAME_WIDTH / 2;
-    const centerY = GAME_HEIGHT / 2;
-    const spacing = 20; // Vertical spacing between elements
 
-    // Resume / Play (top button — shows play.png on first open, resume.png otherwise)
+    // ================================================================== //
+    //  TOP: Shop pack buttons (20px below scoreText)                       //
+    // ================================================================== //
+    const shopBottomY = this.buildShopUI(this.pauseUIContainer);
+
+    // ================================================================== //
+    //  Buttons flow top-down, 20px gaps                                    //
+    // ================================================================== //
+    const btnGap = 20;
+
+    // PLAY / RESUME — 20px below last shop button (xpp)
     const resumeKey = this._showPlayBtn ? IMAGE_KEYS.uiPlayG : IMAGE_KEYS.uiResume;
-    const resumeBtn = this.add.image(centerX, centerY - 120, resumeKey)
+    const resumeBtn = this.add.image(centerX, 0, resumeKey).setScale(UI_SCALE);
+    resumeBtn.y = shopBottomY + btnGap + resumeBtn.displayHeight / 2;
+    resumeBtn
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
       .on("pointerdown", () => {
-        this._showPlayBtn = false; // next pause shows resume.png
+        this._showPlayBtn = false;
         this.playSfx(AUDIO_KEYS.click, 0.7);
         this.resumeGame();
       });
@@ -3546,44 +3608,10 @@ export class GameScene extends Phaser.Scene {
     resumeBtn.on("pointerout", () => resumeBtn.clearTint());
     this.pauseUIContainer.add(resumeBtn);
 
-    // Restart (Below Resume)
-    // Adjust position based on scaled height if needed, but spacing is fixed number.
-    const restartBtn = this.add.image(centerX, resumeBtn.y + (resumeBtn.height * 0.8) + spacing, IMAGE_KEYS.uiRestart)
-      .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
-      .on("pointerdown", () => {
-        this.playSfx(AUDIO_KEYS.click, 0.7);
-        // Clear blur temporarily for the confirmation dialog (optional, but confirmation adds its own blur)
-        // Actually, if we add blur on top of blur it might look weird or be fine.
-        // Let's clear it first to avoid stacking issues, or just let the confirmation handle it.
-        // Since createRestartConfirmation adds blur, we should probably clear this one first?
-        // Or better: pass a flag or handle it. 
-        // If I clear it here, the background will become sharp for a split second? No.
-        // Let's assume createRestartConfirmation will add its own blur or just keep the current one.
-        // BUT createRestartConfirmation creates a NEW container and adds NEW blur.
-        // If I clear it here, the "pause menu" blur is gone.
-        // Let's try to clear it before opening confirmation, because confirmation will add its own.
-        if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
-        this.createRestartConfirmation();
-      });
-    restartBtn.on("pointerover", () => restartBtn.setTint(0xcccccc));
-    restartBtn.on("pointerout", () => restartBtn.clearTint());
-    this.pauseUIContainer.add(restartBtn);
+    // MUSIC CONTROLS — below RESUME
+    const musicY = resumeBtn.y + resumeBtn.displayHeight / 2 + btnGap + resumeBtn.displayHeight / 2;
+    const musicSpacing = 80;
 
-    // Music Controls (Below Restart)
-    // User wants: spacing from Restart to Music == spacing from Music to Exit
-    // Previously: const musicY = restartBtn.y + (restartBtn.height * 0.8) + spacing + 20;
-    // Exit was: musicY + 100
-    // So distance Music->Exit was 100.
-    // Let's make Restart->Music also 100? Or make Music->Exit smaller?
-    // "Spacing from restart to music controls is different, make it the same as between exit and music controls"
-    // Let's define a standard spacing "sectionSpacing".
-    const sectionSpacing = 100; // Value used for Music->Exit previously
-
-    const musicY = restartBtn.y + sectionSpacing;
-    const musicSpacing = 80; // Horizontal spacing between music buttons
-
-    // Prev
     const prevBtn = this.add.image(centerX - musicSpacing, musicY, IMAGE_KEYS.uiPrev)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
@@ -3595,7 +3623,6 @@ export class GameScene extends Phaser.Scene {
     prevBtn.on("pointerout", () => prevBtn.clearTint());
     this.pauseUIContainer.add(prevBtn);
 
-    // Play/Pause Toggle
     const toggleBtn = this.add.image(centerX, musicY, this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
@@ -3608,7 +3635,6 @@ export class GameScene extends Phaser.Scene {
     toggleBtn.on("pointerout", () => toggleBtn.clearTint());
     this.pauseUIContainer.add(toggleBtn);
 
-    // Next
     const nextBtn = this.add.image(centerX + musicSpacing, musicY, IMAGE_KEYS.uiNext)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
@@ -3620,8 +3646,23 @@ export class GameScene extends Phaser.Scene {
     nextBtn.on("pointerout", () => nextBtn.clearTint());
     this.pauseUIContainer.add(nextBtn);
 
-    // Exit (Bottom) — closes directly to MenuScene without confirmation
-    const exitBtn = this.add.image(centerX, musicY + sectionSpacing, IMAGE_KEYS.uiExit)
+    // RESTART — below music
+    const restartY = musicY + toggleBtn.displayHeight / 2 + btnGap + resumeBtn.displayHeight / 2;
+    const restartBtn = this.add.image(centerX, restartY, IMAGE_KEYS.uiRestart)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
+        this.createRestartConfirmation();
+      });
+    restartBtn.on("pointerover", () => restartBtn.setTint(0xcccccc));
+    restartBtn.on("pointerout", () => restartBtn.clearTint());
+    this.pauseUIContainer.add(restartBtn);
+
+    // EXIT — below restart
+    const exitY = restartBtn.y + restartBtn.displayHeight / 2 + btnGap + resumeBtn.displayHeight / 2;
+    const exitBtn = this.add.image(centerX, exitY, IMAGE_KEYS.uiExit)
       .setInteractive({ useHandCursor: true })
       .setScale(UI_SCALE)
       .on("pointerdown", () => {
@@ -3633,31 +3674,18 @@ export class GameScene extends Phaser.Scene {
     exitBtn.on("pointerover", () => exitBtn.setTint(0xcccccc));
     exitBtn.on("pointerout", () => exitBtn.clearTint());
     this.pauseUIContainer.add(exitBtn);
-
-    // ------------------------------------------------------------------ //
-    //  Score display + Shop pack buttons                                   //
-    // ------------------------------------------------------------------ //
-    this.buildShopUI(this.pauseUIContainer, exitBtn.y);
   }
 
   /**
-   * Creates score text and shop-pack buttons below the given yAnchor
-   * (typically the EXIT button y) inside the pause-menu container.
+   * Creates shop-pack buttons at the top of the pause menu, 20px below the
+   * in-game scoreText (pts counter). Returns the bottom Y of the last pack
+   * button image (xpp) so callers can continue layout.
    */
-  private buildShopUI(container: Phaser.GameObjects.Container, yAnchor: number) {
+  private buildShopUI(container: Phaser.GameObjects.Container): number {
     const centerX = GAME_WIDTH / 2;
-
-    // --- Score display ---
-    const scoreY = yAnchor + 50;
-    const scoreTxt = this.add.text(centerX, scoreY, "", {
-      fontFamily: "Orbitron",
-      fontSize: "14px",
-      color: "#FFD700",
-      stroke: "#000000",
-      strokeThickness: 3,
-      align: "center",
-    }).setOrigin(0.5);
-    container.add(scoreTxt);
+    // Anchor top of shop grid 20px below the scoreText bottom edge.
+    const scoreBottom = this.scoreText.y + 24; // scoreText origin(1,0), fontSize 24
+    const shopTopPad  = scoreBottom + 20;
 
     // --- Pack definitions ---
     interface PackInfo {
@@ -3680,11 +3708,11 @@ export class GameScene extends Phaser.Scene {
     const halfH = probe.displayHeight / 2;
     probe.destroy();
 
-    const gap = 5;
+    const gap = 20; // 20px between buttons in both x and y
     const lx  = centerX - halfW - gap / 2;
     const rx  = centerX + halfW + gap / 2;
-    const firstRowY = scoreY + 35;
-    const rowGap    = halfH * 2 + 14;
+    const firstRowY = shopTopPad + halfH; // first row: 20px below scoreText
+    const rowGap    = halfH * 2 + 20;     // button height + 20px
     const rowY = [firstRowY, firstRowY + rowGap, firstRowY + rowGap * 2];
 
     // Grid: [basep, mediump], [bigp, maxip], [xpp centred]
@@ -3696,13 +3724,12 @@ export class GameScene extends Phaser.Scene {
       { pi: 4, x: centerX, y: rowY[2] },
     ];
 
-    type Entry = { img: Phaser.GameObjects.Image; lbl: Phaser.GameObjects.Text; pack: PackInfo };
+    type Entry = { img: Phaser.GameObjects.Image; lbl: Phaser.GameObjects.Text; pack: PackInfo; isXp: boolean };
     const entries: Entry[] = [];
 
     const refreshAll = () => {
       const sv = SaveManager.load();
-      scoreTxt.setText(`SCORE: ${sv.score}`);
-      for (const { img, lbl, pack } of entries) {
+      for (const { img, lbl, pack, isXp } of entries) {
         const owned  = sv[pack.saveFlag] as boolean;
         const reqMet = sv.currentLevel >= pack.reqLevel;
 
@@ -3711,14 +3738,13 @@ export class GameScene extends Phaser.Scene {
         img.off("pointerdown").off("pointerover").off("pointerout");
 
         if (owned) {
-          lbl.setText("OWNED").setColor("#44ff44");
+          if (!isXp) lbl.setText("OWNED").setColor("#44ff44").setVisible(true);
           img.setTint(0x44ff44);
         } else if (!reqMet) {
-          lbl.setText(`LVL ${pack.reqLevel}`).setColor("#888888");
+          if (!isXp) lbl.setText(`LVL ${pack.reqLevel}`).setColor("#888888").setVisible(true);
           img.setTint(0x444444).setAlpha(0.4);
         } else {
-          const canAfford = sv.score >= pack.cost;
-          lbl.setText(`${pack.cost} pts`).setColor(canAfford ? "#FFD700" : "#888888");
+          if (!isXp) lbl.setText("available").setColor("#FFD700").setVisible(true);
           img.clearTint().setInteractive({ useHandCursor: true });
           img.on("pointerover", () => img.setTint(0xcccccc));
           img.on("pointerout",  () => img.clearTint());
@@ -3729,7 +3755,9 @@ export class GameScene extends Phaser.Scene {
             (sv2 as unknown as Record<string, unknown>)[pack.saveFlag as string] = true;
             sv2.score -= pack.cost;
             SaveManager.save(sv2);
-            // Update runtime pack flags so drops take effect immediately.
+            // Sync in-memory score & on-screen pts counter.
+            this.score = sv2.score;
+            this.scoreText.setText(`${this.score}`);
             this.packXp    = sv2.packXp;
             this.packBase  = sv2.packBase;
             this.packMedium = sv2.packMedium;
@@ -3743,6 +3771,7 @@ export class GameScene extends Phaser.Scene {
 
     for (const { pi, x, y } of grid) {
       const pack = PACKS[pi];
+      const isXp = pi === 4; // xpp is the last item, no label
       const img = this.add.image(x, y, pack.key).setScale(UI_SCALE);
       const lbl = this.add.text(x, y + halfH + 9, "", {
         fontFamily: "Orbitron",
@@ -3751,12 +3780,16 @@ export class GameScene extends Phaser.Scene {
         stroke: "#000000",
         strokeThickness: 2,
         align: "center",
-      }).setOrigin(0.5);
+      }).setOrigin(0.5).setVisible(!isXp);
       container.add([img, lbl]);
-      entries.push({ img, lbl, pack });
+      entries.push({ img, lbl, pack, isXp });
     }
 
     refreshAll();
+
+    // Return the bottom Y of the xpp image (no label underneath).
+    const lastImg = entries[entries.length - 1].img;
+    return lastImg.y + halfH;
   }
 
   private destroyPauseUI() {
@@ -3779,16 +3812,9 @@ export class GameScene extends Phaser.Scene {
     this.tweens.pauseAll();
     this.time.paused = true;
 
-    // Blur and dim the home button
+    // Hide the home button while pause menu is open.
     if (this.pauseBtn) {
-      this.pauseBtn.setAlpha(0.5);
-      // Disable interaction on the home button image (first child)
-      const homeBtn = this.pauseBtn.getAt(0) as Phaser.GameObjects.Image;
-      if (homeBtn) homeBtn.disableInteractive();
-
-      if (this.pauseBtn.postFX) {
-        this.pauseBtn.postFX.addBlur(2, 0, 0, 1);
-      }
+      this.pauseBtn.setVisible(false);
     }
 
     this.createPauseUI();
@@ -3803,16 +3829,9 @@ export class GameScene extends Phaser.Scene {
     this.tweens.resumeAll();
     this.time.paused = false;
 
-    // Restore the home button
+    // Show the home button again.
     if (this.pauseBtn) {
-      this.pauseBtn.setAlpha(1);
-      // Re-enable interaction on the home button image
-      const homeBtn = this.pauseBtn.getAt(0) as Phaser.GameObjects.Image;
-      if (homeBtn) homeBtn.setInteractive();
-
-      if (this.pauseBtn.postFX) {
-        this.pauseBtn.postFX.clear();
-      }
+      this.pauseBtn.setVisible(true);
     }
 
     this.destroyPauseUI();

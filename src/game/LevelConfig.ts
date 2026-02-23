@@ -104,7 +104,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.85, shieldChance: 0 },
       { kind: "fighter", weight: 0.15, shieldChance: 0 },
     ],
-    drops: { health: 0.05, shield: 0.04, firingRate: 0.04, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.04, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -117,7 +117,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.65, shieldChance: 0.05 },
       { kind: "fighter", weight: 0.35, shieldChance: 0 },
     ],
-    drops: { health: 0.05, shield: 0.04, firingRate: 0.05, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.05, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -132,7 +132,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.15, shieldChance: 0.10 },
       { kind: "frigate", weight: 0.10, shieldChance: 0.15 },
     ],
-    drops: { health: 0.04, shield: 0.04, firingRate: 0.04, firingRate2: 0, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.04, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -147,7 +147,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.20, shieldChance: 0.25 },
       { kind: "frigate", weight: 0.20, shieldChance: 0.30 },
     ],
-    drops: { health: 0.04, shield: 0.05, firingRate: 0.04, firingRate2: 0, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.04, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -162,7 +162,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.25, shieldChance: 0.30 },
       { kind: "frigate", weight: 0.30, shieldChance: 0.40 },
     ],
-    drops: { health: 0.04, shield: 0.05, firingRate: 0.04, firingRate2: 0, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.04, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -178,7 +178,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.50 },
       { kind: "battlecruiser", weight: 0.10, shieldChance: 0.20 },
     ],
-    drops: { health: 0.05, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -194,7 +194,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.60 },
       { kind: "battlecruiser", weight: 0.20, shieldChance: 0.30 },
     ],
-    drops: { health: 0.05, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -210,7 +210,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.70 },
       { kind: "battlecruiser", weight: 0.30, shieldChance: 0.50 },
     ],
-    drops: { health: 0.05, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -226,7 +226,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.75 },
       { kind: "battlecruiser", weight: 0.30, shieldChance: 0.55 },
     ],
-    drops: { health: 0.05, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -242,7 +242,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.35, shieldChance: 0.80 },
       { kind: "battlecruiser", weight: 0.30, shieldChance: 0.60 },
     ],
-    drops: { health: 0.05, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.05, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -258,7 +258,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.35, shieldChance: 0.85 },
       { kind: "battlecruiser", weight: 0.35, shieldChance: 0.65 },
     ],
-    drops: { health: 0.06, shield: 0.05, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.06, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -274,7 +274,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.35, shieldChance: 0.90 },
       { kind: "battlecruiser", weight: 0.35, shieldChance: 0.70 },
     ],
-    drops: { health: 0.06, shield: 0.06, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.06, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -290,7 +290,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.90 },
       { kind: "battlecruiser", weight: 0.40, shieldChance: 0.75 },
     ],
-    drops: { health: 0.06, shield: 0.06, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.06, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -304,7 +304,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "fighter", weight: 0.30, shieldChance: 0.40 },
       { kind: "frigate", weight: 0.40, shieldChance: 0.50 },
     ],
-    drops: { health: 0.06, shield: 0.06, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.06, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: true,
     bossHp: 200, bossShieldHp: 200, escortWaveIntervalMs: 15_000,
     escortWaves: [
@@ -328,7 +328,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.95 },
       { kind: "battlecruiser", weight: 0.40, shieldChance: 0.80 },
     ],
-    drops: { health: 0.07, shield: 0.06, firingRate: 0.03, firingRate2: 0, ...NWD },
+    drops: { health: 0.07, shield: 0.20, firingRate: 0.03, firingRate2: 0.04, ...NWD },
     isBossLevel: false,
     bossAfterDistance: true,
     bossHp: 250, bossShieldHp: 250, escortWaveIntervalMs: 12_000,

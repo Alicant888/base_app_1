@@ -22,8 +22,11 @@ export interface SaveData {
   score: number;
   /** Main weapon fire-rate multiplier (1 = default, 0.25 = 300% cap). */
   fireRateMultiplier: number;
-  /** Secondary weapon animation speed multiplier (1 = default, max 2 = +100%). */
-  weaponBonusRate: number;
+  /** Per-weapon animation speed multipliers (1 = default, max 3 = +200%). */
+  weaponBonusRateAutoCannons: number;
+  weaponBonusRateRockets: number;
+  weaponBonusRateZapper: number;
+  weaponBonusRateBigSpaceGun: number;
   // --- Shop packs (purchased once, persist forever) ---
   /** XP Pack: unlocks Firing Rate 2 pickup drops. Cost 100. Always available. */
   packXp: boolean;
@@ -47,7 +50,10 @@ const DEFAULT_SAVE: SaveData = {
   highScore: 0,
   score: 0,
   fireRateMultiplier: 1,
-  weaponBonusRate: 1,
+  weaponBonusRateAutoCannons: 1,
+  weaponBonusRateRockets: 1,
+  weaponBonusRateZapper: 1,
+  weaponBonusRateBigSpaceGun: 1,
   packXp: false,
   packBase: false,
   packMedium: false,
