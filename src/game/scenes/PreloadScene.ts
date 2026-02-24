@@ -27,7 +27,6 @@ export class PreloadScene extends Phaser.Scene {
     this.load.atlas(ATLAS_KEYS.enemy, "/assets/atlases/Enemy.png", "/assets/atlases/Enemy.json");
     this.load.atlas(ATLAS_KEYS.fx, "/assets/atlases/FX.png", "/assets/atlases/FX.json");
     this.load.atlas(ATLAS_KEYS.fx2, "/assets/atlases/FX2.png", "/assets/atlases/FX2.json");
-    this.load.atlas(ATLAS_KEYS.ui, "/assets/atlases/ui.png", "/assets/atlases/ui.json");
     // Backgrounds: multi-atlas (BCG.png + L0..L6.png).
     this.load.multiatlas(ATLAS_KEYS.bg, "/assets/atlases/backgrounds.json", "/assets/atlases/");
 
@@ -58,16 +57,12 @@ export class PreloadScene extends Phaser.Scene {
     // Menu background (static) + menu music.
     this.load.image(IMAGE_KEYS.menuBackground, "/assets/start.webp");
     this.load.image(IMAGE_KEYS.pauseBackground, "/assets/menu.webp");
-    this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.wav");
-    this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/1.wav"); // Default to 1.wav
-    this.load.audio(AUDIO_KEYS.music1, "/assets/audio/music/1.wav");
-    this.load.audio(AUDIO_KEYS.music2, "/assets/audio/music/2.wav");
-    this.load.audio(AUDIO_KEYS.music3, "/assets/audio/music/3.wav");
-    this.load.audio(AUDIO_KEYS.music4, "/assets/audio/music/4.wav");
-    this.load.audio(AUDIO_KEYS.music5, "/assets/audio/music/5.wav");
-    this.load.audio(AUDIO_KEYS.music6, "/assets/audio/music/6.wav");
-    this.load.audio(AUDIO_KEYS.music7, "/assets/audio/music/7.wav");
-    this.load.audio(AUDIO_KEYS.music8, "/assets/audio/music/8.wav");
+    this.load.audio(AUDIO_KEYS.startMenuMusic, "/assets/audio/music/start_menu.ogg");
+    this.load.audio(AUDIO_KEYS.gameMusic, "/assets/audio/music/1.ogg"); // Default to 1.ogg
+    this.load.audio(AUDIO_KEYS.music1, "/assets/audio/music/1.ogg");
+    this.load.audio(AUDIO_KEYS.music2, "/assets/audio/music/2.ogg");
+    this.load.audio(AUDIO_KEYS.music3, "/assets/audio/music/3.ogg");
+    this.load.audio(AUDIO_KEYS.bossMusic, "/assets/audio/music/end.ogg");
 
     // SFX
     this.load.audio(AUDIO_KEYS.click, "/assets/audio/sfx/click.wav");

@@ -224,6 +224,7 @@ export class GameScene extends Phaser.Scene {
   private lifeIcons: Phaser.GameObjects.Image[] = [];
   private fireEvent?: Phaser.Time.TimerEvent;
   private gameMusic?: Phaser.Sound.BaseSound;
+  private bossMusic?: Phaser.Sound.BaseSound;
   private musicTracks: string[] = [];
   private currentTrackIndex = 0;
   private pauseUIContainer?: Phaser.GameObjects.Container;
@@ -331,11 +332,6 @@ export class GameScene extends Phaser.Scene {
       AUDIO_KEYS.music1,
       AUDIO_KEYS.music2,
       AUDIO_KEYS.music3,
-      AUDIO_KEYS.music4,
-      AUDIO_KEYS.music5,
-      AUDIO_KEYS.music6,
-      AUDIO_KEYS.music7,
-      AUDIO_KEYS.music8,
     ];
     // Start on a random track each level.
     this.currentTrackIndex = Phaser.Math.Between(0, this.musicTracks.length - 1);
@@ -758,6 +754,8 @@ export class GameScene extends Phaser.Scene {
     // Set initial level text (boss levels show only "LV X BOSS").
     if (this.levelConfig.isBossLevel) {
       this.levelProgressText.setText(`LV ${this.currentLevel}  BOSS`);
+      // Switch to boss music immediately on boss levels.
+      this.startBossMusic();
     } else {
       this.levelProgressText.setText(`LV ${this.currentLevel}  0%`);
     }
@@ -841,6 +839,10 @@ export class GameScene extends Phaser.Scene {
       this.gameMusic?.destroy();
       this.gameMusic = undefined;
 
+      this.bossMusic?.stop();
+      this.bossMusic?.destroy();
+      this.bossMusic = undefined;
+
       this.shieldFx?.destroy();
       this.shieldFx = undefined;
 
@@ -864,6 +866,7 @@ export class GameScene extends Phaser.Scene {
     if (this.levelConfig.isBossLevel || this._bossPhaseActive) {
       // Boss level (or post-distance boss phase) ends when boss is defeated.
       if (this.spawner.isBossDefeated()) {
+        this.stopBossMusic();
         this.onLevelComplete();
         return;
       }
@@ -883,6 +886,8 @@ export class GameScene extends Phaser.Scene {
               this.levelProgressText.setText(`LV ${this.currentLevel}  BOSS`);
             }
             this.spawner.triggerBossPhase(time);
+            // Switch to boss music, pause the normal track.
+            this.startBossMusic();
           }
         } else {
           this.onLevelComplete();
@@ -964,23 +969,47 @@ export class GameScene extends Phaser.Scene {
     this.playMusicTrack(this.currentTrackIndex);
   }
 
+  /** Pause normal music and play end.ogg (boss theme). */
+  private startBossMusic() {
+    // Pause current game music instead of stopping it, so we can resume later.
+    if (this.gameMusic && (this.gameMusic as Phaser.Sound.WebAudioSound).isPlaying) {
+      this.gameMusic.pause();
+    }
+    if (!this.bossMusic) {
+      this.bossMusic = this.sound.add(AUDIO_KEYS.bossMusic, { loop: true, volume: 0.5 });
+    }
+    if (this.isMusicOn) {
+      this.bossMusic.play();
+    }
+  }
+
+  /** Stop boss music and resume normal track. */
+  private stopBossMusic() {
+    if (this.bossMusic) {
+      this.bossMusic.stop();
+      this.bossMusic.destroy();
+      this.bossMusic = undefined;
+    }
+    // Resume normal game music.
+    if (this.gameMusic && this.isMusicOn) {
+      this.gameMusic.resume();
+    }
+  }
+
   private toggleMusic() {
     this.isMusicOn = !this.isMusicOn;
     if (this.isMusicOn) {
-      if (!this.gameMusic) {
+      // Resume whichever music is active (boss or normal).
+      if (this.bossMusic) {
+        this.bossMusic.resume();
+      } else if (!this.gameMusic) {
         this.playMusicTrack(this.currentTrackIndex);
       } else if (!this.gameMusic.isPlaying) {
-        this.gameMusic.play(); // Use play() to restart if needed, or resume if paused?
-        // Logic in playMusicTrack handles new instance.
-        // If track exists but stopped/paused:
-        // Actually playMusicTrack destroys and recreates.
-        // But if I just toggle, I might want to resume?
-        // User said "button disables music...".
-        // If I toggle off, I pause/stop.
-        // If I toggle on, I resume/play.
+        this.gameMusic.play();
       }
     } else {
       this.gameMusic?.pause();
+      this.bossMusic?.pause();
     }
   }
 
