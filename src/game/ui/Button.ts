@@ -138,7 +138,7 @@ export class Button extends Phaser.GameObjects.Container {
       alpha = 0.1;
     }
 
-    this.bg.fillStyle(fillColor, this.isPressed ? 0.3 : (this.isHovered ? 0.1 : 0.9));
+    this.bg.fillStyle(fillColor, alpha);
     // If not pressed/hovered, fill with mainBg at 0.9 alpha
     if (!this.isPressed && !this.isHovered) {
       this.bg.fillStyle(UI_COLORS.mainBg, 0.9);

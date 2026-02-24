@@ -22,8 +22,7 @@ import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
 import { AsteroidSpawner } from "../systems/AsteroidSpawner";
 import { EnemySpawner } from "../systems/EnemySpawner";
-import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS, SPRITE_FRAMES, UI_FRAMES, UI_SCALE } from "../config";
-import { Button } from "../ui/Button";
+import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS, SPRITE_FRAMES, UI_SCALE } from "../config";
 import { getLevelConfig, TOTAL_LEVELS, type LevelConfig, type BgSet } from "../LevelConfig";
 import { SaveManager, type SaveData } from "../systems/SaveManager";
 
@@ -44,8 +43,6 @@ const DEPTH_WEAPON = 4.8; // under the ship, still under the shield.
 // - Asteroids: L4 + L5 + L6 (reserved for some levels)
 // - Planets: L0 (static) + L1 + L2 + L3 (currently active for testing)
 // Background set is now driven by LevelConfig (per-level).
-// The constant below is only a fallback; activeBgSet on the scene instance is authoritative.
-const DEFAULT_BG_SET: BgSet = "asteroids";
 
 // Base background (always visible).
 const BG_SCROLL_SPEED_BCG = 0.015;
@@ -1968,7 +1965,7 @@ export class GameScene extends Phaser.Scene {
     const centerX = GAME_WIDTH / 2;
     const centerY = GAME_HEIGHT / 2;
 
-    const gameOverImg = this.add.image(centerX, centerY - 60, IMAGE_KEYS.ui2d).setDepth(depth + 1).setScale(UI_SCALE);
+    this.add.image(centerX, centerY - 60, IMAGE_KEYS.ui2d).setDepth(depth + 1).setScale(UI_SCALE);
 
     const btnY = centerY + 120;
 
