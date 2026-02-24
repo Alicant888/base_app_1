@@ -33,7 +33,7 @@ export const farcasterConfig = {
     homeUrl: ROOT_URL,
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "game",
-    tags: ["game", "shooter", "space", "space shooter"],
+    tags: ["game", "shooter", "space", "space shooter", "arcade"],
     heroImageUrl: `${ROOT_URL}/hero.png`, 
     tagline: "",
     ogTitle: "",

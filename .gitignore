@@ -4,6 +4,7 @@
 /.cursor
 /.agents
 /.trae
+/.vscode
 /.github
 /node_modules
 /.pnp

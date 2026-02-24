@@ -104,7 +104,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.85, shieldChance: 0 },
       { kind: "fighter", weight: 0.15, shieldChance: 0 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.03, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -117,7 +117,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.65, shieldChance: 0.05 },
       { kind: "fighter", weight: 0.35, shieldChance: 0 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.03, shield: 0.20, firingRate: 0.02, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -132,7 +132,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.15, shieldChance: 0.10 },
       { kind: "frigate", weight: 0.10, shieldChance: 0.15 },
     ],
-    drops: { health: 0.04, shield: 0.20, firingRate: 0.03, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -147,7 +147,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.20, shieldChance: 0.25 },
       { kind: "frigate", weight: 0.20, shieldChance: 0.30 },
     ],
-    drops: { health: 0.04, shield: 0.20, firingRate: 0.04, firingRate2: 0.03, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -162,7 +162,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "torpedo", weight: 0.25, shieldChance: 0.30 },
       { kind: "frigate", weight: 0.30, shieldChance: 0.40 },
     ],
-    drops: { health: 0.04, shield: 0.20, firingRate: 0.04, firingRate2: 0.03, ...NWD },
+    drops: { health: 0.04, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
