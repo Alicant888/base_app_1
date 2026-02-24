@@ -133,7 +133,14 @@ export class EnemySpawner {
 
         const entryIdx = wave.enemies.indexOf(entry);
         if (miniBossSlots.has(`${entryIdx}_${i}`)) {
-          enemy.setMiniBoss(true);
+          // Battlecruiser mini-boss limit: max 2 active simultaneously.
+          if (entry.kind === "battlecruiser") {
+            const activeBCMiniBosses = (this.enemies.getChildren() as Enemy[])
+              .filter(e => e.active && e.isMiniBoss && e.getKind() === "battlecruiser").length;
+            if (activeBCMiniBosses < 2) enemy.setMiniBoss(true);
+          } else {
+            enemy.setMiniBoss(true);
+          }
         }
       }
     }
