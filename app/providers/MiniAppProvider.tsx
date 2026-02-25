@@ -28,7 +28,7 @@ export function MiniAppProvider({ children }: { children: ReactNode }) {
       if (isInApp) {
         const ctx = await sdk.context;
         setContext(ctx);
-        await sdk.actions.ready();
+        await sdk.actions.ready({ disableNativeGestures: true });
         setIsReady(true);
       }
     };
