@@ -291,8 +291,6 @@ export class GameScene extends Phaser.Scene {
   private packMaxi = false;
 
   create() {
-    this.scale.scaleMode = Phaser.Scale.FIT;
-    this.scale.resize(GAME_WIDTH, GAME_HEIGHT);
     this.cameras.main.setBackgroundColor("#000000");
 
     // Reset run state (Scene instances are reused between starts).
@@ -1034,7 +1032,7 @@ export class GameScene extends Phaser.Scene {
       // Auto-resume removed. Use the specific Pause/Resume button.
       if (this.draggingPointerId !== null) return;
       this.draggingPointerId = pointer.id;
-      this.dragOffset.set(pointer.x - this.player.x, pointer.y - this.player.y);
+      this.dragOffset.set(pointer.worldX - this.player.x, pointer.worldY - this.player.y);
 
       this.dragTarget.set(this.player.x, this.player.y);
       this.hasDragTarget = true;
@@ -1054,8 +1052,8 @@ export class GameScene extends Phaser.Scene {
 
       const halfW = this.player.displayWidth * 0.5;
       const halfH = this.player.displayHeight * 0.5;
-      const tx = Phaser.Math.Clamp(pointer.x - this.dragOffset.x, halfW, GAME_WIDTH - halfW);
-      const ty = Phaser.Math.Clamp(pointer.y - this.dragOffset.y, halfH, GAME_HEIGHT - halfH);
+      const tx = Phaser.Math.Clamp(pointer.worldX - this.dragOffset.x, halfW, GAME_WIDTH - halfW);
+      const ty = Phaser.Math.Clamp(pointer.worldY - this.dragOffset.y, halfH, GAME_HEIGHT - halfH);
       this.dragTarget.set(tx, ty);
     };
 
