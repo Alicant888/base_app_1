@@ -2,18 +2,80 @@ import * as Phaser from "phaser";
 import { AUDIO_KEYS, IMAGE_KEYS, UI_SCALE } from "../config";
 import { SaveManager, SaveData } from "../systems/SaveManager";
 
-async function submitStartCheckIn() {
-  try {
-    const { sdk } = await import("@farcaster/miniapp-sdk");
-    if (!(await sdk.isInMiniApp())) return;
+const DAY_MS = 86_400_000;
 
-    const response = await sdk.quickAuth.fetch("/api/checkin/start", { method: "POST" });
-    if (!response.ok) {
-      console.warn("Start check-in failed:", response.status);
-    }
-  } catch (error) {
-    console.warn("Start check-in request failed:", error);
+function getCheckInContractAddress(): `0x${string}` | null {
+  const raw = process.env.NEXT_PUBLIC_CHECKIN_CONTRACT_ADDRESS?.trim();
+  if (!raw) return null;
+  if (!raw.startsWith("0x") || raw.length !== 42) {
+    console.warn("Invalid NEXT_PUBLIC_CHECKIN_CONTRACT_ADDRESS:", raw);
+    return null;
   }
+  return raw as `0x${string}`;
+}
+
+async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
+  const contractAddress = getCheckInContractAddress();
+  if (!contractAddress) return null;
+
+  const [{ sdk }, viem, { base }] = await Promise.all([
+    import("@farcaster/miniapp-sdk"),
+    import("viem"),
+    import("viem/chains"),
+  ]);
+
+  if (!(await sdk.isInMiniApp())) return null;
+
+  const provider = await sdk.wallet.getEthereumProvider();
+  if (!provider) return null;
+
+  const transport = viem.custom(provider);
+  const walletClient = viem.createWalletClient({ chain: base, transport });
+  const publicClient = viem.createPublicClient({ chain: base, transport });
+
+  const existing = await walletClient.getAddresses();
+  const [account] = existing.length ? existing : await walletClient.requestAddresses();
+  if (!account) return null;
+
+  const abi = [
+    {
+      type: "function",
+      name: "checkIn",
+      stateMutability: "nonpayable",
+      inputs: [],
+      outputs: [],
+    },
+    {
+      type: "function",
+      name: "lastDay",
+      stateMutability: "view",
+      inputs: [{ name: "user", type: "address" }],
+      outputs: [{ name: "", type: "uint256" }],
+    },
+  ] as const;
+
+  const today = BigInt(Math.floor(Date.now() / DAY_MS));
+
+  try {
+    const lastDay = await publicClient.readContract({
+      address: contractAddress,
+      abi,
+      functionName: "lastDay",
+      args: [account],
+    });
+    if (lastDay >= today) return null;
+  } catch (error) {
+    // If the contract doesn't expose `lastDay`, we can't preflight daily check-ins.
+    // We'll attempt the write instead and let the contract enforce its own rules.
+    console.warn("Onchain check-in preflight failed:", error);
+  }
+
+  return walletClient.writeContract({
+    address: contractAddress,
+    abi,
+    functionName: "checkIn",
+    account,
+  });
 }
 
 export class MenuScene extends Phaser.Scene {
@@ -49,15 +111,9 @@ export class MenuScene extends Phaser.Scene {
     this.startButton.on("pointerout", () => this.startButton.clearTint());
     this.startButton.on("pointerdown", () => {
       this.startButton.setTint(0x888888);
-      const savedData = SaveManager.load();
-      if (savedData.currentLevel > 1) {
-        this.onStart(savedData.currentLevel, savedData);
-      } else {
-        this.onStart(1);
-      }
-      globalThis.setTimeout(() => {
-        void submitStartCheckIn();
-      }, 0);
+      this.unlockAudioOnce();
+      this.startButton.disableInteractive();
+      void this.handleStartPressed();
     });
 
     const layout = (width: number, height: number) => {
@@ -93,6 +149,22 @@ export class MenuScene extends Phaser.Scene {
     this.menuMusic?.destroy();
     this.menuMusic = undefined;
     this.scene.start("GameScene", { level, save, showMenu });
+  }
+
+  private async handleStartPressed() {
+    const savedData = SaveManager.load();
+    const level = savedData.currentLevel > 1 ? savedData.currentLevel : 1;
+    const save = savedData.currentLevel > 1 ? savedData : undefined;
+
+    try {
+      const txHash = await ensureDailyOnchainCheckIn();
+      if (txHash) console.log("Onchain check-in tx:", txHash);
+      this.onStart(level, save);
+    } catch (error) {
+      console.warn("Onchain check-in failed:", error);
+      this.startButton.clearTint();
+      this.startButton.setInteractive({ useHandCursor: true });
+    }
   }
 
   private playClick() {
