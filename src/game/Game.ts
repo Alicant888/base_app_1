@@ -34,7 +34,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     antialiasGL: true,
     render: {
       antialias: true,
-      antialiasGL: true,
+      antialiasGL: false,
       roundPixels: true,
     },
     disableContextMenu: true,
