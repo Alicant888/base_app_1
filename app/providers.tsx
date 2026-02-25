@@ -17,7 +17,7 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <MiniAppProvider>
-      <WagmiProvider config={config}>
+      <WagmiProvider config={config} reconnectOnMount={false}>
         <QueryClientProvider client={queryClient}>
           {children}
         </QueryClientProvider>
