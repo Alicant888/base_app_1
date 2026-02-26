@@ -57,8 +57,8 @@ function getRequestedAudioMode(): GameAudioMode | null {
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<import("phaser").Game | null>(null);
+  const resumeRef = useRef<(() => void) | null>(null);
   const [status, setStatus] = useState<"loading" | "running" | "error">("loading");
-  const [errorText, setErrorText] = useState<string | null>(null);
   const [attemptText, setAttemptText] = useState<string | null>(null);
 
   useEffect(() => {
@@ -66,7 +66,6 @@ export function GameCanvas() {
     if (!container) return;
 
     setStatus("loading");
-    setErrorText(null);
     setAttemptText(null);
 
     const root = document.documentElement;
@@ -99,6 +98,7 @@ export function GameCanvas() {
     let currentRenderer: GameRenderer = "auto";
     let currentAudioMode: GameAudioMode = "auto";
     let internalStatus: "loading" | "running" | "error" = "loading";
+    let lastFatalError = "";
     let loggedNonFatalResumeIssue = false;
 
     const destroyGame = () => {
@@ -143,7 +143,6 @@ export function GameCanvas() {
             // ignore
           }
           setAttemptText(`Retrying with Canvas (attempt ${attempt + 1}/3)...`);
-          setErrorText(message);
           internalStatus = "loading";
           setStatus("loading");
           scheduleStart("canvas", currentAudioMode, 350);
@@ -159,7 +158,6 @@ export function GameCanvas() {
             // ignore
           }
           setAttemptText(`Retrying with ${retryLabel} (attempt ${attempt + 1}/3)...`);
-          setErrorText(message);
           internalStatus = "loading";
           setStatus("loading");
           scheduleStart(currentRenderer, nextAudioMode, 350);
@@ -167,15 +165,14 @@ export function GameCanvas() {
         }
 
         setAttemptText(`Retrying (attempt ${attempt + 1}/3)...`);
-        setErrorText(message);
         internalStatus = "loading";
         setStatus("loading");
         scheduleStart(currentRenderer, currentAudioMode, 350);
         return;
       }
 
+      lastFatalError = message;
       setAttemptText(null);
-      setErrorText(message);
       internalStatus = "error";
       setStatus("error");
     };
@@ -275,17 +272,35 @@ export function GameCanvas() {
       }
     };
 
+    const requestResume = () => {
+      if (disposed) return;
+      const nextAudioMode: GameAudioMode = looksLikeAudioStartupFailure(lastFatalError)
+        ? "noaudio"
+        : currentAudioMode;
+      if (nextAudioMode !== currentAudioMode) {
+        try {
+          sessionStorage.setItem(AUDIO_MODE_STORAGE_KEY, nextAudioMode);
+        } catch {
+          // ignore
+        }
+      }
+      setAttemptText("Resuming...");
+      internalStatus = "loading";
+      setStatus("loading");
+      scheduleStart(currentRenderer, nextAudioMode, 0);
+    };
+
     const start = async (renderer: GameRenderer, audioMode: GameAudioMode) => {
       const myRunId = (runId += 1);
       attempt += 1;
       currentRenderer = renderer;
       currentAudioMode = audioMode;
       startupDeadline = performance.now() + 2500;
+      lastFatalError = "";
 
       setAttemptText(`Starting (${renderer}, ${audioMode}, attempt ${attempt}/3)...`);
       internalStatus = "loading";
       setStatus("loading");
-      setErrorText(null);
 
       destroyGame();
 
@@ -317,6 +332,7 @@ export function GameCanvas() {
         gameRef.current = game;
         detachVisibility = attachVisibilityHandlers(game);
         setAttemptText(null);
+        lastFatalError = "";
         internalStatus = "running";
         setStatus("running");
       } catch (error) {
@@ -324,6 +340,8 @@ export function GameCanvas() {
         reportError(error);
       }
     };
+
+    resumeRef.current = requestResume;
 
     const requestedRenderer = getRequestedRenderer();
     if (requestedRenderer) {
@@ -363,6 +381,7 @@ export function GameCanvas() {
 
     return () => {
       disposed = true;
+      resumeRef.current = null;
 
       if (retryTimer) window.clearTimeout(retryTimer);
       retryTimer = null;
@@ -384,6 +403,10 @@ export function GameCanvas() {
     };
   }, []);
 
+  const onResume = () => {
+    resumeRef.current?.();
+  };
+
   return (
     <>
       <div
@@ -403,104 +426,44 @@ export function GameCanvas() {
 
       {status !== "running" ? (
         <div
+          onClick={status === "error" ? onResume : undefined}
+          onTouchEnd={status === "error" ? onResume : undefined}
+          role={status === "error" ? "button" : undefined}
+          tabIndex={status === "error" ? 0 : undefined}
+          onKeyDown={
+            status === "error"
+              ? (event) => {
+                  if (event.key === "Enter" || event.key === " ") onResume();
+                }
+              : undefined
+          }
           style={{
             position: "fixed",
             inset: 0,
-            padding: "16px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            background: "rgba(0, 0, 0, 0.92)",
+            background: "#000",
             color: "#fff",
             fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
             zIndex: 1000,
+            userSelect: "none",
           }}
         >
-          <div style={{ maxWidth: 520, width: "100%" }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-              {status === "loading" ? "Loading game..." : "Game failed to start"}
-            </div>
+          <div style={{ textAlign: "center", padding: "16px" }}>
             {attemptText ? (
-              <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 10 }}>{attemptText}</div>
+              <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 12 }}>{attemptText}</div>
             ) : null}
-            {errorText ? (
-              <pre
-                style={{
-                  whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
-                  fontSize: 12,
-                  opacity: 0.9,
-                  marginBottom: 12,
-                }}
-              >
-                {errorText}
-              </pre>
+            {status === "loading" ? (
+              <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.08em" }}>LOADING...</div>
             ) : (
-              <div style={{ fontSize: 12, opacity: 0.8, marginBottom: 12 }}>
-                If this screen persists, try reloading.
-              </div>
+              <>
+                <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "0.12em", color: "#00e8ff" }}>
+                  TAP TO RESUME
+                </div>
+                <div style={{ marginTop: 8, fontSize: 12, opacity: 0.75, letterSpacing: "0.14em" }}>RESUME</div>
+              </>
             )}
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button
-                type="button"
-                onClick={() => window.location.reload()}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                }}
-              >
-                Reload
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  try {
-                    sessionStorage.setItem(RENDERER_STORAGE_KEY, "canvas");
-                  } catch {
-                    // ignore
-                  }
-                  window.location.reload();
-                }}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                }}
-              >
-                Force Canvas
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  try {
-                    localStorage.removeItem("space_shooter_save");
-                    for (let i = localStorage.length - 1; i >= 0; i -= 1) {
-                      const key = localStorage.key(i);
-                      if (key && key.startsWith("wagmi.")) localStorage.removeItem(key);
-                    }
-                    sessionStorage.removeItem(RENDERER_STORAGE_KEY);
-                    sessionStorage.removeItem(AUDIO_MODE_STORAGE_KEY);
-                  } catch {
-                    // ignore
-                  }
-                  window.location.reload();
-                }}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: 10,
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(255,255,255,0.08)",
-                  color: "#fff",
-                }}
-              >
-                Reset & Reload
-              </button>
-            </div>
           </div>
         </div>
       ) : null}
