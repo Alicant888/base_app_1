@@ -20,6 +20,12 @@ function looksLikeWebglStartupFailure(message: string): boolean {
   return /webgl|framebuffer|createframebuffer|createresource/i.test(message);
 }
 
+function looksLikeNonFatalResumeError(message: string): boolean {
+  // iOS WebViews often reject AudioContext resume without a user gesture.
+  // Phaser may trigger this on focus/visibility restore, which should not be fatal for gameplay.
+  return /resume@\[[^\]]*native code[^\]]*\]|notallowederror|audiocontext/i.test(message);
+}
+
 function getRequestedRenderer(): GameRenderer | null {
   try {
     const params = new URLSearchParams(window.location.search);
@@ -74,6 +80,8 @@ export function GameCanvas() {
     let runId = 0;
     let attempt = 0;
     let currentRenderer: GameRenderer = "auto";
+    let internalStatus: "loading" | "running" | "error" = "loading";
+    let loggedNonFatalResumeIssue = false;
 
     const destroyGame = () => {
       detachVisibility?.();
@@ -117,6 +125,7 @@ export function GameCanvas() {
           }
           setAttemptText(`Retrying with Canvas (attempt ${attempt + 1}/3)...`);
           setErrorText(message);
+          internalStatus = "loading";
           setStatus("loading");
           scheduleStart("canvas", 350);
           return;
@@ -124,6 +133,7 @@ export function GameCanvas() {
 
         setAttemptText(`Retrying (attempt ${attempt + 1}/3)...`);
         setErrorText(message);
+        internalStatus = "loading";
         setStatus("loading");
         scheduleStart(currentRenderer, 350);
         return;
@@ -131,11 +141,66 @@ export function GameCanvas() {
 
       setAttemptText(null);
       setErrorText(message);
+      internalStatus = "error";
       setStatus("error");
     };
 
-    const onWindowError = (event: ErrorEvent) => reportError(event.error ?? event.message);
-    const onUnhandledRejection = (event: PromiseRejectionEvent) => reportError(event.reason);
+    const recordVisible = () => {
+      // If the game crashed while backgrounded, try to restart automatically on restore.
+      if (!disposed && !gameRef.current && internalStatus === "error") {
+        scheduleStart(currentRenderer, 0);
+      }
+    };
+
+    const onVisibilityForRecovery = () => {
+      if (!document.hidden) recordVisible();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityForRecovery, { passive: true });
+    window.addEventListener("focus", recordVisible, { passive: true });
+    window.addEventListener("pageshow", recordVisible, { passive: true });
+
+    const shouldIgnoreResumeError = (error: unknown): boolean => {
+      if (document.hidden) return false;
+      if (!gameRef.current) return false;
+      if (performance.now() < startupDeadline) return false;
+      const message = toErrorString(error);
+      if (!looksLikeNonFatalResumeError(message)) return false;
+      return true;
+    };
+
+    const onWindowError = (event: ErrorEvent) => {
+      const error = event.error ?? event.message;
+      if (shouldIgnoreResumeError(error)) {
+        try {
+          event.preventDefault();
+        } catch {
+          // ignore
+        }
+        if (!loggedNonFatalResumeIssue && process.env.NODE_ENV !== "production") {
+          loggedNonFatalResumeIssue = true;
+          console.warn("Ignored non-fatal resume error:", error);
+        }
+        return;
+      }
+      reportError(error);
+    };
+
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (shouldIgnoreResumeError(event.reason)) {
+        try {
+          event.preventDefault();
+        } catch {
+          // ignore
+        }
+        if (!loggedNonFatalResumeIssue && process.env.NODE_ENV !== "production") {
+          loggedNonFatalResumeIssue = true;
+          console.warn("Ignored non-fatal resume rejection:", event.reason);
+        }
+        return;
+      }
+      reportError(event.reason);
+    };
     window.addEventListener("error", onWindowError);
     window.addEventListener("unhandledrejection", onUnhandledRejection);
 
@@ -186,6 +251,7 @@ export function GameCanvas() {
       startupDeadline = performance.now() + 2500;
 
       setAttemptText(`Starting (${renderer}, attempt ${attempt}/3)...`);
+      internalStatus = "loading";
       setStatus("loading");
       setErrorText(null);
 
@@ -219,6 +285,7 @@ export function GameCanvas() {
         gameRef.current = game;
         detachVisibility = attachVisibilityHandlers(game);
         setAttemptText(null);
+        internalStatus = "running";
         setStatus("running");
       } catch (error) {
         if (disposed || myRunId !== runId) return;
@@ -258,6 +325,9 @@ export function GameCanvas() {
       container.removeEventListener("touchmove", preventTouchMove);
       window.removeEventListener("error", onWindowError);
       window.removeEventListener("unhandledrejection", onUnhandledRejection);
+      document.removeEventListener("visibilitychange", onVisibilityForRecovery);
+      window.removeEventListener("focus", recordVisible);
+      window.removeEventListener("pageshow", recordVisible);
 
       root.style.overflow = prevHtmlOverflow;
       root.style.overscrollBehavior = prevHtmlOverscroll;

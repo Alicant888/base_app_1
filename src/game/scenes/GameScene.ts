@@ -3828,7 +3828,7 @@ export class GameScene extends Phaser.Scene {
       const pack = PACKS[pi];
       const isXp = pi === 4; // xpp is the last item, no label
       const img = this.add.image(x, y, pack.key).setScale(UI_SCALE);
-      const lbl = this.add.text(x, y + halfH + 9, "", {
+      const lbl = this.add.text(x, y + halfH + gap / 2, "", {
         fontFamily: "Orbitron",
         fontSize: "10px",
         color: "#FFFFFF",
