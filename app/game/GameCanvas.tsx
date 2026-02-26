@@ -20,10 +20,10 @@ function looksLikeWebglStartupFailure(message: string): boolean {
   return /webgl|framebuffer|createframebuffer|createresource/i.test(message);
 }
 
-function looksLikeNonFatalResumeError(message: string): boolean {
-  // iOS WebViews often reject AudioContext resume without a user gesture.
-  // Phaser may trigger this on focus/visibility restore, which should not be fatal for gameplay.
-  return /resume@\[[^\]]*native code[^\]]*\]|notallowederror|audiocontext/i.test(message);
+function looksLikeNonFatalLifecycleError(message: string): boolean {
+  // iOS WebViews may fail AudioContext suspend/resume across background/foreground transitions.
+  // Those errors are noisy but usually non-fatal for gameplay and should not trigger a fatal overlay.
+  return /(?:resume|suspend)@\[[^\]]*native code[^\]]*\]|notallowederror|audiocontext/i.test(message);
 }
 
 function getRequestedRenderer(): GameRenderer | null {
@@ -160,16 +160,14 @@ export function GameCanvas() {
     window.addEventListener("focus", recordVisible, { passive: true });
     window.addEventListener("pageshow", recordVisible, { passive: true });
 
-    const shouldIgnoreResumeError = (error: unknown): boolean => {
-      if (document.hidden) return false;
+    const shouldIgnoreLifecycleError = (error: unknown): boolean => {
       const message = toErrorString(error);
-      if (!looksLikeNonFatalResumeError(message)) return false;
-      return true;
+      return looksLikeNonFatalLifecycleError(message);
     };
 
     const onWindowError = (event: ErrorEvent) => {
       const error = event.error ?? event.message;
-      if (shouldIgnoreResumeError(error)) {
+      if (shouldIgnoreLifecycleError(error)) {
         try {
           event.preventDefault();
         } catch {
@@ -177,7 +175,7 @@ export function GameCanvas() {
         }
         if (!loggedNonFatalResumeIssue && process.env.NODE_ENV !== "production") {
           loggedNonFatalResumeIssue = true;
-          console.warn("Ignored non-fatal resume error:", error);
+          console.warn("Ignored non-fatal lifecycle error:", error);
         }
         return;
       }
@@ -185,7 +183,7 @@ export function GameCanvas() {
     };
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (shouldIgnoreResumeError(event.reason)) {
+      if (shouldIgnoreLifecycleError(event.reason)) {
         try {
           event.preventDefault();
         } catch {
@@ -193,7 +191,7 @@ export function GameCanvas() {
         }
         if (!loggedNonFatalResumeIssue && process.env.NODE_ENV !== "production") {
           loggedNonFatalResumeIssue = true;
-          console.warn("Ignored non-fatal resume rejection:", event.reason);
+          console.warn("Ignored non-fatal lifecycle rejection:", event.reason);
         }
         return;
       }
