@@ -897,10 +897,6 @@ export class GameScene extends Phaser.Scene {
     } else if (this.levelConfig.distanceGoal > 0) {
       const t0 = delta / 16.666;
       this.distanceTraveled += BG_SCROLL_SPEED_BCG * t0;
-      const pct = Math.min(100, Math.floor((this.distanceTraveled / this.levelConfig.distanceGoal) * 100));
-      if (this.levelProgressText) {
-        this.levelProgressText.setText(`LVL ${this.currentLevel}`);
-      }
       if (this.distanceTraveled >= this.levelConfig.distanceGoal) {
         if (this.levelConfig.bossAfterDistance) {
           // Trigger boss spawn once, then wait for defeat (handled in the branch above).
