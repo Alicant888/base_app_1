@@ -57,8 +57,8 @@ function getRequestedAudioMode(): GameAudioMode | null {
 export function GameCanvas() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const gameRef = useRef<import("phaser").Game | null>(null);
-  const resumeRef = useRef<(() => void) | null>(null);
-  const [status, setStatus] = useState<"loading" | "running" | "error">("loading");
+  const resumeRef = useRef<(() => Promise<void>) | null>(null);
+  const [status, setStatus] = useState<"loading" | "running" | "resume" | "error">("loading");
   const [attemptText, setAttemptText] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,21 +90,17 @@ export function GameCanvas() {
     container.addEventListener("touchmove", preventTouchMove, { passive: false });
 
     let disposed = false;
-    let detachVisibility: (() => void) | null = null;
     let retryTimer: number | null = null;
     let startupDeadline = 0;
     let runId = 0;
     let attempt = 0;
     let currentRenderer: GameRenderer = "auto";
     let currentAudioMode: GameAudioMode = "auto";
-    let internalStatus: "loading" | "running" | "error" = "loading";
-    let lastFatalError = "";
+    let internalStatus: "loading" | "running" | "resume" | "error" = "loading";
+    let needsManualResume = false;
     let loggedNonFatalResumeIssue = false;
 
     const destroyGame = () => {
-      detachVisibility?.();
-      detachVisibility = null;
-
       if (gameRef.current) {
         try {
           gameRef.current.destroy(true);
@@ -113,6 +109,7 @@ export function GameCanvas() {
         }
         gameRef.current = null;
       }
+      needsManualResume = false;
     };
 
     const scheduleStart = (nextRenderer: GameRenderer, nextAudioMode: GameAudioMode, delayMs: number) => {
@@ -171,26 +168,90 @@ export function GameCanvas() {
         return;
       }
 
-      lastFatalError = message;
       setAttemptText(null);
       internalStatus = "error";
       setStatus("error");
     };
 
-    const recordVisible = () => {
-      // If the game crashed while backgrounded, try to restart automatically on restore.
-      if (!disposed && !gameRef.current && internalStatus === "error") {
-        scheduleStart(currentRenderer, currentAudioMode, 0);
+    const safePauseInPlace = () => {
+      const game = gameRef.current;
+      if (!game) return;
+      try {
+        game.pause();
+      } catch {
+        // ignore
       }
     };
 
-    const onVisibilityForRecovery = () => {
-      if (!document.hidden) recordVisible();
+    const safeResumeInPlace = async (): Promise<boolean> => {
+      const game = gameRef.current;
+      if (!game) return false;
+
+      const gameWithSound = game as import("phaser").Game & {
+        sound?: {
+          context?: { resume?: () => Promise<void> | void };
+          unlock?: () => void;
+        };
+      };
+
+      try {
+        gameWithSound.sound?.unlock?.();
+      } catch {
+        // ignore
+      }
+
+      try {
+        const maybeResume = gameWithSound.sound?.context?.resume?.();
+        if (maybeResume && typeof (maybeResume as Promise<void>).then === "function") {
+          await (maybeResume as Promise<void>).catch(() => undefined);
+        }
+      } catch {
+        // ignore
+      }
+
+      try {
+        game.resume();
+        return true;
+      } catch {
+        return false;
+      }
     };
 
-    document.addEventListener("visibilitychange", onVisibilityForRecovery, { passive: true });
-    window.addEventListener("focus", recordVisible, { passive: true });
-    window.addEventListener("pageshow", recordVisible, { passive: true });
+    const markNeedsResume = () => {
+      if (disposed || !gameRef.current) return;
+      needsManualResume = true;
+      safePauseInPlace();
+
+      if (!document.hidden) {
+        setAttemptText(null);
+        internalStatus = "resume";
+        setStatus("resume");
+      }
+    };
+
+    const onVisibilityLifecycle = () => {
+      if (document.hidden) {
+        markNeedsResume();
+        return;
+      }
+
+      if (needsManualResume && gameRef.current) {
+        setAttemptText(null);
+        internalStatus = "resume";
+        setStatus("resume");
+      }
+    };
+
+    const onBlurLifecycle = () => markNeedsResume();
+    const onFocusLifecycle = () => onVisibilityLifecycle();
+    const onPageHideLifecycle = () => markNeedsResume();
+    const onPageShowLifecycle = () => onVisibilityLifecycle();
+
+    document.addEventListener("visibilitychange", onVisibilityLifecycle, { passive: true });
+    window.addEventListener("blur", onBlurLifecycle, { passive: true });
+    window.addEventListener("focus", onFocusLifecycle, { passive: true });
+    window.addEventListener("pagehide", onPageHideLifecycle, { passive: true });
+    window.addEventListener("pageshow", onPageShowLifecycle, { passive: true });
 
     const shouldIgnoreLifecycleError = (error: unknown): boolean => {
       const message = toErrorString(error);
@@ -199,6 +260,17 @@ export function GameCanvas() {
 
     const onWindowError = (event: ErrorEvent) => {
       const error = event.error ?? event.message;
+
+      if (gameRef.current && looksLikeAudioStartupFailure(toErrorString(error))) {
+        try {
+          event.preventDefault();
+        } catch {
+          // ignore
+        }
+        markNeedsResume();
+        return;
+      }
+
       if (shouldIgnoreLifecycleError(error)) {
         try {
           event.preventDefault();
@@ -215,6 +287,16 @@ export function GameCanvas() {
     };
 
     const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (gameRef.current && looksLikeAudioStartupFailure(toErrorString(event.reason))) {
+        try {
+          event.preventDefault();
+        } catch {
+          // ignore
+        }
+        markNeedsResume();
+        return;
+      }
+
       if (shouldIgnoreLifecycleError(event.reason)) {
         try {
           event.preventDefault();
@@ -272,22 +354,42 @@ export function GameCanvas() {
       }
     };
 
-    const requestResume = () => {
+    const requestResume = async () => {
       if (disposed) return;
-      const nextAudioMode: GameAudioMode = looksLikeAudioStartupFailure(lastFatalError)
-        ? "noaudio"
-        : currentAudioMode;
-      if (nextAudioMode !== currentAudioMode) {
-        try {
-          sessionStorage.setItem(AUDIO_MODE_STORAGE_KEY, nextAudioMode);
-        } catch {
-          // ignore
+
+      if (!gameRef.current) {
+        if (internalStatus === "error") {
+          setAttemptText("Resuming...");
+          internalStatus = "loading";
+          setStatus("loading");
+          scheduleStart(currentRenderer, currentAudioMode, 0);
         }
+        return;
       }
+
       setAttemptText("Resuming...");
       internalStatus = "loading";
       setStatus("loading");
-      scheduleStart(currentRenderer, nextAudioMode, 0);
+
+      const resumed = await safeResumeInPlace();
+      if (disposed) return;
+
+      if (!resumed) {
+        setAttemptText(null);
+        internalStatus = "resume";
+        setStatus("resume");
+        return;
+      }
+
+      needsManualResume = false;
+      try {
+        gameRef.current?.registry.set("audioUnlocked", true);
+      } catch {
+        // ignore
+      }
+      setAttemptText(null);
+      internalStatus = "running";
+      setStatus("running");
     };
 
     const start = async (renderer: GameRenderer, audioMode: GameAudioMode) => {
@@ -296,7 +398,6 @@ export function GameCanvas() {
       currentRenderer = renderer;
       currentAudioMode = audioMode;
       startupDeadline = performance.now() + 2500;
-      lastFatalError = "";
 
       setAttemptText(`Starting (${renderer}, ${audioMode}, attempt ${attempt}/3)...`);
       internalStatus = "loading";
@@ -310,10 +411,7 @@ export function GameCanvas() {
 
         // IMPORTANT: Phaser must never be imported during SSR.
         // Next.js can evaluate client components on the server, but `useEffect` runs only on the client.
-        const [{ createGame }, { attachVisibilityHandlers }] = await Promise.all([
-          import("@/src/game/Game"),
-          import("@/src/platform"),
-        ]);
+        const { createGame } = await import("@/src/game/Game");
 
         if (disposed || myRunId !== runId) return;
         if (gameRef.current) return;
@@ -330,9 +428,8 @@ export function GameCanvas() {
         }
 
         gameRef.current = game;
-        detachVisibility = attachVisibilityHandlers(game);
+        needsManualResume = false;
         setAttemptText(null);
-        lastFatalError = "";
         internalStatus = "running";
         setStatus("running");
       } catch (error) {
@@ -391,9 +488,11 @@ export function GameCanvas() {
       container.removeEventListener("touchmove", preventTouchMove);
       window.removeEventListener("error", onWindowError);
       window.removeEventListener("unhandledrejection", onUnhandledRejection);
-      document.removeEventListener("visibilitychange", onVisibilityForRecovery);
-      window.removeEventListener("focus", recordVisible);
-      window.removeEventListener("pageshow", recordVisible);
+      document.removeEventListener("visibilitychange", onVisibilityLifecycle);
+      window.removeEventListener("blur", onBlurLifecycle);
+      window.removeEventListener("focus", onFocusLifecycle);
+      window.removeEventListener("pagehide", onPageHideLifecycle);
+      window.removeEventListener("pageshow", onPageShowLifecycle);
 
       root.style.overflow = prevHtmlOverflow;
       root.style.overscrollBehavior = prevHtmlOverscroll;
@@ -404,7 +503,7 @@ export function GameCanvas() {
   }, []);
 
   const onResume = () => {
-    resumeRef.current?.();
+    void resumeRef.current?.();
   };
 
   return (
@@ -426,12 +525,12 @@ export function GameCanvas() {
 
       {status !== "running" ? (
         <div
-          onClick={status === "error" ? onResume : undefined}
-          onTouchEnd={status === "error" ? onResume : undefined}
-          role={status === "error" ? "button" : undefined}
-          tabIndex={status === "error" ? 0 : undefined}
+          onClick={status === "resume" ? onResume : undefined}
+          onTouchEnd={status === "resume" ? onResume : undefined}
+          role={status === "resume" ? "button" : undefined}
+          tabIndex={status === "resume" ? 0 : undefined}
           onKeyDown={
-            status === "error"
+            status === "resume"
               ? (event) => {
                   if (event.key === "Enter" || event.key === " ") onResume();
                 }
@@ -456,13 +555,15 @@ export function GameCanvas() {
             ) : null}
             {status === "loading" ? (
               <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.08em" }}>LOADING...</div>
-            ) : (
+            ) : status === "resume" ? (
               <>
                 <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: "0.12em", color: "#00e8ff" }}>
                   TAP TO RESUME
                 </div>
                 <div style={{ marginTop: 8, fontSize: 12, opacity: 0.75, letterSpacing: "0.14em" }}>RESUME</div>
               </>
+            ) : (
+              <div style={{ fontSize: 14, opacity: 0.85 }}>Game failed to start</div>
             )}
           </div>
         </div>
