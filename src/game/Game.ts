@@ -5,9 +5,11 @@ import { MenuScene } from "./scenes/MenuScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 
 export type GameRenderer = "auto" | "canvas" | "webgl";
+export type GameAudioMode = "auto" | "html5" | "noaudio";
 
 export interface CreateGameOptions {
   renderer?: GameRenderer;
+  audioMode?: GameAudioMode;
 }
 
 /**
@@ -16,7 +18,7 @@ export interface CreateGameOptions {
  * IMPORTANT (Next.js): call this only on the client, inside useEffect.
  */
 export function createGame(parent: HTMLElement, options: CreateGameOptions = {}): Phaser.Game {
-  const { renderer = "auto" } = options;
+  const { renderer = "auto", audioMode = "auto" } = options;
   const type = renderer === "canvas" ? Phaser.CANVAS : renderer === "webgl" ? Phaser.WEBGL : Phaser.AUTO;
 
   const parentRect = parent.getBoundingClientRect();
@@ -53,6 +55,9 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
     },
     scene: [PreloadScene, MenuScene, GameScene],
   };
+
+  if (audioMode === "html5") config.audio = { disableWebAudio: true };
+  else if (audioMode === "noaudio") config.audio = { noAudio: true };
 
   return new Phaser.Game(config);
 }

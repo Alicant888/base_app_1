@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 
 type GameRenderer = "auto" | "canvas" | "webgl";
+type GameAudioMode = "auto" | "html5" | "noaudio";
 
 const RENDERER_STORAGE_KEY = "phaser.renderer";
+const AUDIO_MODE_STORAGE_KEY = "phaser.audioMode";
 
 function toErrorString(error: unknown): string {
   if (error instanceof Error) return error.stack || error.message;
@@ -20,6 +22,10 @@ function looksLikeWebglStartupFailure(message: string): boolean {
   return /webgl|framebuffer|createframebuffer|createresource/i.test(message);
 }
 
+function looksLikeAudioStartupFailure(message: string): boolean {
+  return /failed to start the audio device|failed to construct .*audiocontext|audiocontext was not allowed to start/i.test(message);
+}
+
 function looksLikeNonFatalLifecycleError(message: string): boolean {
   // iOS WebViews may fail AudioContext suspend/resume across background/foreground transitions.
   // Those errors are noisy but usually non-fatal for gameplay and should not trigger a fatal overlay.
@@ -31,6 +37,17 @@ function getRequestedRenderer(): GameRenderer | null {
     const params = new URLSearchParams(window.location.search);
     const renderer = params.get("renderer")?.toLowerCase();
     if (renderer === "canvas" || renderer === "webgl" || renderer === "auto") return renderer;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function getRequestedAudioMode(): GameAudioMode | null {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("audio")?.toLowerCase();
+    if (mode === "auto" || mode === "html5" || mode === "noaudio") return mode;
   } catch {
     // ignore
   }
@@ -80,6 +97,7 @@ export function GameCanvas() {
     let runId = 0;
     let attempt = 0;
     let currentRenderer: GameRenderer = "auto";
+    let currentAudioMode: GameAudioMode = "auto";
     let internalStatus: "loading" | "running" | "error" = "loading";
     let loggedNonFatalResumeIssue = false;
 
@@ -97,12 +115,12 @@ export function GameCanvas() {
       }
     };
 
-    const scheduleStart = (nextRenderer: GameRenderer, delayMs: number) => {
+    const scheduleStart = (nextRenderer: GameRenderer, nextAudioMode: GameAudioMode, delayMs: number) => {
       if (disposed) return;
       if (retryTimer) window.clearTimeout(retryTimer);
       retryTimer = window.setTimeout(() => {
         retryTimer = null;
-        void start(nextRenderer);
+        void start(nextRenderer, nextAudioMode);
       }, delayMs);
     };
 
@@ -115,6 +133,7 @@ export function GameCanvas() {
 
       if (canRetry) {
         const webglish = looksLikeWebglStartupFailure(message);
+        const audioStartupFailure = looksLikeAudioStartupFailure(message);
 
         // If WebGL init is flaky on iOS WebViews, fall back to Canvas after one failed auto attempt.
         if (webglish && currentRenderer !== "canvas") {
@@ -127,7 +146,23 @@ export function GameCanvas() {
           setErrorText(message);
           internalStatus = "loading";
           setStatus("loading");
-          scheduleStart("canvas", 350);
+          scheduleStart("canvas", currentAudioMode, 350);
+          return;
+        }
+
+        if (audioStartupFailure && currentAudioMode !== "noaudio") {
+          const nextAudioMode: GameAudioMode = currentAudioMode === "auto" ? "html5" : "noaudio";
+          const retryLabel = nextAudioMode === "html5" ? "HTML5 audio" : "audio disabled";
+          try {
+            sessionStorage.setItem(AUDIO_MODE_STORAGE_KEY, nextAudioMode);
+          } catch {
+            // ignore
+          }
+          setAttemptText(`Retrying with ${retryLabel} (attempt ${attempt + 1}/3)...`);
+          setErrorText(message);
+          internalStatus = "loading";
+          setStatus("loading");
+          scheduleStart(currentRenderer, nextAudioMode, 350);
           return;
         }
 
@@ -135,7 +170,7 @@ export function GameCanvas() {
         setErrorText(message);
         internalStatus = "loading";
         setStatus("loading");
-        scheduleStart(currentRenderer, 350);
+        scheduleStart(currentRenderer, currentAudioMode, 350);
         return;
       }
 
@@ -148,7 +183,7 @@ export function GameCanvas() {
     const recordVisible = () => {
       // If the game crashed while backgrounded, try to restart automatically on restore.
       if (!disposed && !gameRef.current && internalStatus === "error") {
-        scheduleStart(currentRenderer, 0);
+        scheduleStart(currentRenderer, currentAudioMode, 0);
       }
     };
 
@@ -240,13 +275,14 @@ export function GameCanvas() {
       }
     };
 
-    const start = async (renderer: GameRenderer) => {
+    const start = async (renderer: GameRenderer, audioMode: GameAudioMode) => {
       const myRunId = (runId += 1);
       attempt += 1;
       currentRenderer = renderer;
+      currentAudioMode = audioMode;
       startupDeadline = performance.now() + 2500;
 
-      setAttemptText(`Starting (${renderer}, attempt ${attempt}/3)...`);
+      setAttemptText(`Starting (${renderer}, ${audioMode}, attempt ${attempt}/3)...`);
       internalStatus = "loading";
       setStatus("loading");
       setErrorText(null);
@@ -267,7 +303,7 @@ export function GameCanvas() {
         if (disposed || myRunId !== runId) return;
         if (gameRef.current) return;
 
-        const game = createGame(container, { renderer });
+        const game = createGame(container, { renderer, audioMode });
 
         if (disposed || myRunId !== runId) {
           try {
@@ -289,26 +325,41 @@ export function GameCanvas() {
       }
     };
 
-    const requested = getRequestedRenderer();
-    if (requested) {
+    const requestedRenderer = getRequestedRenderer();
+    if (requestedRenderer) {
       try {
-        if (requested === "auto") sessionStorage.removeItem(RENDERER_STORAGE_KEY);
-        else sessionStorage.setItem(RENDERER_STORAGE_KEY, requested);
+        if (requestedRenderer === "auto") sessionStorage.removeItem(RENDERER_STORAGE_KEY);
+        else sessionStorage.setItem(RENDERER_STORAGE_KEY, requestedRenderer);
+      } catch {
+        // ignore
+      }
+    }
+
+    const requestedAudioMode = getRequestedAudioMode();
+    if (requestedAudioMode) {
+      try {
+        if (requestedAudioMode === "auto") sessionStorage.removeItem(AUDIO_MODE_STORAGE_KEY);
+        else sessionStorage.setItem(AUDIO_MODE_STORAGE_KEY, requestedAudioMode);
       } catch {
         // ignore
       }
     }
 
     let initialRenderer: GameRenderer = "auto";
+    let initialAudioMode: GameAudioMode = "auto";
     try {
       const stored = sessionStorage.getItem(RENDERER_STORAGE_KEY);
       if (stored === "canvas" || stored === "webgl") initialRenderer = stored;
+
+      const storedAudio = sessionStorage.getItem(AUDIO_MODE_STORAGE_KEY);
+      if (storedAudio === "html5" || storedAudio === "noaudio") initialAudioMode = storedAudio;
     } catch {
       // ignore
     }
-    if (requested) initialRenderer = requested;
+    if (requestedRenderer) initialRenderer = requestedRenderer;
+    if (requestedAudioMode) initialAudioMode = requestedAudioMode;
 
-    void start(initialRenderer);
+    void start(initialRenderer, initialAudioMode);
 
     return () => {
       disposed = true;
@@ -433,6 +484,7 @@ export function GameCanvas() {
                       if (key && key.startsWith("wagmi.")) localStorage.removeItem(key);
                     }
                     sessionStorage.removeItem(RENDERER_STORAGE_KEY);
+                    sessionStorage.removeItem(AUDIO_MODE_STORAGE_KEY);
                   } catch {
                     // ignore
                   }
