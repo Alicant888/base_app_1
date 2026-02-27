@@ -17,7 +17,7 @@ export class BigSpaceGunPickup extends Phaser.Physics.Arcade.Sprite {
 
     this.setActive(false);
     this.setVisible(false);
-    this.setDepth(6);
+    this.setDepth(9);
     this.setScale(BIG_SPACE_GUN_PICKUP_SCALE);
   }
 

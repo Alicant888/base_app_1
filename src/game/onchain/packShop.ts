@@ -44,11 +44,7 @@ async function getWalletClients() {
   const transport = viem.custom(provider);
   const walletClient = viem.createWalletClient({ chain: base, transport });
   const publicClient = viem.createPublicClient({ chain: base, transport });
-  const existing = await walletClient.getAddresses();
-  const [account] = existing.length ? existing : [];
-  if (!account) return null;
-
-  return { viem, walletClient, publicClient, account };
+  return { viem, walletClient, publicClient };
 }
 
 export async function getOnchainPackOwnership(): Promise<OnchainPackOwnership | null> {
@@ -71,7 +67,10 @@ export async function getOnchainPackOwnership(): Promise<OnchainPackOwnership | 
     },
   ] as const;
 
-  const { publicClient, account } = clients;
+  const { walletClient, publicClient } = clients;
+  const existing = await walletClient.getAddresses();
+  const [account] = existing.length ? existing : [];
+  if (!account) return null;
   const owned = await Promise.all([
     publicClient.readContract({
       address: contractAddress,
@@ -128,7 +127,8 @@ export async function buyPackWithEth({
     throw new Error("ETH purchases are available only inside Base App");
   }
   const { viem, walletClient, publicClient } = clients;
-  const [account] = await walletClient.requestAddresses();
+  const existing = await walletClient.getAddresses();
+  const [account] = existing.length ? existing : await walletClient.requestAddresses();
   if (!account) throw new Error("No wallet account available");
 
   const abi = [

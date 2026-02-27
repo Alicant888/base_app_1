@@ -17,7 +17,7 @@ export class AutoCannonsPickup extends Phaser.Physics.Arcade.Sprite {
 
     this.setActive(false);
     this.setVisible(false);
-    this.setDepth(6);
+    this.setDepth(9);
     this.setScale(AUTO_CANNONS_PICKUP_SCALE);
   }
 

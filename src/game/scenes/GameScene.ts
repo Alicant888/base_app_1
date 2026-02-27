@@ -3730,8 +3730,76 @@ export class GameScene extends Phaser.Scene {
         if (this.cameras.main.postFX) {
           this.cameras.main.postFX.clear();
         }
+        const prev = SaveManager.load();
         SaveManager.clear();
+        const cleared = SaveManager.load();
+        cleared.packXp = prev.packXp;
+        cleared.packBase = prev.packBase;
+        cleared.packMedium = prev.packMedium;
+        cleared.packBig = prev.packBig;
+        cleared.packMaxi = prev.packMaxi;
+        SaveManager.save(cleared);
         this.scene.start("GameScene", { level: 1, showMenu: true });
+      });
+    yesBtn.on("pointerover", () => yesBtn.setTint(0xcccccc));
+    yesBtn.on("pointerout", () => yesBtn.clearTint());
+    container.add(yesBtn);
+  }
+
+  private createPackPurchaseConfirmation(packName: string, onConfirm: () => void) {
+    const depth = 200;
+    const container = this.add.container(0, 0).setDepth(depth);
+
+    const blocker = this.add.rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.7)
+      .setOrigin(0)
+      .setInteractive();
+    container.add(blocker);
+
+    if (this.cameras.main.postFX) {
+      this.cameras.main.postFX.addBlur(4, 0, 0, 0.5);
+    }
+
+    const dialogX = GAME_WIDTH / 2;
+    const dialogY = GAME_HEIGHT / 2;
+
+    const message = this.add.image(dialogX, dialogY - 50, IMAGE_KEYS.ui1d);
+    message.setScale(UI_SCALE);
+    container.add(message);
+
+    const label = this.add.text(dialogX, dialogY + 5, `Buy a ${packName}?`, {
+      fontFamily: "Orbitron",
+      fontSize: "16px",
+      color: "#FFE066",
+      stroke: "#000000",
+      strokeThickness: 3,
+      align: "center",
+    }).setOrigin(0.5);
+    container.add(label);
+
+    const noBtn = this.add.image(dialogX - 80, dialogY + 60, IMAGE_KEYS.uiNo)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
+        container.destroy();
+      });
+    noBtn.on("pointerover", () => noBtn.setTint(0xcccccc));
+    noBtn.on("pointerout", () => noBtn.clearTint());
+    container.add(noBtn);
+
+    const yesBtn = this.add.image(dialogX + 80, dialogY + 60, IMAGE_KEYS.uiYes)
+      .setInteractive({ useHandCursor: true })
+      .setScale(UI_SCALE)
+      .on("pointerdown", () => {
+        this.playSfx(AUDIO_KEYS.click, 0.7);
+        if (this.cameras.main.postFX) {
+          this.cameras.main.postFX.clear();
+        }
+        container.destroy();
+        onConfirm();
       });
     yesBtn.on("pointerover", () => yesBtn.setTint(0xcccccc));
     yesBtn.on("pointerout", () => yesBtn.clearTint());
@@ -3867,15 +3935,16 @@ export class GameScene extends Phaser.Scene {
       costPoints: number | null;
       reqLevel: number;
       saveFlag: PackFlag;
+      displayName: string;
       ethPrice: string;
       ethPackId: number;
     }
     const PACKS: PackInfo[] = [
-      { key: IMAGE_KEYS.uiPackBase, costPoints: 200, reqLevel: 2, saveFlag: "packBase", ethPrice: SHOP_ETH_PRICES.packBase, ethPackId: SHOP_PACK_IDS.packBase },
-      { key: IMAGE_KEYS.uiPackMedium, costPoints: 600, reqLevel: 5, saveFlag: "packMedium", ethPrice: SHOP_ETH_PRICES.packMedium, ethPackId: SHOP_PACK_IDS.packMedium },
-      { key: IMAGE_KEYS.uiPackBig, costPoints: 1800, reqLevel: 9, saveFlag: "packBig", ethPrice: SHOP_ETH_PRICES.packBig, ethPackId: SHOP_PACK_IDS.packBig },
-      { key: IMAGE_KEYS.uiPackMaxi, costPoints: 5400, reqLevel: 12, saveFlag: "packMaxi", ethPrice: SHOP_ETH_PRICES.packMaxi, ethPackId: SHOP_PACK_IDS.packMaxi },
-      { key: IMAGE_KEYS.uiPackXp, costPoints: null, reqLevel: 1, saveFlag: "packXp", ethPrice: SHOP_ETH_PRICES.packXp, ethPackId: SHOP_PACK_IDS.packXp },
+      { key: IMAGE_KEYS.uiPackBase, costPoints: 200, reqLevel: 2, saveFlag: "packBase", displayName: "Base pack", ethPrice: SHOP_ETH_PRICES.packBase, ethPackId: SHOP_PACK_IDS.packBase },
+      { key: IMAGE_KEYS.uiPackMedium, costPoints: 600, reqLevel: 5, saveFlag: "packMedium", displayName: "Medium pack", ethPrice: SHOP_ETH_PRICES.packMedium, ethPackId: SHOP_PACK_IDS.packMedium },
+      { key: IMAGE_KEYS.uiPackBig, costPoints: 1800, reqLevel: 9, saveFlag: "packBig", displayName: "Big pack", ethPrice: SHOP_ETH_PRICES.packBig, ethPackId: SHOP_PACK_IDS.packBig },
+      { key: IMAGE_KEYS.uiPackMaxi, costPoints: 5400, reqLevel: 12, saveFlag: "packMaxi", displayName: "Maxi pack", ethPrice: SHOP_ETH_PRICES.packMaxi, ethPackId: SHOP_PACK_IDS.packMaxi },
+      { key: IMAGE_KEYS.uiPackXp, costPoints: null, reqLevel: 1, saveFlag: "packXp", displayName: "XP pack", ethPrice: SHOP_ETH_PRICES.packXp, ethPackId: SHOP_PACK_IDS.packXp },
     ];
     const onchainEnabled = isPackShopOnchainEnabled();
     let pendingOnchainPurchase = false;
@@ -3924,13 +3993,7 @@ export class GameScene extends Phaser.Scene {
           if (!isXp) lbl.setText(`LVL ${pack.reqLevel}`).setColor("#888888").setVisible(true);
           img.setTint(0x444444).setAlpha(0.4);
         } else {
-          if (!isXp) {
-            if (pack.costPoints !== null) {
-              lbl.setText(`${pack.costPoints} PTS / ${pack.ethPrice} ETH`).setColor("#FFD700").setVisible(true);
-            } else {
-              lbl.setText(`${pack.ethPrice} ETH`).setColor("#FFD700").setVisible(true);
-            }
-          }
+          if (!isXp) lbl.setText("Available").setColor("#FFD700").setVisible(true);
 
           if (!canBuyWithPoints && !canBuyWithEth) {
             img.setTint(0x555555).setAlpha(0.5);
@@ -3952,15 +4015,20 @@ export class GameScene extends Phaser.Scene {
 
             const pointsAvailable = pack.costPoints !== null && sv2.score >= pack.costPoints;
             if (pointsAvailable) {
-              const pointsCost = pack.costPoints ?? 0;
-              this.playSfx(AUDIO_KEYS.bought, 0.7);
-              (sv2 as unknown as Record<string, unknown>)[pack.saveFlag as string] = true;
-              sv2.score -= pointsCost;
-              SaveManager.save(sv2);
-              this.score = sv2.score;
-              this.scoreText.setText(`${this.score}`);
-              this.applyPackFlags(sv2, false);
-              refreshAll();
+              this.createPackPurchaseConfirmation(pack.displayName, () => {
+                const sv3 = SaveManager.load();
+                if (sv3[pack.saveFlag]) return;
+                if (pack.costPoints === null || sv3.score < pack.costPoints) return;
+
+                this.playSfx(AUDIO_KEYS.bought, 0.7);
+                (sv3 as unknown as Record<string, unknown>)[pack.saveFlag as string] = true;
+                sv3.score -= pack.costPoints;
+                SaveManager.save(sv3);
+                this.score = sv3.score;
+                this.scoreText.setText(`${this.score}`);
+                this.applyPackFlags(sv3, false);
+                refreshAll();
+              });
               return;
             }
 
