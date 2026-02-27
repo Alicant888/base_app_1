@@ -82,7 +82,7 @@ const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefi
 // ── Per-enemy-type depth (z-order) ───────────────────────────
 // Small / weak ships render ABOVE large ones so they are never hidden.
 // Offsets within a type: engine −0.2, body 0, weapon +0.1, shield +0.2.
-const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
+export const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
   dreadnought:   { engine: 1.8, body: 2,   weapon: 2.1, shield: 2.2 },
   battlecruiser: { engine: 2.3, body: 2.5, weapon: 2.6, shield: 2.7 },
   frigate:       { engine: 2.8, body: 3,   weapon: 3.1, shield: 3.2 },

@@ -8,7 +8,7 @@ import { BigSpaceGunProjectile } from "../entities/BigSpaceGunProjectile";
 import { Bullet } from "../entities/Bullet";
 import { BurstEnginePickup } from "../entities/BurstEnginePickup";
 import { Asteroid } from "../entities/Asteroid";
-import { Enemy, type EnemyKind, getEnemyXp } from "../entities/Enemy";
+import { Enemy, ENEMY_DEPTH, type EnemyKind, getEnemyXp } from "../entities/Enemy";
 import { EnemyBullet } from "../entities/EnemyBullet";
 import { FiringRatePickup } from "../entities/FiringRatePickup";
 import { FiringRate2Pickup } from "../entities/FiringRate2Pickup";
@@ -2174,7 +2174,7 @@ export class GameScene extends Phaser.Scene {
                 ? `${SPRITE_FRAMES.torpedoShipDestructionPrefix}${SPRITE_FRAMES.torpedoShipDestructionStart}${SPRITE_FRAMES.torpedoShipDestructionSuffix}`
                 : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
 
-    const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(6);
+    const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(ENEMY_DEPTH[kind].body);
 
     const animKey =
       kind === "fighter"
