@@ -4,6 +4,18 @@ import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES } from "
 
 export type EnemyKind = "scout" | "fighter" | "torpedo" | "frigate" | "battlecruiser" | "dreadnought";
 
+// ── Per-enemy-type depth (z-order) ───────────────────────────
+// Small / weak ships render ABOVE large ones so they are never hidden.
+// Offsets within a type: engine −0.2, body 0, weapon +0.1, shield +0.2.
+export const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
+  dreadnought:   { engine: 1.8, body: 2,   weapon: 2.1, shield: 2.2 },
+  battlecruiser: { engine: 2.3, body: 2.5, weapon: 2.6, shield: 2.7 },
+  frigate:       { engine: 2.8, body: 3,   weapon: 3.1, shield: 3.2 },
+  torpedo:       { engine: 3.3, body: 3.5, weapon: 3.6, shield: 3.7 },
+  fighter:       { engine: 3.8, body: 4,   weapon: 4.1, shield: 4.2 },
+  scout:         { engine: 4.3, body: 4.5, weapon: 4.6, shield: 4.7 },
+};
+
 const FIGHTER_HP = 2;
 const FIGHTER_SHIELD_HP = 2;
 const FIGHTER_BULLET_OFFSET_X = 6;
@@ -13,7 +25,7 @@ const FIGHTER_WEAPON_FIRE_LEFT_FRAME = `${SPRITE_FRAMES.fighterWeaponPrefix}3${S
 const TORPEDO_SHIP_HP = 2;
 const TORPEDO_SHIP_SHIELD_HP = 2;
 const TORPEDO_SHIP_TORPEDO_DAMAGE = 2;
-const TORPEDO_SHIP_TORPEDO_DEPTH = 5;
+const TORPEDO_SHIP_TORPEDO_DEPTH = ENEMY_DEPTH.torpedo.body;
 const TORPEDO_SHIP_SALVO_BASE_Y_FACTOR = 0.15;
 const TORPEDO_SHIP_ENGINE_EDGE_MARGIN_PX = 6;
 const TORPEDO_SHIP_ENGINE_SCALE = 0.7; // -30%
@@ -31,7 +43,7 @@ const SCOUT_HITBOX_H_MULT = 0.1;
 const FRIGATE_HP = 3;
 const FRIGATE_SHIELD_HP = 3;
 const FRIGATE_BULLET_DAMAGE = 2;
-const FRIGATE_BULLET_DEPTH = 5;
+const FRIGATE_BULLET_DEPTH = ENEMY_DEPTH.frigate.body;
 const FRIGATE_SALVO_BASE_Y_FACTOR = 0.15;
 const FRIGATE_BIG_BULLET_SCALE = 0.6;
 // TUNE HITBOX MULTIPLIER HERE (Frigate):
@@ -41,7 +53,7 @@ const FRIGATE_HITBOX_H_MULT = 0.1;
 const BATTLECRUISER_HP = 30;
 const BATTLECRUISER_SHIELD_HP = 30;
 const BATTLECRUISER_WAVE_DAMAGE = 3;
-const BATTLECRUISER_WAVE_DEPTH = 5;
+const BATTLECRUISER_WAVE_DEPTH = ENEMY_DEPTH.battlecruiser.body;
 const BATTLECRUISER_FIRE_Y_FACTOR = 0.28;
 const BATTLECRUISER_ENGINE_EDGE_MARGIN_PX = 32;
 const BATTLECRUISER_ENGINE_OFFSET_Y = 12;
@@ -57,7 +69,7 @@ const BATTLECRUISER_WEAPON_FIRE_FRAME_22 = `${SPRITE_FRAMES.battlecruiserWeaponP
 const DREADNOUGHT_HP = 100;
 const DREADNOUGHT_SHIELD_HP = 100;
 const DREADNOUGHT_RAY_DAMAGE = 5;
-const DREADNOUGHT_RAY_DEPTH = 1.9; // under dreadnought body (depth 2)
+const DREADNOUGHT_RAY_DEPTH = ENEMY_DEPTH.dreadnought.engine; // under dreadnought body
 // With dreadnought_weapon at 28fps and shots every 7 frames (0.25s),
 // set relative speed so segments stack seamlessly: 38px (ray height) / 0.25s = 152px/s.
 const DREADNOUGHT_RAY_REL_SPEED_Y = 152;
@@ -79,17 +91,6 @@ const DREADNOUGHT_SHIELD_BODY_RADIUS_MULT = 0.9;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_27 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}27${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}34${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 
-// ── Per-enemy-type depth (z-order) ───────────────────────────
-// Small / weak ships render ABOVE large ones so they are never hidden.
-// Offsets within a type: engine −0.2, body 0, weapon +0.1, shield +0.2.
-export const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
-  dreadnought:   { engine: 1.8, body: 2,   weapon: 2.1, shield: 2.2 },
-  battlecruiser: { engine: 2.3, body: 2.5, weapon: 2.6, shield: 2.7 },
-  frigate:       { engine: 2.8, body: 3,   weapon: 3.1, shield: 3.2 },
-  torpedo:       { engine: 3.3, body: 3.5, weapon: 3.6, shield: 3.7 },
-  fighter:       { engine: 3.8, body: 4,   weapon: 4.1, shield: 4.2 },
-  scout:         { engine: 4.3, body: 4.5, weapon: 4.6, shield: 4.7 },
-};
 const DREADNOUGHT_WEAPON_FIRE_FRAME_41 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}41${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_48 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}48${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_55 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}55${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
@@ -1086,14 +1087,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
           if (frameKey === FIGHTER_WEAPON_FIRE_RIGHT_FRAME && !firedRight) {
             firedRight = true;
-            const fired = this.spawnEnemyBulletAt(x + FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
+            const fired = this.spawnEnemyBulletAt(x + FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED, depth: ENEMY_DEPTH.fighter.body });
             if (fired) playShotSfx();
             return;
           }
 
           if (frameKey === FIGHTER_WEAPON_FIRE_LEFT_FRAME && !firedLeft) {
             firedLeft = true;
-            const fired = this.spawnEnemyBulletAt(x - FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
+            const fired = this.spawnEnemyBulletAt(x - FIGHTER_BULLET_OFFSET_X, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED, depth: ENEMY_DEPTH.fighter.body });
             if (fired) playShotSfx();
           }
         },
@@ -1137,7 +1138,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const x = this.x;
     const y = this.y + (this.displayHeight || 24) * 0.15;
-    const firedAny = this.spawnEnemyBulletAt(x, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED });
+    const firedAny = this.spawnEnemyBulletAt(x, y, { speedY: SCOUT_FIGHTER_FRIGATE_BULLET_SPEED, depth: ENEMY_DEPTH.scout.body });
 
     if (firedAny && this.scene.registry.get("audioUnlocked")) {
       try {
