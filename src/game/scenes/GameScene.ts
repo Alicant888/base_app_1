@@ -164,7 +164,7 @@ const XP_PACK_HP_BONUS = 5;
 const HUD_EDGE_PADDING = 5;
 const LIFE_ICON_START_X = 10;
 const LIFE_ICON_TOP_Y = 10;
-const LIFE_ICON_SCALE = 0.6;
+const LIFE_ICON_SCALE = 0.58;
 const LIFE_ICON_GAP_X = 4;
 const SCORE_RIGHT_PADDING = 10; // отступ pts от правого края
 
@@ -173,7 +173,7 @@ const SHOP_ETH_PRICES = {
   packMedium: "0.001",
   packBig: "0.002",
   packMaxi: "0.006",
-  packXp: (process.env.NEXT_PUBLIC_PACK_XP_PRICE_ETH?.trim() || "0.0005"),
+  packXp: (process.env.NEXT_PUBLIC_PACK_XP_PRICE_ETH?.trim() || "0.05"),
 } as const;
 
 const SHOP_PACK_IDS = {
@@ -3915,7 +3915,7 @@ export class GameScene extends Phaser.Scene {
     const centerX = GAME_WIDTH / 2;
     // Anchor top of shop grid 20px below the scoreText bottom edge.
     const scoreBottom = this.scoreText.y + 16; // scoreText origin(1,0), fontSize 16
-    const shopTopPad = scoreBottom + 20;
+    const shopTopPad = scoreBottom + 16;
 
     type PackFlag = "packBase" | "packMedium" | "packBig" | "packMaxi" | "packXp";
     interface PackInfo {
