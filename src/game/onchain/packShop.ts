@@ -11,6 +11,22 @@ export interface OnchainPackOwnership {
   packXp: boolean;
 }
 
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
 function getPackShopContractAddress(): `0x${string}` | null {
   const raw = process.env.NEXT_PUBLIC_PACKS_CONTRACT_ADDRESS?.trim();
   if (!raw) return null;
@@ -43,7 +59,7 @@ async function getWalletClients() {
 
   const transport = viem.custom(provider);
   const walletClient = viem.createWalletClient({ chain: base, transport });
-  const publicClient = viem.createPublicClient({ chain: base, transport });
+  const publicClient = viem.createPublicClient({ chain: base, transport: viem.http() });
   return { viem, walletClient, publicClient };
 }
 
@@ -126,9 +142,15 @@ export async function buyPackWithEth({
   if (!clients) {
     throw new Error("ETH purchases are available only inside Base App");
   }
-  const { viem, walletClient, publicClient } = clients;
-  const existing = await walletClient.getAddresses();
-  const [account] = existing.length ? existing : await walletClient.requestAddresses();
+  const { viem, walletClient } = clients;
+  const existing = await withTimeout(
+    walletClient.getAddresses(),
+    7000,
+    "Wallet connection timed out",
+  );
+  const [account] = existing.length
+    ? existing
+    : await withTimeout(walletClient.requestAddresses(), 15000, "Wallet confirmation timed out");
   if (!account) throw new Error("No wallet account available");
 
   const abi = [
@@ -141,19 +163,18 @@ export async function buyPackWithEth({
     },
   ] as const;
 
-  const hash = await walletClient.writeContract({
-    address: contractAddress,
-    abi,
-    functionName: "buyPack",
-    args: [packId],
-    value: viem.parseEther(valueEth),
-    account,
-  });
-
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
-  if (receipt.status !== "success") {
-    throw new Error("ETH purchase transaction failed");
-  }
+  const hash = await withTimeout(
+    walletClient.writeContract({
+      address: contractAddress,
+      abi,
+      functionName: "buyPack",
+      args: [packId],
+      value: viem.parseEther(valueEth),
+      account,
+    }),
+    45000,
+    "Transaction request timed out",
+  );
 
   return hash;
 }
