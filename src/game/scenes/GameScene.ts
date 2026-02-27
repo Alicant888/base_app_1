@@ -161,12 +161,13 @@ const DEFAULT_DROPS = {
 
 const BASE_HP = 5;
 const XP_PACK_HP_BONUS = 5;
-const HUD_EDGE_PADDING = 10;
-const LIFE_ICON_START_X = HUD_EDGE_PADDING;
-const LIFE_ICON_TOP_Y = HUD_EDGE_PADDING;
+const HUD_EDGE_PADDING = 5;
+const LIFE_ICON_START_X = 10;
+const LIFE_ICON_TOP_Y = 10;
 const LIFE_ICON_SCALE = 0.6;
 const LIFE_ICON_GAP_X = 4;
 const LIFE_ICON_ROW_GAP = 5;
+const SCORE_RIGHT_PADDING = 10; // отступ pts от правого края
 
 const SHOP_ETH_PRICES = {
   packBase: "0.0005",
@@ -2977,7 +2978,7 @@ export class GameScene extends Phaser.Scene {
     const topRowCount = Math.min(BASE_HP, this.maxHp);
     const bottomRowCount = Math.max(0, this.maxHp - BASE_HP);
     const probe = this.add
-      .image(-9999, -9999, ATLAS_KEYS.ship, SPRITE_FRAMES.playerShip)
+      .image(-9999, -9999, IMAGE_KEYS.uiXp)
       .setOrigin(0, 0)
       .setScale(LIFE_ICON_SCALE);
     const iconWidth = probe.displayWidth;
@@ -2988,26 +2989,15 @@ export class GameScene extends Phaser.Scene {
     this.lifeIcons.forEach((icon) => icon.destroy());
     this.lifeIcons = [];
 
-    for (let i = 0; i < topRowCount; i += 1) {
+    // All icons in a single horizontal row.
+    const totalCount = topRowCount + bottomRowCount;
+    for (let i = 0; i < totalCount; i += 1) {
       const icon = this.add
-        .image(LIFE_ICON_START_X + i * iconStep, LIFE_ICON_TOP_Y, ATLAS_KEYS.ship, SPRITE_FRAMES.playerShip)
+        .image(LIFE_ICON_START_X + i * iconStep, LIFE_ICON_TOP_Y, IMAGE_KEYS.uiXp)
         .setOrigin(0, 0)
         .setDepth(uiDepth)
         .setScale(LIFE_ICON_SCALE);
       this.lifeIcons.push(icon);
-    }
-
-    if (bottomRowCount > 0) {
-      const secondRowY = LIFE_ICON_TOP_Y + iconHeight + LIFE_ICON_ROW_GAP;
-
-      for (let i = 0; i < bottomRowCount; i += 1) {
-        const icon = this.add
-          .image(LIFE_ICON_START_X + i * iconStep, secondRowY, ATLAS_KEYS.ship, SPRITE_FRAMES.playerShip)
-          .setOrigin(0, 0)
-          .setDepth(uiDepth)
-          .setScale(LIFE_ICON_SCALE);
-        this.lifeIcons.push(icon);
-      }
     }
   }
 
@@ -3020,7 +3010,7 @@ export class GameScene extends Phaser.Scene {
 
     // Score Text (Top Right)
     this.scoreText = this.add
-      .text(GAME_WIDTH - HUD_EDGE_PADDING, HUD_EDGE_PADDING, "0", {
+      .text(GAME_WIDTH - SCORE_RIGHT_PADDING, HUD_EDGE_PADDING, "0", {
         fontFamily: "Orbitron",
         fontSize: "16px",
         color: "#ffffff",
@@ -4005,10 +3995,27 @@ export class GameScene extends Phaser.Scene {
             continue;
           }
 
-          img.clearTint().setInteractive({ useHandCursor: true });
+          const hitPadding = 10;
+          const hitArea = new Phaser.Geom.Rectangle(
+            -img.displayWidth / 2 - hitPadding,
+            -img.displayHeight / 2 - hitPadding,
+            img.displayWidth + hitPadding * 2,
+            img.displayHeight + hitPadding * 2,
+          );
+          img.clearTint().setInteractive({
+            useHandCursor: true,
+            hitArea,
+            hitAreaCallback: Phaser.Geom.Rectangle.Contains,
+          });
           img.on("pointerover", () => img.setTint(0xcccccc));
           img.on("pointerout", () => img.clearTint());
-          img.on("pointerdown", async () => {
+          img.on("pointerdown", async (
+            _pointer: Phaser.Input.Pointer,
+            _localX: number,
+            _localY: number,
+            event: Phaser.Types.Input.EventData,
+          ) => {
+            event.stopPropagation();
             if (pendingOnchainPurchase) return;
             const sv2 = SaveManager.load();
             if (sv2[pack.saveFlag]) return;
@@ -4101,6 +4108,9 @@ export class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
     if (this.isPausedByInput) return;
     this.isPausedByInput = true;
+    this.draggingPointerId = null;
+    this.hasDragTarget = false;
+    this.input.resetPointers();
     this.physics.pause();
     this.anims.pauseAll();
     this.tweens.pauseAll();
@@ -4118,6 +4128,9 @@ export class GameScene extends Phaser.Scene {
     if (this.isGameOver) return;
     if (!this.isPausedByInput) return;
     this.isPausedByInput = false;
+    this.draggingPointerId = null;
+    this.hasDragTarget = false;
+    this.input.resetPointers();
     this.physics.resume();
     this.anims.resumeAll();
     this.tweens.resumeAll();
