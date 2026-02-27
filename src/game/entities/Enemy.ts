@@ -22,7 +22,7 @@ const TORPEDO_SHIP_HITBOX_W_MULT = 0.7;
 const TORPEDO_SHIP_HITBOX_H_MULT = 0.1;
 const ENEMY_ENGINE_OFFSET_Y = 30;
 // TUNE HITBOX MULTIPLIER HERE (Fighter):
-const FIGHTER_HITBOX_W_MULT = 0.7;
+const FIGHTER_HITBOX_W_MULT = 0.5;
 const FIGHTER_HITBOX_H_MULT = 0.1;
 // TUNE HITBOX MULTIPLIER HERE (Scout):
 const SCOUT_HITBOX_W_MULT = 0.5;
@@ -57,7 +57,7 @@ const BATTLECRUISER_WEAPON_FIRE_FRAME_22 = `${SPRITE_FRAMES.battlecruiserWeaponP
 const DREADNOUGHT_HP = 100;
 const DREADNOUGHT_SHIELD_HP = 100;
 const DREADNOUGHT_RAY_DAMAGE = 5;
-const DREADNOUGHT_RAY_DEPTH = 3; // under ship (depth 4) and weapon FX (depth 5)
+const DREADNOUGHT_RAY_DEPTH = 1.9; // under dreadnought body (depth 2)
 // With dreadnought_weapon at 28fps and shots every 7 frames (0.25s),
 // set relative speed so segments stack seamlessly: 38px (ray height) / 0.25s = 152px/s.
 const DREADNOUGHT_RAY_REL_SPEED_Y = 152;
@@ -78,6 +78,18 @@ const DREADNOUGHT_SHIELD_BODY_RADIUS_MULT = 0.9;
 
 const DREADNOUGHT_WEAPON_FIRE_FRAME_27 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}27${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_34 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}34${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
+
+// ── Per-enemy-type depth (z-order) ───────────────────────────
+// Small / weak ships render ABOVE large ones so they are never hidden.
+// Offsets within a type: engine −0.2, body 0, weapon +0.1, shield +0.2.
+const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
+  dreadnought:   { engine: 1.8, body: 2,   weapon: 2.1, shield: 2.2 },
+  battlecruiser: { engine: 2.3, body: 2.5, weapon: 2.6, shield: 2.7 },
+  frigate:       { engine: 2.8, body: 3,   weapon: 3.1, shield: 3.2 },
+  torpedo:       { engine: 3.3, body: 3.5, weapon: 3.6, shield: 3.7 },
+  fighter:       { engine: 3.8, body: 4,   weapon: 4.1, shield: 4.2 },
+  scout:         { engine: 4.3, body: 4.5, weapon: 4.6, shield: 4.7 },
+};
 const DREADNOUGHT_WEAPON_FIRE_FRAME_41 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}41${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_48 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}48${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
 const DREADNOUGHT_WEAPON_FIRE_FRAME_55 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}55${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`;
@@ -464,6 +476,15 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     this.isFiring = false;
     this.nextFireAt = this.scene.time.now + Phaser.Math.Between(isDreadnought ? 400 : 850, isDreadnought ? 633 : 1400);
+
+    // ── Depth (z-order) per enemy type ──
+    const d = ENEMY_DEPTH[this.kind];
+    this.setDepth(d.body);
+    this.engineFx.setDepth(d.engine);
+    this.engineFxL?.setDepth(d.engine);
+    this.engineFxR?.setDepth(d.engine);
+    this.shieldFx.setDepth(d.shield);
+    this.weaponFx.setDepth(d.weapon);
 
     // IMPORTANT: This enemy is pooled and its FX sprites are separate GameObjects.
     // Sync their positions immediately on spawn to avoid a 1-frame "flicker" at the
