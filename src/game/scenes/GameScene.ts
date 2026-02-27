@@ -3961,10 +3961,22 @@ export class GameScene extends Phaser.Scene {
 
     type Entry = { img: Phaser.GameObjects.Image; lbl: Phaser.GameObjects.Text; pack: PackInfo; isXp: boolean };
     const entries: Entry[] = [];
+    let shopUiDisposed = false;
+    container.once("destroy", () => {
+      shopUiDisposed = true;
+    });
+
+    const isShopUiActive = () =>
+      !shopUiDisposed
+      && this.pauseUIContainer === container
+      && !!container.scene
+      && container.active;
 
     const refreshAll = () => {
+      if (!isShopUiActive()) return;
       const sv = SaveManager.load();
       for (const { img, lbl, pack, isXp } of entries) {
+        if (!img.scene || !img.active) continue;
         const owned = sv[pack.saveFlag];
         const reqMet = this.currentLevel >= pack.reqLevel;
         const canBuyWithPoints = pack.costPoints !== null && this.score >= pack.costPoints;
@@ -4008,7 +4020,9 @@ export class GameScene extends Phaser.Scene {
             _localY: number,
             event: Phaser.Types.Input.EventData,
           ) => {
-            event.stopPropagation();
+            event?.stopPropagation?.();
+            if (!isShopUiActive()) return;
+            this.playSfx(AUDIO_KEYS.click, 0.7);
             if (pendingOnchainPurchase) return;
             const sv2 = SaveManager.load();
             if (sv2[pack.saveFlag]) return;
@@ -4027,7 +4041,7 @@ export class GameScene extends Phaser.Scene {
                 SaveManager.save(sv3);
                 this.scoreText.setText(`${this.score}`);
                 this.applyPackFlags(sv3, false);
-                refreshAll();
+                if (isShopUiActive()) refreshAll();
               });
               return;
             }
@@ -4035,8 +4049,10 @@ export class GameScene extends Phaser.Scene {
             if (!onchainEnabled) return;
 
             pendingOnchainPurchase = true;
-            if (!isXp) lbl.setText("PENDING...").setColor("#66ccff").setVisible(true);
-            img.setTint(0x8888ff);
+            if (isShopUiActive()) {
+              if (!isXp) lbl.setText("PENDING...").setColor("#66ccff").setVisible(true);
+              img.setTint(0x8888ff);
+            }
 
             try {
               const txHash = await buyPackWithEth({ packId: pack.ethPackId, valueEth: pack.ethPrice });
@@ -4052,10 +4068,13 @@ export class GameScene extends Phaser.Scene {
               this.applyPackFlags(sv3, true);
             } catch (error) {
               console.warn("ETH pack purchase failed:", error);
-              if (!isXp) lbl.setText("TX FAILED").setColor("#ff6666").setVisible(true);
+              if (!isXp && isShopUiActive()) lbl.setText("TX FAILED").setColor("#ff6666").setVisible(true);
             } finally {
               pendingOnchainPurchase = false;
-              refreshAll();
+              this.draggingPointerId = null;
+              this.hasDragTarget = false;
+              this.input.resetPointers();
+              if (isShopUiActive()) refreshAll();
             }
           });
         }
