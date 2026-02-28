@@ -306,7 +306,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "frigate", weight: 0.30, shieldChance: 0.90 },
       { kind: "battlecruiser", weight: 0.40, shieldChance: 0.90 },
     ],
-    drops: { health: 0.06, shield: 0.20, firingRate: 0.03, firingRate2: 0.03, ...NWD },
+    drops: { health: 0.06, shield: 0.20, firingRate: 0.1, firingRate2: 0.03, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------

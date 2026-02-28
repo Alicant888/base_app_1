@@ -31,6 +31,11 @@ const BASE_FIRE_RATE_MS = 375; // ~2.67 shots/sec
 const BASE_MOVE_SPEED_PX_PER_SEC = 280;
 const BASE_MOVE_SPEED_MULTIPLIER = 0.8; // Main Ship is 20% slower by default.
 
+// ── Fan (spread) shooting constants ──────────────────────────
+const FAN_ANGLE_DEG = 5;               // Side bullets angle offset (degrees).
+const FAN_FIRE_RATE_BOOST_STEP = 0.05; // +5% per pickup.
+const FAN_FIRE_RATE_FLOOR = 0.5;       // Max fan boost = +100% (2× speed).
+
 const DEPTH_PLAYER = 5;
 // Flames should render above the engine, but still below the shield.
 const DEPTH_ENGINE_FLAMES = 6.5;
@@ -243,6 +248,11 @@ export class GameScene extends Phaser.Scene {
   private engineFlameR?: Phaser.GameObjects.Sprite;
   private activeEngineType: "base" | "supercharged" | "burst" | "bigPulse" | null = null;
   private fireRateMultiplier = 1;
+  /** Whether fan (spread) shooting is active. */
+  private hasFanShot = false;
+  /** Fire-rate multiplier for fan (side) bullets. 1 = base rate, up to FAN_FIRE_RATE_CAP. */
+  private fanFireRateMultiplier = 1;
+  private fanFireEvent?: Phaser.Time.TimerEvent;
   /** Per-weapon animation speed multipliers (stacks after fire-rate cap). */
   private weaponBonusRateAutoCannons = 1;
   private weaponBonusRateRockets = 1;
@@ -412,6 +422,8 @@ export class GameScene extends Phaser.Scene {
     this.distanceTraveled = 0;
     this.shieldHits = 0;
     this.fireRateMultiplier = 1;
+    this.hasFanShot = false;
+    this.fanFireRateMultiplier = 1;
     this.weaponBonusRateAutoCannons = 1;
     this.weaponBonusRateRockets = 1;
     this.weaponBonusRateZapper = 1;
@@ -890,6 +902,12 @@ export class GameScene extends Phaser.Scene {
         this.fireRateMultiplier = this._pendingSave.fireRateMultiplier;
         this.setFireRateMultiplier(this.fireRateMultiplier);
       }
+      // Restore fan (spread) shooting state.
+      if (this._pendingSave.hasFanShot) {
+        this.hasFanShot = true;
+        this.fanFireRateMultiplier = this._pendingSave.fanFireRateMultiplier;
+        this.configureFanFireEvent();
+      }
       this.weaponBonusRateAutoCannons = this._pendingSave.weaponBonusRateAutoCannons;
       this.weaponBonusRateRockets = this._pendingSave.weaponBonusRateRockets;
       this.weaponBonusRateZapper = this._pendingSave.weaponBonusRateZapper;
@@ -1241,10 +1259,21 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private spawnBullet(x: number, y: number): boolean {
+  /** Fire the two angled side bullets (fan spread). */
+  private fireFanShot() {
+    if (!this.player.active) return;
+
+    const x = this.player.x;
+    const y = this.player.y - this.player.displayHeight * 0.1;
+
+    this.spawnBullet(x, y, -FAN_ANGLE_DEG); // left
+    this.spawnBullet(x, y, FAN_ANGLE_DEG);  // right
+  }
+
+  private spawnBullet(x: number, y: number, angleDeg = 0): boolean {
     const bullet = this.bullets.get(x, y) as Bullet | null;
     if (!bullet) return false;
-    bullet.fire(x, y);
+    bullet.fire(x, y, angleDeg);
     return true;
   }
 
@@ -1676,13 +1705,20 @@ export class GameScene extends Phaser.Scene {
 
     pickup.kill();
     this.playSfx(AUDIO_KEYS.pickup, 0.875);
-    // Additive +10% from base (1.0) per pickup.
-    // fireRateMultiplier goes from 1.0 down; lower = faster.
-    // Cap depends on current level tier.
     const minMultiplier = this.getFireRateFloor();
     if (this.fireRateMultiplier > minMultiplier) {
+      // Still room to boost main fire rate.
       const newMultiplier = Math.max(minMultiplier, this.fireRateMultiplier - 0.1);
       this.setFireRateMultiplier(newMultiplier);
+    } else if (!this.hasFanShot) {
+      // Main fire rate maxed → activate fan shooting.
+      this.hasFanShot = true;
+      this.fanFireRateMultiplier = 1;
+      this.configureFanFireEvent();
+    } else {
+      // Fan already active → boost fan fire rate by 5%, min FAN_FIRE_RATE_FLOOR (cap +100% = 2× speed).
+      this.fanFireRateMultiplier = Math.max(FAN_FIRE_RATE_FLOOR, this.fanFireRateMultiplier - FAN_FIRE_RATE_BOOST_STEP);
+      this.configureFanFireEvent();
     }
   }
 
@@ -1998,6 +2034,8 @@ export class GameScene extends Phaser.Scene {
       highScore: Math.max(this.score, SaveManager.load().highScore),
       score: this.score,
       fireRateMultiplier: this.fireRateMultiplier,
+      hasFanShot: this.hasFanShot,
+      fanFireRateMultiplier: this.fanFireRateMultiplier,
       weaponBonusRateAutoCannons: this.weaponBonusRateAutoCannons,
       weaponBonusRateRockets: this.weaponBonusRateRockets,
       weaponBonusRateZapper: this.weaponBonusRateZapper,
@@ -2087,6 +2125,8 @@ export class GameScene extends Phaser.Scene {
       highScore: Math.max(this.score, SaveManager.load().highScore),
       score: this.score,
       fireRateMultiplier: this.fireRateMultiplier,
+      hasFanShot: this.hasFanShot,
+      fanFireRateMultiplier: this.fanFireRateMultiplier,
       weaponBonusRateAutoCannons: this.weaponBonusRateAutoCannons,
       weaponBonusRateRockets: this.weaponBonusRateRockets,
       weaponBonusRateZapper: this.weaponBonusRateZapper,
@@ -3102,6 +3142,8 @@ export class GameScene extends Phaser.Scene {
   private destroyWeaponFireEvents() {
     this.fireEvent?.remove(false);
     this.fireEvent = undefined;
+    this.fanFireEvent?.remove(false);
+    this.fanFireEvent = undefined;
   }
 
   private configureWeaponFireEvents() {
@@ -3114,10 +3156,36 @@ export class GameScene extends Phaser.Scene {
       loop: true,
       callback: () => this.fireSingleShot(),
     });
+
+    // Fan (spread) side bullets on their own timer.
+    if (this.hasFanShot) {
+      this.fanFireEvent = this.time.addEvent({
+        delay: this.getFanFireDelayMs(),
+        loop: true,
+        callback: () => this.fireFanShot(),
+      });
+    }
+  }
+
+  /** Reconfigure only the fan timer without touching the main fire event. */
+  private configureFanFireEvent() {
+    this.fanFireEvent?.remove(false);
+    this.fanFireEvent = undefined;
+    if (this.isGameOver || !this.hasFanShot) return;
+
+    this.fanFireEvent = this.time.addEvent({
+      delay: this.getFanFireDelayMs(),
+      loop: true,
+      callback: () => this.fireFanShot(),
+    });
   }
 
   private getFireDelayMs() {
     return Math.round(BASE_FIRE_RATE_MS * this.fireRateMultiplier);
+  }
+
+  private getFanFireDelayMs() {
+    return Math.round(BASE_FIRE_RATE_MS * this.fanFireRateMultiplier);
   }
 
   private setFireRateMultiplier(multiplier: number) {

@@ -3,6 +3,9 @@ import { GAME_HEIGHT } from "../config";
 
 const BULLET_SPEED = 420;
 
+/** Degrees-to-radians multiplier. */
+const DEG2RAD = Math.PI / 180;
+
 export class Bullet extends Phaser.Physics.Arcade.Image {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, "bullet");
@@ -12,7 +15,7 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     this.setDepth(1.5);
   }
 
-  fire(x: number, y: number) {
+  fire(x: number, y: number, angleDeg = 0) {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return;
 
@@ -24,12 +27,21 @@ export class Bullet extends Phaser.Physics.Arcade.Image {
     body.reset(x, y);
 
     body.allowGravity = false;
-    this.setVelocity(0, -BULLET_SPEED);
+
+    if (angleDeg === 0) {
+      this.setRotation(0);
+      this.setVelocity(0, -BULLET_SPEED);
+    } else {
+      const rad = angleDeg * DEG2RAD;
+      this.setRotation(rad);
+      this.setVelocity(Math.sin(rad) * BULLET_SPEED, -Math.cos(rad) * BULLET_SPEED);
+    }
   }
 
   kill() {
     this.setActive(false);
     this.setVisible(false);
+    this.setRotation(0);
 
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (body) {

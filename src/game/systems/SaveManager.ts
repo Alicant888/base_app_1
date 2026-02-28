@@ -27,6 +27,10 @@ export interface SaveData {
   weaponBonusRateRockets: number;
   weaponBonusRateZapper: number;
   weaponBonusRateBigSpaceGun: number;
+  /** Whether fan (spread) shooting is active. */
+  hasFanShot: boolean;
+  /** Fan bullets fire-rate multiplier (1 = base, 0.5 = +100% cap). */
+  fanFireRateMultiplier: number;
   // --- Shop packs (purchased once, persist forever) ---
   /** XP Pack: ETH-only purchase, adds +5 Main Ship durability. */
   packXp: boolean;
@@ -54,6 +58,8 @@ const DEFAULT_SAVE: SaveData = {
   weaponBonusRateRockets: 1,
   weaponBonusRateZapper: 1,
   weaponBonusRateBigSpaceGun: 1,
+  hasFanShot: false,
+  fanFireRateMultiplier: 1,
   packXp: false,
   packBase: false,
   packMedium: false,
