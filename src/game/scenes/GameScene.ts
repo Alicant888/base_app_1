@@ -1087,8 +1087,9 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Provide player X for boss AI (safe + cheap).
+    // Provide player position for enemy AI (safe + cheap).
     this.registry.set("playerX", this.player.x);
+    this.registry.set("playerY", this.player.y);
 
     const t = delta / 16.666;
     // Subtract to make the texture appear to move "down".
@@ -2366,8 +2367,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private spawnExplosion(x: number, y: number, kind: EnemyKind) {
-    const frame =
-      kind === "fighter"
+    const isBomber = kind === "bomber";
+    const frame = isBomber
+      ? `${SPRITE_FRAMES.bomberDestructionPrefix}${SPRITE_FRAMES.bomberDestructionStart}${SPRITE_FRAMES.bomberDestructionSuffix}`
+      : kind === "fighter"
         ? `${SPRITE_FRAMES.fighterDestructionPrefix}${SPRITE_FRAMES.fighterDestructionStart}${SPRITE_FRAMES.fighterDestructionSuffix}`
         : kind === "dreadnought"
           ? `${SPRITE_FRAMES.dreadnoughtDestructionPrefix}${SPRITE_FRAMES.dreadnoughtDestructionStart}${SPRITE_FRAMES.dreadnoughtDestructionSuffix}`
@@ -2379,10 +2382,12 @@ export class GameScene extends Phaser.Scene {
                 ? `${SPRITE_FRAMES.torpedoShipDestructionPrefix}${SPRITE_FRAMES.torpedoShipDestructionStart}${SPRITE_FRAMES.torpedoShipDestructionSuffix}`
                 : `${SPRITE_FRAMES.enemyDestructionPrefix}${SPRITE_FRAMES.enemyDestructionStart}${SPRITE_FRAMES.enemyDestructionSuffix}`;
 
-    const boom = this.add.sprite(x, y, ATLAS_KEYS.enemy, frame).setDepth(ENEMY_DEPTH[kind].body);
+    const atlasKey = isBomber ? ATLAS_KEYS.fx3 : ATLAS_KEYS.enemy;
+    const boom = this.add.sprite(x, y, atlasKey, frame).setDepth(ENEMY_DEPTH[kind].body);
 
-    const animKey =
-      kind === "fighter"
+    const animKey = isBomber
+      ? "bomber_explode"
+      : kind === "fighter"
         ? "fighter_explode"
         : kind === "dreadnought"
           ? "dreadnought_explode"
@@ -2485,6 +2490,20 @@ export class GameScene extends Phaser.Scene {
       });
     }
 
+    if (!this.anims.exists("bomber_explode")) {
+      this.anims.create({
+        key: "bomber_explode",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.fx3, {
+          start: SPRITE_FRAMES.bomberDestructionStart,
+          end: SPRITE_FRAMES.bomberDestructionEnd,
+          prefix: SPRITE_FRAMES.bomberDestructionPrefix,
+          suffix: SPRITE_FRAMES.bomberDestructionSuffix,
+        }),
+        frameRate: 20,
+        repeat: 0,
+      });
+    }
+
     if (!this.anims.exists("enemy_engine")) {
       this.anims.create({
         key: "enemy_engine",
@@ -2549,6 +2568,20 @@ export class GameScene extends Phaser.Scene {
           end: SPRITE_FRAMES.dreadnoughtEngineEnd,
           prefix: SPRITE_FRAMES.dreadnoughtEnginePrefix,
           suffix: SPRITE_FRAMES.dreadnoughtEngineSuffix,
+        }),
+        frameRate: 14,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("bomber_engine")) {
+      this.anims.create({
+        key: "bomber_engine",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.fx3, {
+          start: SPRITE_FRAMES.bomberEngineStart,
+          end: SPRITE_FRAMES.bomberEngineEnd,
+          prefix: SPRITE_FRAMES.bomberEnginePrefix,
+          suffix: SPRITE_FRAMES.bomberEngineSuffix,
         }),
         frameRate: 14,
         repeat: -1,
@@ -2825,6 +2858,20 @@ export class GameScene extends Phaser.Scene {
           end: SPRITE_FRAMES.dreadnoughtShieldEnd,
           prefix: SPRITE_FRAMES.dreadnoughtShieldPrefix,
           suffix: SPRITE_FRAMES.dreadnoughtShieldSuffix,
+        }),
+        frameRate: 18,
+        repeat: -1,
+      });
+    }
+
+    if (!this.anims.exists("bomber_shield")) {
+      this.anims.create({
+        key: "bomber_shield",
+        frames: this.anims.generateFrameNames(ATLAS_KEYS.fx3, {
+          start: SPRITE_FRAMES.bomberShieldStart,
+          end: SPRITE_FRAMES.bomberShieldEnd,
+          prefix: SPRITE_FRAMES.bomberShieldPrefix,
+          suffix: SPRITE_FRAMES.bomberShieldSuffix,
         }),
         frameRate: 18,
         repeat: -1,

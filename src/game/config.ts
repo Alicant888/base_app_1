@@ -459,4 +459,19 @@ export const SPRITE_FRAMES = {
   dronePickupSuffix: ".png",
   dronePickupStart: 0,
   dronePickupEnd: 9,
+
+  // Bomber enemy (atlas: FX3)
+  bomberBase: "Kla'ed - Bomber - Base.png",
+  bomberEnginePrefix: "Kla'ed - Bomber - Engine-",
+  bomberEngineSuffix: ".png",
+  bomberEngineStart: 0,
+  bomberEngineEnd: 9,
+  bomberShieldPrefix: "Kla'ed - Bomber - Shield-",
+  bomberShieldSuffix: ".png",
+  bomberShieldStart: 0,
+  bomberShieldEnd: 5,
+  bomberDestructionPrefix: "Kla'ed - Bomber - Destruction-",
+  bomberDestructionSuffix: ".png",
+  bomberDestructionStart: 0,
+  bomberDestructionEnd: 7,
 } as const;

@@ -2,18 +2,19 @@ import * as Phaser from "phaser";
 import { EnemyBullet, type EnemyProjectileFireOptions } from "./EnemyBullet";
 import { ATLAS_KEYS, AUDIO_KEYS, GAME_HEIGHT, GAME_WIDTH, SPRITE_FRAMES } from "../config";
 
-export type EnemyKind = "scout" | "fighter" | "torpedo" | "frigate" | "battlecruiser" | "dreadnought";
+export type EnemyKind = "scout" | "fighter" | "torpedo" | "frigate" | "battlecruiser" | "dreadnought" | "bomber";
 
 // ── Per-enemy-type depth (z-order) ───────────────────────────
 // Small / weak ships render ABOVE large ones so they are never hidden.
 // Offsets within a type: engine −0.2, body 0, weapon +0.1, shield +0.2.
 export const ENEMY_DEPTH: Record<EnemyKind, { engine: number; body: number; weapon: number; shield: number }> = {
-  dreadnought:   { engine: 1.8, body: 2,   weapon: 2.1, shield: 2.2 },
+  dreadnought: { engine: 1.8, body: 2, weapon: 2.1, shield: 2.2 },
   battlecruiser: { engine: 2.3, body: 2.5, weapon: 2.6, shield: 2.7 },
-  frigate:       { engine: 2.8, body: 3,   weapon: 3.1, shield: 3.2 },
-  torpedo:       { engine: 3.3, body: 3.5, weapon: 3.6, shield: 3.7 },
-  fighter:       { engine: 3.8, body: 4,   weapon: 4.1, shield: 4.2 },
-  scout:         { engine: 4.3, body: 4.5, weapon: 4.6, shield: 4.7 },
+  frigate: { engine: 2.8, body: 3, weapon: 3.1, shield: 3.2 },
+  bomber: { engine: 3.3, body: 3.5, weapon: 3.6, shield: 3.7 },
+  torpedo: { engine: 3.8, body: 4, weapon: 4.1, shield: 4.2 },
+  fighter: { engine: 4.3, body: 4.5, weapon: 4.6, shield: 4.7 },
+  scout: { engine: 4.8, body: 5, weapon: 5.1, shield: 5.2 },
 };
 
 const FIGHTER_HP = 2;
@@ -33,12 +34,25 @@ const TORPEDO_SHIP_ENGINE_SCALE = 0.7; // -30%
 const TORPEDO_SHIP_HITBOX_W_MULT = 0.7;
 const TORPEDO_SHIP_HITBOX_H_MULT = 0.1;
 const ENEMY_ENGINE_OFFSET_Y = 30;
+// Bomber-specific engine flame offset
+const BOMBER_ENGINE_OFFSET_Y = 32;
 // TUNE HITBOX MULTIPLIER HERE (Fighter):
 const FIGHTER_HITBOX_W_MULT = 0.5;
 const FIGHTER_HITBOX_H_MULT = 0.1;
 // TUNE HITBOX MULTIPLIER HERE (Scout):
 const SCOUT_HITBOX_W_MULT = 0.5;
 const SCOUT_HITBOX_H_MULT = 0.1;
+
+// Bomber (kamikaze).
+const BOMBER_HP = 1;
+const BOMBER_SHIELD_HP = 1;
+const BOMBER_COLLISION_DAMAGE = 5;
+const BOMBER_HITBOX_W_MULT = 0.5;
+const BOMBER_HITBOX_H_MULT = 0.1;
+const BOMBER_APPROACH_DISTANCE = 180;   // px from top before slowing down
+const BOMBER_SLOW_SPEED = 30;           // crawl speed while locking target
+const BOMBER_SLOW_DURATION_MS = 600;    // time spent crawling
+const BOMBER_CHARGE_SPEED = 550;        // px/s dive speed
 
 const FRIGATE_HP = 3;
 const FRIGATE_SHIELD_HP = 3;
@@ -131,6 +145,8 @@ const BATTLECRUISER_SHIELD_OFFSET_X = 0;
 const BATTLECRUISER_SHIELD_OFFSET_Y = 0;
 const DREADNOUGHT_SHIELD_OFFSET_X = 0;
 const DREADNOUGHT_SHIELD_OFFSET_Y = 0;
+const BOMBER_SHIELD_OFFSET_X = 0;
+const BOMBER_SHIELD_OFFSET_Y = 8;
 
 type TorpedoShipShotConfig = {
   frameIndex: number;
@@ -164,6 +180,8 @@ export const getEnemyXp = (kind: EnemyKind): number => {
       return BATTLECRUISER_HP;
     case "dreadnought":
       return DREADNOUGHT_HP;
+    case "bomber":
+      return BOMBER_HP;
   }
 };
 
@@ -194,6 +212,12 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   // Boss-only state (Dreadnought).
   private dreadnoughtState: "idle" | "aligning" | "firing" = "idle";
   private dreadnoughtDriftDir: -1 | 1 = 1;
+
+  // Bomber kamikaze state.
+  private bomberPhase: "approach" | "slow" | "charge" = "approach";
+  private bomberSlowUntil = 0;
+  private bomberTargetX = 0;
+  private bomberTargetY = 0;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, ATLAS_KEYS.enemy, SPRITE_FRAMES.enemyBase);
@@ -241,13 +265,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const isFrigate = this.kind === "frigate";
     const isBattlecruiser = this.kind === "battlecruiser";
     const isDreadnought = this.kind === "dreadnought";
+    const isBomber = this.kind === "bomber";
 
     this.torpedoSalvoDone = false;
     this.shieldSuppressed = false;
     this.dreadnoughtState = "idle";
     this.dreadnoughtDriftDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+    this.bomberPhase = "approach";
+    this.bomberSlowUntil = 0;
 
-    const defaultHp = isDreadnought ? DREADNOUGHT_HP : isBattlecruiser ? BATTLECRUISER_HP : isFrigate ? FRIGATE_HP : isTorpedo ? TORPEDO_SHIP_HP : isFighter ? FIGHTER_HP : 1;
+    const defaultHp = isDreadnought ? DREADNOUGHT_HP : isBattlecruiser ? BATTLECRUISER_HP : isFrigate ? FRIGATE_HP : isTorpedo ? TORPEDO_SHIP_HP : isFighter ? FIGHTER_HP : isBomber ? BOMBER_HP : 1;
     this.hp = hpOverride ?? defaultHp;
 
     const defaultShieldHp = isDreadnought
@@ -260,26 +287,34 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             ? (hasShield ? TORPEDO_SHIP_SHIELD_HP : 0)
             : isFighter
               ? (hasShield ? FIGHTER_SHIELD_HP : 0)
-              : hasShield
-                ? 1
-                : 0;
+              : isBomber
+                ? BOMBER_SHIELD_HP          // bomber always has shield
+                : hasShield
+                  ? 1
+                  : 0;
     this.shieldHp = shieldHpOverride ?? defaultShieldHp;
     this._spawnedWithShield = hasShield || (shieldHpOverride ?? 0) > 0;
     this._isMiniBoss = false;
 
-    this.setFrame(
-      isDreadnought
-        ? SPRITE_FRAMES.dreadnoughtBase
-        : isBattlecruiser
-          ? SPRITE_FRAMES.battlecruiserBase
-          : isFrigate
-            ? SPRITE_FRAMES.frigateBase
-            : isTorpedo
-              ? SPRITE_FRAMES.torpedoShipBase
-              : isFighter
-                ? SPRITE_FRAMES.fighterBase
-                : SPRITE_FRAMES.enemyBase,
-    );
+    // Bomber lives in FX3 atlas; all others use Enemy atlas.
+    if (isBomber) {
+      this.setTexture(ATLAS_KEYS.fx3, SPRITE_FRAMES.bomberBase);
+    } else {
+      this.setTexture(ATLAS_KEYS.enemy);
+      this.setFrame(
+        isDreadnought
+          ? SPRITE_FRAMES.dreadnoughtBase
+          : isBattlecruiser
+            ? SPRITE_FRAMES.battlecruiserBase
+            : isFrigate
+              ? SPRITE_FRAMES.frigateBase
+              : isTorpedo
+                ? SPRITE_FRAMES.torpedoShipBase
+                : isFighter
+                  ? SPRITE_FRAMES.fighterBase
+                  : SPRITE_FRAMES.enemyBase,
+      );
+    }
 
     // Keep large enemies within bounds.
     // Dreadnought is a boss: allow it to go partially off-screen so its center weapon can still reach edge players.
@@ -311,7 +346,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             ? TORPEDO_SHIP_HITBOX_W_MULT
             : isFighter
               ? FIGHTER_HITBOX_W_MULT
-              : SCOUT_HITBOX_W_MULT;
+              : isBomber
+                ? BOMBER_HITBOX_W_MULT
+                : SCOUT_HITBOX_W_MULT;
     const hitboxHMult = isDreadnought
       ? DREADNOUGHT_HITBOX_H_MULT
       : isBattlecruiser
@@ -322,22 +359,26 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
             ? TORPEDO_SHIP_HITBOX_H_MULT
             : isFighter
               ? FIGHTER_HITBOX_H_MULT
-              : SCOUT_HITBOX_H_MULT;
+              : isBomber
+                ? BOMBER_HITBOX_H_MULT
+                : SCOUT_HITBOX_H_MULT;
     body.setSize(this.width * hitboxWMult, this.height * hitboxHMult, true);
     this.syncDreadnoughtCollisionBody();
 
     // Engine loop.
-    const engineFrame = isBattlecruiser
-      ? `${SPRITE_FRAMES.battlecruiserEnginePrefix}${SPRITE_FRAMES.battlecruiserEngineStart}${SPRITE_FRAMES.battlecruiserEngineSuffix}`
-      : isDreadnought
-        ? `${SPRITE_FRAMES.dreadnoughtEnginePrefix}${SPRITE_FRAMES.dreadnoughtEngineStart}${SPRITE_FRAMES.dreadnoughtEngineSuffix}`
-        : isFrigate
-          ? `${SPRITE_FRAMES.frigateEnginePrefix}${SPRITE_FRAMES.frigateEngineStart}${SPRITE_FRAMES.frigateEngineSuffix}`
-          : isTorpedo
-            ? `${SPRITE_FRAMES.torpedoShipEnginePrefix}${SPRITE_FRAMES.torpedoShipEngineStart}${SPRITE_FRAMES.torpedoShipEngineSuffix}`
-            : isFighter
-              ? `${SPRITE_FRAMES.fighterEnginePrefix}${SPRITE_FRAMES.fighterEngineStart}${SPRITE_FRAMES.fighterEngineSuffix}`
-              : `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`;
+    const engineFrame = isBomber
+      ? `${SPRITE_FRAMES.bomberEnginePrefix}${SPRITE_FRAMES.bomberEngineStart}${SPRITE_FRAMES.bomberEngineSuffix}`
+      : isBattlecruiser
+        ? `${SPRITE_FRAMES.battlecruiserEnginePrefix}${SPRITE_FRAMES.battlecruiserEngineStart}${SPRITE_FRAMES.battlecruiserEngineSuffix}`
+        : isDreadnought
+          ? `${SPRITE_FRAMES.dreadnoughtEnginePrefix}${SPRITE_FRAMES.dreadnoughtEngineStart}${SPRITE_FRAMES.dreadnoughtEngineSuffix}`
+          : isFrigate
+            ? `${SPRITE_FRAMES.frigateEnginePrefix}${SPRITE_FRAMES.frigateEngineStart}${SPRITE_FRAMES.frigateEngineSuffix}`
+            : isTorpedo
+              ? `${SPRITE_FRAMES.torpedoShipEnginePrefix}${SPRITE_FRAMES.torpedoShipEngineStart}${SPRITE_FRAMES.torpedoShipEngineSuffix}`
+              : isFighter
+                ? `${SPRITE_FRAMES.fighterEnginePrefix}${SPRITE_FRAMES.fighterEngineStart}${SPRITE_FRAMES.fighterEngineSuffix}`
+                : `${SPRITE_FRAMES.enemyEnginePrefix}${SPRITE_FRAMES.enemyEngineStart}${SPRITE_FRAMES.enemyEngineSuffix}`;
     if (isTorpedo) {
       // Torpedo Ship has 2 engine flames at the edges.
       if (!this.engineFxL) {
@@ -414,41 +455,55 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.engineFxR?.setVisible(false);
       this.engineFxR?.anims.stop();
 
-      this.engineFx.setFrame(engineFrame);
+      // Bomber engine uses FX3 atlas; switch texture before setting frame.
+      if (isBomber) {
+        this.engineFx.setTexture(ATLAS_KEYS.fx3, engineFrame);
+      } else {
+        this.engineFx.setTexture(ATLAS_KEYS.enemy, engineFrame);
+      }
       this.engineFx.setVisible(true);
       this.engineFx.setFlipY(true);
       this.engineFx.setScale(1);
-      this.engineFx.play(isDreadnought ? "dreadnought_engine" : isFrigate ? "frigate_engine" : isFighter ? "fighter_engine" : "enemy_engine", true);
+      this.engineFx.play(isBomber ? "bomber_engine" : isDreadnought ? "dreadnought_engine" : isFrigate ? "frigate_engine" : isFighter ? "fighter_engine" : "enemy_engine", true);
     }
 
     // Shield. For Dreadnought boss: always starts visible unless broken.
     if (this.shieldHp > 0 && !this.shieldSuppressed) {
-      const shieldFrame = isDreadnought
-        ? `${SPRITE_FRAMES.dreadnoughtShieldPrefix}${SPRITE_FRAMES.dreadnoughtShieldStart}${SPRITE_FRAMES.dreadnoughtShieldSuffix}`
-        : isBattlecruiser
-          ? `${SPRITE_FRAMES.battlecruiserShieldPrefix}${SPRITE_FRAMES.battlecruiserShieldStart}${SPRITE_FRAMES.battlecruiserShieldSuffix}`
-          : isFrigate
-            ? `${SPRITE_FRAMES.frigateShieldPrefix}${SPRITE_FRAMES.frigateShieldStart}${SPRITE_FRAMES.frigateShieldSuffix}`
-            : isTorpedo
-              ? `${SPRITE_FRAMES.torpedoShipShieldPrefix}${SPRITE_FRAMES.torpedoShipShieldStart}${SPRITE_FRAMES.torpedoShipShieldSuffix}`
-              : isFighter
-                ? `${SPRITE_FRAMES.fighterShieldPrefix}${SPRITE_FRAMES.fighterShieldStart}${SPRITE_FRAMES.fighterShieldSuffix}`
-                : `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`;
-      this.shieldFx.setFrame(shieldFrame);
+      const shieldFrame = isBomber
+        ? `${SPRITE_FRAMES.bomberShieldPrefix}${SPRITE_FRAMES.bomberShieldStart}${SPRITE_FRAMES.bomberShieldSuffix}`
+        : isDreadnought
+          ? `${SPRITE_FRAMES.dreadnoughtShieldPrefix}${SPRITE_FRAMES.dreadnoughtShieldStart}${SPRITE_FRAMES.dreadnoughtShieldSuffix}`
+          : isBattlecruiser
+            ? `${SPRITE_FRAMES.battlecruiserShieldPrefix}${SPRITE_FRAMES.battlecruiserShieldStart}${SPRITE_FRAMES.battlecruiserShieldSuffix}`
+            : isFrigate
+              ? `${SPRITE_FRAMES.frigateShieldPrefix}${SPRITE_FRAMES.frigateShieldStart}${SPRITE_FRAMES.frigateShieldSuffix}`
+              : isTorpedo
+                ? `${SPRITE_FRAMES.torpedoShipShieldPrefix}${SPRITE_FRAMES.torpedoShipShieldStart}${SPRITE_FRAMES.torpedoShipShieldSuffix}`
+                : isFighter
+                  ? `${SPRITE_FRAMES.fighterShieldPrefix}${SPRITE_FRAMES.fighterShieldStart}${SPRITE_FRAMES.fighterShieldSuffix}`
+                  : `${SPRITE_FRAMES.enemyShieldPrefix}${SPRITE_FRAMES.enemyShieldStart}${SPRITE_FRAMES.enemyShieldSuffix}`;
+      // Bomber shield uses FX3 atlas.
+      if (isBomber) {
+        this.shieldFx.setTexture(ATLAS_KEYS.fx3, shieldFrame);
+      } else {
+        this.shieldFx.setTexture(ATLAS_KEYS.enemy, shieldFrame);
+      }
       this.shieldFx.setVisible(true);
       this.shieldFx.setFlipY(true);
       this.shieldFx.play(
-        isDreadnought
-          ? "dreadnought_shield"
-          : isBattlecruiser
-            ? "battlecruiser_shield"
-            : isFrigate
-              ? "frigate_shield"
-              : isTorpedo
-                ? "torpedo_ship_shield"
-                : isFighter
-                  ? "fighter_shield"
-                  : "enemy_shield",
+        isBomber
+          ? "bomber_shield"
+          : isDreadnought
+            ? "dreadnought_shield"
+            : isBattlecruiser
+              ? "battlecruiser_shield"
+              : isFrigate
+                ? "frigate_shield"
+                : isTorpedo
+                  ? "torpedo_ship_shield"
+                  : isFighter
+                    ? "fighter_shield"
+                    : "enemy_shield",
         true,
       );
     } else {
@@ -456,27 +511,31 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.shieldFx.anims.stop();
     }
 
-    // Weapon FX is off until firing.
-    const weaponFrame = isDreadnought
-      ? `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}${SPRITE_FRAMES.dreadnoughtWeaponStart}${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`
-      : isBattlecruiser
-        ? `${SPRITE_FRAMES.battlecruiserWeaponPrefix}${SPRITE_FRAMES.battlecruiserWeaponStart}${SPRITE_FRAMES.battlecruiserWeaponSuffix}`
-        : isFrigate
-          ? `${SPRITE_FRAMES.frigateWeaponPrefix}${SPRITE_FRAMES.frigateWeaponStart}${SPRITE_FRAMES.frigateWeaponSuffix}`
-          : isTorpedo
-            ? `${SPRITE_FRAMES.torpedoShipWeaponPrefix}${SPRITE_FRAMES.torpedoShipWeaponStart}${SPRITE_FRAMES.torpedoShipWeaponSuffix}`
-            : isFighter
-              ? `${SPRITE_FRAMES.fighterWeaponPrefix}${SPRITE_FRAMES.fighterWeaponStart}${SPRITE_FRAMES.fighterWeaponSuffix}`
-              : `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`;
-    this.weaponFx.setFrame(weaponFrame);
-    // Torpedo Ship shows weapon idle (frame 0) on spawn, then hides it on first shot.
-    this.weaponFx.setVisible(isTorpedo);
+    // Weapon FX is off until firing. Bomber has no weapon.
+    if (!isBomber) {
+      const weaponFrame = isDreadnought
+        ? `${SPRITE_FRAMES.dreadnoughtWeaponPrefix}${SPRITE_FRAMES.dreadnoughtWeaponStart}${SPRITE_FRAMES.dreadnoughtWeaponSuffix}`
+        : isBattlecruiser
+          ? `${SPRITE_FRAMES.battlecruiserWeaponPrefix}${SPRITE_FRAMES.battlecruiserWeaponStart}${SPRITE_FRAMES.battlecruiserWeaponSuffix}`
+          : isFrigate
+            ? `${SPRITE_FRAMES.frigateWeaponPrefix}${SPRITE_FRAMES.frigateWeaponStart}${SPRITE_FRAMES.frigateWeaponSuffix}`
+            : isTorpedo
+              ? `${SPRITE_FRAMES.torpedoShipWeaponPrefix}${SPRITE_FRAMES.torpedoShipWeaponStart}${SPRITE_FRAMES.torpedoShipWeaponSuffix}`
+              : isFighter
+                ? `${SPRITE_FRAMES.fighterWeaponPrefix}${SPRITE_FRAMES.fighterWeaponStart}${SPRITE_FRAMES.fighterWeaponSuffix}`
+                : `${SPRITE_FRAMES.enemyWeaponPrefix}${SPRITE_FRAMES.enemyWeaponStart}${SPRITE_FRAMES.enemyWeaponSuffix}`;
+      this.weaponFx.setFrame(weaponFrame);
+      // Torpedo Ship shows weapon idle (frame 0) on spawn, then hides it on first shot.
+      this.weaponFx.setVisible(isTorpedo);
+    } else {
+      this.weaponFx.setVisible(false);
+    }
     this.weaponFx.setFlipY(true);
     this.weaponFx.anims.stop();
     this.weaponFx.removeAllListeners();
 
     this.isFiring = false;
-    this.nextFireAt = this.scene.time.now + Phaser.Math.Between(isDreadnought ? 400 : 850, isDreadnought ? 633 : 1400);
+    this.nextFireAt = isBomber ? Number.MAX_SAFE_INTEGER : this.scene.time.now + Phaser.Math.Between(isDreadnought ? 400 : 850, isDreadnought ? 633 : 1400);
 
     // ── Depth (z-order) per enemy type ──
     const d = ENEMY_DEPTH[this.kind];
@@ -506,6 +565,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this._spawnedWithShield = false;
     this._isMiniBoss = false;
     this.dreadnoughtState = "idle";
+    this.bomberPhase = "approach";
+    this.bomberSlowUntil = 0;
     this.engineFx.setVisible(false);
     this.engineFx.anims.stop();
     this.engineFxL?.setVisible(false);
@@ -528,6 +589,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   update(time: number) {
     if (!this.active) return;
     this.syncFxPositions();
+
+    if (this.kind === "bomber") {
+      this.updateBomber(time);
+      return;
+    }
 
     if (this.kind === "dreadnought") {
       this.updateDreadnoughtBoss(time);
@@ -586,6 +652,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
 
   getCollisionDamage(): number {
+    if (this.kind === "bomber") return BOMBER_COLLISION_DAMAGE;
     // Collision should hurt based on remaining enemy durability.
     // Shield only counts if it's currently active (not suppressed).
     const shield = this.shieldSuppressed ? 0 : this.shieldHp;
@@ -600,7 +667,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // With origin (0.5, 1) this pins the bottom of the flame to the top of the ship.
     // Engine frames have a lot of transparent space (trim) below the visible flame,
     // so we push the sprite down to keep the visible pixels tight to the ship.
-    const engineY = top.y + ENEMY_ENGINE_OFFSET_Y;
+
+    // Use bomber-specific offset if needed
+    const engineYOffset = this.kind === "bomber" ? BOMBER_ENGINE_OFFSET_Y : ENEMY_ENGINE_OFFSET_Y;
+    const engineY = top.y + engineYOffset;
 
     if (this.kind === "torpedo") {
       const halfW = (this.displayWidth || this.width) * 0.5;
@@ -621,29 +691,33 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     }
 
     const shieldOffsetX =
-      this.kind === "dreadnought"
-        ? DREADNOUGHT_SHIELD_OFFSET_X
-        : this.kind === "battlecruiser"
-          ? BATTLECRUISER_SHIELD_OFFSET_X
-          : this.kind === "torpedo"
-            ? TORPEDO_SHIP_SHIELD_OFFSET_X
-            : this.kind === "frigate"
-              ? FRIGATE_SHIELD_OFFSET_X
-              : this.kind === "fighter"
-                ? FIGHTER_SHIELD_OFFSET_X
-                : SCOUT_SHIELD_OFFSET_X;
+      this.kind === "bomber"
+        ? BOMBER_SHIELD_OFFSET_X
+        : this.kind === "dreadnought"
+          ? DREADNOUGHT_SHIELD_OFFSET_X
+          : this.kind === "battlecruiser"
+            ? BATTLECRUISER_SHIELD_OFFSET_X
+            : this.kind === "torpedo"
+              ? TORPEDO_SHIP_SHIELD_OFFSET_X
+              : this.kind === "frigate"
+                ? FRIGATE_SHIELD_OFFSET_X
+                : this.kind === "fighter"
+                  ? FIGHTER_SHIELD_OFFSET_X
+                  : SCOUT_SHIELD_OFFSET_X;
     const shieldOffsetY =
-      this.kind === "dreadnought"
-        ? DREADNOUGHT_SHIELD_OFFSET_Y
-        : this.kind === "battlecruiser"
-          ? BATTLECRUISER_SHIELD_OFFSET_Y
-          : this.kind === "torpedo"
-            ? TORPEDO_SHIP_SHIELD_OFFSET_Y
-            : this.kind === "frigate"
-              ? FRIGATE_SHIELD_OFFSET_Y
-              : this.kind === "fighter"
-                ? FIGHTER_SHIELD_OFFSET_Y
-                : SCOUT_SHIELD_OFFSET_Y;
+      this.kind === "bomber"
+        ? BOMBER_SHIELD_OFFSET_Y
+        : this.kind === "dreadnought"
+          ? DREADNOUGHT_SHIELD_OFFSET_Y
+          : this.kind === "battlecruiser"
+            ? BATTLECRUISER_SHIELD_OFFSET_Y
+            : this.kind === "torpedo"
+              ? TORPEDO_SHIP_SHIELD_OFFSET_Y
+              : this.kind === "frigate"
+                ? FRIGATE_SHIELD_OFFSET_Y
+                : this.kind === "fighter"
+                  ? FIGHTER_SHIELD_OFFSET_Y
+                  : SCOUT_SHIELD_OFFSET_Y;
     this.shieldFx.setPosition(this.x + shieldOffsetX, this.y + shieldOffsetY);
 
     // Weapon frames are trimmed differently; placing it at the same position prevents it
@@ -692,6 +766,45 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   /** Mark this enemy as a mini-boss (hover + drift like Dreadnought). */
   public setMiniBoss(value: boolean) {
     this._isMiniBoss = value;
+  }
+
+  private updateBomber(time: number) {
+    const body = this.body as Phaser.Physics.Arcade.Body | null;
+    if (!body) return;
+
+    if (this.bomberPhase === "approach") {
+      // Descend normally until reaching the approach threshold.
+      if (this.y >= BOMBER_APPROACH_DISTANCE) {
+        this.bomberPhase = "slow";
+        this.bomberSlowUntil = time + BOMBER_SLOW_DURATION_MS;
+        body.velocity.y = BOMBER_SLOW_SPEED;
+        body.velocity.x = 0;
+      }
+    }
+
+    if (this.bomberPhase === "slow") {
+      body.velocity.y = BOMBER_SLOW_SPEED;
+      if (time >= this.bomberSlowUntil) {
+        // Lock onto current player position and charge.
+        const playerXRaw = this.scene.registry.get("playerX");
+        const playerYRaw = this.scene.registry.get("playerY");
+        this.bomberTargetX = typeof playerXRaw === "number" ? playerXRaw : GAME_WIDTH * 0.5;
+        this.bomberTargetY = typeof playerYRaw === "number" ? playerYRaw : GAME_HEIGHT * 0.8;
+        this.bomberPhase = "charge";
+
+        // Compute velocity towards target.
+        const dx = this.bomberTargetX - this.x;
+        const dy = this.bomberTargetY - this.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        body.velocity.x = (dx / dist) * BOMBER_CHARGE_SPEED;
+        body.velocity.y = (dy / dist) * BOMBER_CHARGE_SPEED;
+      }
+    }
+
+    // Kill if off-screen.
+    if (this.y > GAME_HEIGHT + 48 || this.y < -48 || this.x < -48 || this.x > GAME_WIDTH + 48) {
+      this.kill();
+    }
   }
 
   private updateMiniBoss(time: number) {
