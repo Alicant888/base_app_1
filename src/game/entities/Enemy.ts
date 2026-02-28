@@ -908,14 +908,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
 
     const offsetRange = this.kind === "torpedo" ? 18 : 12;
     const targetX = Phaser.Math.Clamp(playerX + Phaser.Math.Between(-offsetRange, offsetRange), minX, maxX);
+    const dx = targetX - this.x;
+    const dist = Math.abs(dx);
+
+    const durationMs = this.kind === "torpedo" ? Phaser.Math.Between(650, 950) : Phaser.Math.Between(520, 820);
+    const minSpeedX = this.kind === "torpedo" ? 150 : 180;
+    const maxSpeedX = this.kind === "torpedo" ? 420 : 520;
+    const desiredSpeedX = dist / Math.max(0.001, durationMs / 1000);
 
     this.preFireState = "aligning";
     this.preFireTargetX = targetX;
-    this.preFireAlignSpeedX = this.kind === "torpedo" ? Phaser.Math.Between(120, 180) : Phaser.Math.Between(150, 220);
+    this.preFireAlignSpeedX = Phaser.Math.Clamp(desiredSpeedX, minSpeedX, maxSpeedX);
     this.preFireAlignEpsPx = Phaser.Math.Between(4, 8);
-    this.preFireAlignUntil = time + Phaser.Math.Between(380, 650);
+    // Give enough time to reach the target at the chosen speed (plus a small buffer),
+    // but keep a hard cap so enemies don't get stuck aligning forever.
+    const etaMs = (dist / Math.max(1, this.preFireAlignSpeedX)) * 1000;
+    this.preFireAlignUntil = time + Math.min(1200, Math.max(260, Math.round(etaMs + 140)));
 
-    const dx = targetX - this.x;
     body.velocity.x = Math.sign(dx || 1) * this.preFireAlignSpeedX;
   }
 
@@ -927,8 +936,16 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const dx = this.preFireTargetX - this.x;
 
     // Timeout safety: fire anyway even if alignment never converges.
-    if (time >= this.preFireAlignUntil || Math.abs(dx) <= this.preFireAlignEpsPx) {
+    if (Math.abs(dx) <= this.preFireAlignEpsPx) {
+      // Small snap only when already basically aligned.
       this.setX(Phaser.Math.Clamp(this.preFireTargetX, minX, maxX));
+      body.velocity.x = 0;
+      this.preFireState = "none";
+      this.startFiringSequence();
+      return false;
+    }
+
+    if (time >= this.preFireAlignUntil) {
       body.velocity.x = 0;
       this.preFireState = "none";
       this.startFiringSequence();
