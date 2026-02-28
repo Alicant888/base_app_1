@@ -31,6 +31,13 @@ export interface SaveData {
   hasFanShot: boolean;
   /** Fan bullets fire-rate multiplier (1 = base, 0.5 = +100% cap). */
   fanFireRateMultiplier: number;
+  // --- Drone (satellite) ---
+  /** Whether the drone is active (persists between levels). */
+  hasDrone: boolean;
+  /** Drone hidden HP (default 4). */
+  droneHp: number;
+  /** Drone fire-rate multiplier (1 = base, 1/3 = +200% cap). */
+  droneFireRateMultiplier: number;
   // --- Shop packs (purchased once, persist forever) ---
   /** XP Pack: ETH-only purchase, adds +5 Main Ship durability. */
   packXp: boolean;
@@ -60,6 +67,9 @@ const DEFAULT_SAVE: SaveData = {
   weaponBonusRateBigSpaceGun: 1,
   hasFanShot: false,
   fanFireRateMultiplier: 1,
+  hasDrone: false,
+  droneHp: 0,
+  droneFireRateMultiplier: 1,
   packXp: false,
   packBase: false,
   packMedium: false,

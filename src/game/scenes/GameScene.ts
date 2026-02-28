@@ -20,6 +20,8 @@ import { ZapperProjectile } from "../entities/ZapperProjectile";
 import { SuperchargedEnginePickup } from "../entities/SuperchargedEnginePickup";
 import { Player } from "../entities/Player";
 import { ShieldPickup } from "../entities/ShieldPickup";
+import { Drone } from "../entities/Drone";
+import { DronePickup } from "../entities/DronePickup";
 import { AsteroidSpawner } from "../systems/AsteroidSpawner";
 import { EnemySpawner } from "../systems/EnemySpawner";
 import { ATLAS_KEYS, AUDIO_KEYS, BG_FRAMES, GAME_HEIGHT, GAME_WIDTH, IMAGE_KEYS, SPRITE_FRAMES, UI_SCALE, setGameHeight } from "../config";
@@ -35,6 +37,10 @@ const BASE_MOVE_SPEED_MULTIPLIER = 0.8; // Main Ship is 20% slower by default.
 const FAN_ANGLE_DEG = 5;               // Side bullets angle offset (degrees).
 const FAN_FIRE_RATE_BOOST_STEP = 0.05; // +5% per pickup.
 const FAN_FIRE_RATE_FLOOR = 0.5;       // Max fan boost = +100% (2× speed).
+
+// ── Drone (satellite) constants ──────────────────────────────
+const DRONE_FIRE_RATE_BOOST_STEP = 0.1;  // +10% per pickup.
+const DRONE_FIRE_RATE_FLOOR = 1 / 3;     // Max boost = +200% (3× speed).
 
 const DEPTH_PLAYER = 5;
 // Flames should render above the engine, but still below the shield.
@@ -259,6 +265,14 @@ export class GameScene extends Phaser.Scene {
   private weaponBonusRateZapper = 1;
   private weaponBonusRateBigSpaceGun = 1;
 
+  // --- Drone (satellite) ---
+  private drone?: Drone;
+  private dronePickups!: Phaser.Physics.Arcade.Group;
+  private hasDrone = false;
+  private droneHp = 0;
+  private droneFireRateMultiplier = 1;
+  private droneFireEvent?: Phaser.Time.TimerEvent;
+
   private lifeIcons: Phaser.GameObjects.Image[] = [];
   private fireEvent?: Phaser.Time.TimerEvent;
   private gameMusic?: Phaser.Sound.BaseSound;
@@ -437,6 +451,10 @@ export class GameScene extends Phaser.Scene {
     this.hasZapper = false;
     this.hasBigSpaceGun = false;
     this._bossPhaseActive = false;
+    this.hasDrone = false;
+    this.droneHp = 0;
+    this.droneFireRateMultiplier = 1;
+    this.droneFireEvent = undefined;
 
     // Reset pause state
     this.isPausedByInput = false;
@@ -613,6 +631,12 @@ export class GameScene extends Phaser.Scene {
       runChildUpdate: true,
     });
 
+    this.dronePickups = this.physics.add.group({
+      classType: DronePickup,
+      maxSize: 8,
+      runChildUpdate: true,
+    });
+
     this.enemies = this.physics.add.group({
       classType: Enemy,
       maxSize: 50,
@@ -630,6 +654,14 @@ export class GameScene extends Phaser.Scene {
     this.player = new Player(this, GAME_WIDTH / 2, GAME_HEIGHT * 0.8);
     this.player.setDepth(DEPTH_PLAYER);
     this.updatePlayerDamageAppearance();
+
+    // Drone (satellite) — created once, activated/deactivated via pickup.
+    this.drone = new Drone(this, 0, 0);
+    this.add.existing(this.drone);
+    this.physics.add.existing(this.drone);
+    // Start with body disabled (activated on first pickup).
+    const droneBody = this.drone.body as Phaser.Physics.Arcade.Body | null;
+    if (droneBody) droneBody.enable = false;
 
     // Input.
     this.cursors = this.input.keyboard?.createCursorKeys();
@@ -757,6 +789,15 @@ export class GameScene extends Phaser.Scene {
       this,
     );
 
+    // Drone ↔ enemy bullet overlap.
+    this.physics.add.overlap(
+      this.drone,
+      this.enemyBullets,
+      this.onEnemyBulletHitsDrone as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
     this.physics.add.overlap(
       this.player,
       this.shieldPickups,
@@ -853,6 +894,14 @@ export class GameScene extends Phaser.Scene {
       this,
     );
 
+    this.physics.add.overlap(
+      this.player,
+      this.dronePickups,
+      this.onDronePickup as Phaser.Types.Physics.Arcade.ArcadePhysicsCallback,
+      undefined,
+      this,
+    );
+
     // Auto-fire (weapon-dependent).
     this.configureWeaponFireEvents();
 
@@ -907,6 +956,15 @@ export class GameScene extends Phaser.Scene {
         this.hasFanShot = true;
         this.fanFireRateMultiplier = this._pendingSave.fanFireRateMultiplier;
         this.configureFanFireEvent();
+      }
+      // Restore drone (satellite) state.
+      if (this._pendingSave.hasDrone) {
+        this.hasDrone = true;
+        this.droneHp = this._pendingSave.droneHp;
+        this.droneFireRateMultiplier = this._pendingSave.droneFireRateMultiplier;
+        if (this.droneHp > 0) {
+          this.activateDrone();
+        }
       }
       this.weaponBonusRateAutoCannons = this._pendingSave.weaponBonusRateAutoCannons;
       this.weaponBonusRateRockets = this._pendingSave.weaponBonusRateRockets;
@@ -1078,6 +1136,11 @@ export class GameScene extends Phaser.Scene {
 
     this.syncPlayerWeaponFx();
     this.syncPlayerEngineFx();
+
+    // Drone orbit update.
+    if (this.drone?.active) {
+      this.drone.orbitUpdate(this.player.x, this.player.y, delta);
+    }
   }
 
   private playMusicTrack(index: number) {
@@ -1679,6 +1742,16 @@ export class GameScene extends Phaser.Scene {
     this.takeHit(damage);
   }
 
+  private onEnemyBulletHitsDrone(_droneObj: Phaser.GameObjects.GameObject, bulletObj: Phaser.GameObjects.GameObject) {
+    const bullet = bulletObj as EnemyBullet;
+    if (!bullet.active) return;
+    if (!this.drone?.active) return;
+
+    const damage = bullet.getDamage();
+    bullet.kill();
+    this.hitDrone(damage);
+  }
+
   private onShieldPickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
     const pickup = pickupObj as ShieldPickup;
     if (!pickup.active) return;
@@ -1814,6 +1887,76 @@ export class GameScene extends Phaser.Scene {
     pickup.kill();
     this.playSfx(AUDIO_KEYS.pickup, 1);
     this.activateBigPulseEngine();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Drone (satellite) pickup & control
+  // ---------------------------------------------------------------------------
+
+  private onDronePickup(_playerObj: Phaser.GameObjects.GameObject, pickupObj: Phaser.GameObjects.GameObject) {
+    const pickup = pickupObj as DronePickup;
+    if (!pickup.active) return;
+
+    pickup.kill();
+    this.playSfx(AUDIO_KEYS.pickup, 0.875);
+
+    if (!this.hasDrone) {
+      // First pickup → activate the drone.
+      this.hasDrone = true;
+      this.droneHp = 4;
+      this.droneFireRateMultiplier = 1;
+      this.activateDrone();
+    } else if (!this.drone?.active) {
+      // Drone was destroyed → re-activate with full HP.
+      this.droneHp = 4;
+      this.activateDrone();
+    } else {
+      // Drone already active → boost fire rate (+10% per pickup, max +200% = floor 1/3).
+      this.droneFireRateMultiplier = Math.max(DRONE_FIRE_RATE_FLOOR, this.droneFireRateMultiplier - DRONE_FIRE_RATE_BOOST_STEP);
+      this.configureDroneFireEvent();
+    }
+  }
+
+  private activateDrone() {
+    if (!this.drone) return;
+    this.drone.activate(this.player.displayWidth);
+    this.drone.hp = this.droneHp;
+    this.configureDroneFireEvent();
+  }
+
+  private configureDroneFireEvent() {
+    this.droneFireEvent?.remove(false);
+    this.droneFireEvent = undefined;
+    if (this.isGameOver || !this.hasDrone || !this.drone?.active) return;
+
+    this.droneFireEvent = this.time.addEvent({
+      delay: this.getDroneFireDelayMs(),
+      loop: true,
+      callback: () => this.fireDroneShot(),
+    });
+  }
+
+  private getDroneFireDelayMs() {
+    return Math.round(BASE_FIRE_RATE_MS * this.droneFireRateMultiplier);
+  }
+
+  private fireDroneShot() {
+    if (this.isGameOver || !this.drone?.active) return;
+
+    const x = this.drone.getMuzzleX();
+    const y = this.drone.getMuzzleY();
+    this.spawnBullet(x, y);
+  }
+
+  /** Called when the drone takes a hit from an enemy bullet or asteroid. */
+  private hitDrone(damage = 1) {
+    if (!this.drone?.active) return;
+    this.drone.hit(damage);
+    this.droneHp = this.drone.hp;
+    if (this.droneHp <= 0) {
+      this.droneFireEvent?.remove(false);
+      this.droneFireEvent = undefined;
+    }
   }
 
   private takeHit(damage = 1) {
@@ -2004,6 +2147,10 @@ export class GameScene extends Phaser.Scene {
     threshold += d.firingRate2;
     if (r < threshold) return this.spawnFiringRate2Pickup(x, y);
 
+    // Drone (satellite) pickup — 2% base drop chance, always available.
+    threshold += 0.2;
+    if (r < threshold) return this.spawnDronePickup(x, y);
+
     threshold += d.shield;
     if (r < threshold) {
       if (hadShield) this.spawnShieldPickup(x, y);
@@ -2040,6 +2187,9 @@ export class GameScene extends Phaser.Scene {
       weaponBonusRateRockets: this.weaponBonusRateRockets,
       weaponBonusRateZapper: this.weaponBonusRateZapper,
       weaponBonusRateBigSpaceGun: this.weaponBonusRateBigSpaceGun,
+      hasDrone: this.hasDrone,
+      droneHp: this.droneHp,
+      droneFireRateMultiplier: this.droneFireRateMultiplier,
       packXp: this.packXp,
       packBase: this.packBase,
       packMedium: this.packMedium,
@@ -2131,6 +2281,9 @@ export class GameScene extends Phaser.Scene {
       weaponBonusRateRockets: this.weaponBonusRateRockets,
       weaponBonusRateZapper: this.weaponBonusRateZapper,
       weaponBonusRateBigSpaceGun: this.weaponBonusRateBigSpaceGun,
+      hasDrone: this.hasDrone,
+      droneHp: this.droneHp,
+      droneFireRateMultiplier: this.droneFireRateMultiplier,
       packXp: this.packXp,
       packBase: this.packBase,
       packMedium: this.packMedium,
@@ -2817,6 +2970,16 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.createLoopAnimIfFrames(
+      "drone_pickup",
+      ATLAS_KEYS.fx3,
+      SPRITE_FRAMES.dronePickupPrefix,
+      SPRITE_FRAMES.dronePickupStart,
+      SPRITE_FRAMES.dronePickupEnd,
+      SPRITE_FRAMES.dronePickupSuffix,
+      14,
+    );
+
+    this.createLoopAnimIfFrames(
       "base_engine_flame",
       ATLAS_KEYS.ship,
       SPRITE_FRAMES.baseEngineFlamePrefix,
@@ -3144,6 +3307,8 @@ export class GameScene extends Phaser.Scene {
     this.fireEvent = undefined;
     this.fanFireEvent?.remove(false);
     this.fanFireEvent = undefined;
+    this.droneFireEvent?.remove(false);
+    this.droneFireEvent = undefined;
   }
 
   private configureWeaponFireEvents() {
@@ -3163,6 +3328,15 @@ export class GameScene extends Phaser.Scene {
         delay: this.getFanFireDelayMs(),
         loop: true,
         callback: () => this.fireFanShot(),
+      });
+    }
+
+    // Drone (satellite) fire timer.
+    if (this.hasDrone && this.drone?.active) {
+      this.droneFireEvent = this.time.addEvent({
+        delay: this.getDroneFireDelayMs(),
+        loop: true,
+        callback: () => this.fireDroneShot(),
       });
     }
   }
@@ -3254,6 +3428,12 @@ export class GameScene extends Phaser.Scene {
 
   private spawnBigPulseEnginePickup(x: number, y: number) {
     const pickup = this.bigPulseEnginePickups.get(x, y) as BigPulseEnginePickup | null;
+    if (!pickup) return;
+    pickup.spawn(x, y);
+  }
+
+  private spawnDronePickup(x: number, y: number) {
+    const pickup = this.dronePickups.get(x, y) as DronePickup | null;
     if (!pickup) return;
     pickup.spawn(x, y);
   }

@@ -29,6 +29,7 @@ export const IMAGE_KEYS = {
   uiPackMedium: "ui_pack_medium",
   uiPackBig: "ui_pack_big",
   uiPackMaxi: "ui_pack_maxi",
+  droneSprite: "drone_satm",
 } as const;
 
 export const AUDIO_KEYS = {
@@ -60,6 +61,7 @@ export const ATLAS_KEYS = {
   enemy: "Enemy",
   fx: "FX",
   fx2: "FX2",
+  fx3: "FX3",
   ui: "ui",
   bg: "backgrounds",
 } as const;
@@ -451,4 +453,10 @@ export const SPRITE_FRAMES = {
   playerShieldSuffix: ".png",
   playerShieldStart: 0,
   playerShieldEnd: 9,
+
+  // Drone (satellite) pickup icon (atlas: Sat)
+  dronePickupPrefix: "sat- ",
+  dronePickupSuffix: ".png",
+  dronePickupStart: 0,
+  dronePickupEnd: 9,
 } as const;

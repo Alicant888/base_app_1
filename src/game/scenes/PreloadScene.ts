@@ -38,6 +38,9 @@ export class PreloadScene extends Phaser.Scene {
     this.load.atlas(ATLAS_KEYS.fx2, "/assets/atlases/FX2.png", "/assets/atlases/FX2.json");
     // Backgrounds: multi-atlas (BCG.png + L0..L6.png).
     this.load.multiatlas(ATLAS_KEYS.bg, "/assets/atlases/backgrounds.json", "/assets/atlases/");
+    this.load.multiatlas(ATLAS_KEYS.fx3, "/assets/atlases/FX3.json", "/assets/atlases/");
+    // Drone sprite (standalone image).
+    this.load.image(IMAGE_KEYS.droneSprite, "/assets/atlases/satm.png");
 
     // Load new UI buttons (loose PNGs)
     this.load.image(IMAGE_KEYS.uiStart, "/assets/atlases/UI/start.png");
