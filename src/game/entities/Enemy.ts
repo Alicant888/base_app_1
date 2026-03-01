@@ -309,7 +309,13 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private rollEliteRole(kind: EnemyKind): EliteRole {
     // Roles are meant to be readable and fair; heavy ships lean towards Sniper.
     if (kind === "bomber") return "berserk";
-    if (kind === "battlecruiser") return "sniper";
+    if (kind === "battlecruiser") {
+      // 10–40% Berserk chance (scales with level so early fights stay readable).
+      const levelRaw = this.scene.registry.get("level");
+      const level = typeof levelRaw === "number" ? levelRaw : Number(levelRaw ?? 0);
+      const berserkChance = Phaser.Math.Clamp(0.1 + Math.max(0, level - 7) * 0.05, 0.1, 0.4);
+      return Phaser.Math.FloatBetween(0, 1) < berserkChance ? "berserk" : "sniper";
+    }
 
     const r = Phaser.Math.FloatBetween(0, 1);
 

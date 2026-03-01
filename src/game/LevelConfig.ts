@@ -283,7 +283,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.1, shieldChance: 0.55 },
       { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
-    drops: { health: 0.02, shield: 0.10, firingRate: 0.02, firingRate2: 0.02, ...NWD },
+    drops: { health: 0.02, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     sections: [
       { type: "waveMode", from: 120, to: 180, mode: "formations" },
       { type: "meteorStorm", from: 260, to: 290, intensity: 3 },
@@ -304,7 +304,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.15, shieldChance: 0.60 },
       { kind: "bomber", weight: 0.15, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -321,7 +321,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.15, shieldChance: 0.65 },
       { kind: "bomber", weight: 0.2, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -338,7 +338,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.20, shieldChance: 0.70 },
       { kind: "bomber", weight: 0.2, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -355,7 +355,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.20, shieldChance: 0.75 },
       { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -372,7 +372,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.25, shieldChance: 0.90 },
       { kind: "bomber", weight: 0.25, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.1, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.1, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
   },
   // -----------------------------------------------------------------------
@@ -389,7 +389,7 @@ export const LEVELS: LevelConfig[] = [
       { kind: "battlecruiser", weight: 0.25, shieldChance: 1 },
       { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
-    drops: { health: 0.15, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.03, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
     bossAfterDistance: true,
     bossHp: 5000, bossShieldHp: 5000, escortWaveIntervalMs: 4_000,
