@@ -15,6 +15,7 @@ export class LevelSectionDirector {
   private nextMeteorAt = 0;
   private nextWallAt = 0;
   private appliedWaveMode: EnemyWaveMode = "normal";
+  private battlecruiserSuppressed = false;
 
   constructor(
     private enemySpawner: EnemySpawner,
@@ -25,6 +26,7 @@ export class LevelSectionDirector {
     this.levelConfig = config;
     this.nextMeteorAt = 0;
     this.nextWallAt = 0;
+    this.setBattlecruiserSuppressed(false);
     this.applyWaveMode("normal");
   }
 
@@ -33,6 +35,7 @@ export class LevelSectionDirector {
     if (!sections?.length) {
       this.nextMeteorAt = 0;
       this.nextWallAt = 0;
+      this.setBattlecruiserSuppressed(false);
       this.applyWaveMode("normal");
       return;
     }
@@ -49,10 +52,17 @@ export class LevelSectionDirector {
     const storm = active.find(s => s.type === "meteorStorm") as Extract<LevelSection, { type: "meteorStorm" }> | undefined;
     if (storm) {
       const intensity = storm.intensity ?? 2;
-      if (this.nextMeteorAt === 0) this.nextMeteorAt = time;
+      if (this.nextMeteorAt === 0) {
+        // Don't start instantly every time — feels less "scripted".
+        this.nextMeteorAt = time + Phaser.Math.Between(450, 950);
+      }
 
       if (time >= this.nextMeteorAt) {
-        this.asteroidSpawner.spawnMeteorStormBurst(intensity);
+        // Slight randomness: sometimes skip a burst so it doesn't spam.
+        const spawnChance = intensity === 1 ? 0.55 : intensity === 2 ? 0.65 : 0.75;
+        if (Phaser.Math.FloatBetween(0, 1) < spawnChance) {
+          this.asteroidSpawner.spawnMeteorStormBurst(intensity);
+        }
         this.nextMeteorAt = time + this.getMeteorIntervalMs(intensity);
       }
     } else {
@@ -61,20 +71,33 @@ export class LevelSectionDirector {
 
     // --- Asteroid wall (periodic "gate" rows).
     const wall = active.find(s => s.type === "asteroidWall") as Extract<LevelSection, { type: "asteroidWall" }> | undefined;
+    this.setBattlecruiserSuppressed(!!wall);
     if (wall) {
-      const intervalMs = Phaser.Math.Clamp(wall.intervalMs ?? 1900, 1000, 5000);
+      const intervalMs = Phaser.Math.Clamp(wall.intervalMs ?? 2600, 1400, 8000);
       const gapWidthPx = Phaser.Math.Clamp(wall.gapWidthPx ?? 88, 64, 140);
 
-      if (this.nextWallAt === 0) this.nextWallAt = time;
+      if (this.nextWallAt === 0) {
+        // Add a little delay on entry so the first wall isn't always immediate.
+        this.nextWallAt = time + Phaser.Math.Between(Math.floor(intervalMs * 0.35), Math.floor(intervalMs * 0.85));
+      }
 
       if (time >= this.nextWallAt) {
-        this.asteroidSpawner.spawnAsteroidWall({ gapWidthPx });
+        const spawnChance = 0.82;
+        if (Phaser.Math.FloatBetween(0, 1) < spawnChance) {
+          this.asteroidSpawner.spawnAsteroidWall({ gapWidthPx });
+        }
         const jitter = Phaser.Math.FloatBetween(0.85, 1.15);
         this.nextWallAt = time + Math.round(intervalMs * jitter);
       }
     } else {
       this.nextWallAt = 0;
     }
+  }
+
+  private setBattlecruiserSuppressed(suppressed: boolean) {
+    if (this.battlecruiserSuppressed === suppressed) return;
+    this.battlecruiserSuppressed = suppressed;
+    this.enemySpawner.setKindSuppressed("battlecruiser", suppressed);
   }
 
   private applyWaveMode(mode: EnemyWaveMode) {
@@ -97,9 +120,9 @@ export class LevelSectionDirector {
   }
 
   private getMeteorIntervalMs(intensity: 1 | 2 | 3): number {
-    const min = intensity === 1 ? 280 : intensity === 2 ? 220 : 180;
-    const max = intensity === 1 ? 360 : intensity === 2 ? 300 : 260;
+    // Much slower than the base implementation — meteor bursts are extra hazards, not constant rain.
+    const min = intensity === 1 ? 640 : intensity === 2 ? 520 : 420;
+    const max = intensity === 1 ? 980 : intensity === 2 ? 860 : 740;
     return Phaser.Math.Between(min, max);
   }
 }
-

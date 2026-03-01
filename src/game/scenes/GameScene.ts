@@ -1791,7 +1791,7 @@ export class GameScene extends Phaser.Scene {
     const minMultiplier = this.getFireRateFloor();
     if (this.fireRateMultiplier > minMultiplier) {
       // Still room to boost main fire rate.
-      const newMultiplier = Math.max(minMultiplier, this.fireRateMultiplier - 0.1);
+      const newMultiplier = Math.max(minMultiplier, this.fireRateMultiplier - 0.05);
       this.setFireRateMultiplier(newMultiplier);
     } else if (!this.hasFanShot) {
       // Main fire rate maxed → activate fan shooting.
@@ -1811,11 +1811,11 @@ export class GameScene extends Phaser.Scene {
 
     pickup.kill();
     this.playSfx(AUDIO_KEYS.pickup, 0.875);
-    // Boost active weapon animation speed (+20% per pickup, max +200% = 3.0).
+    // Boost active weapon animation speed (+5% per pickup, max +200% = 3.0).
     const MAX_WEAPON_BONUS = 3; // +200%
     const currentRate = this.getActiveWeaponBonusRate();
     if (currentRate < MAX_WEAPON_BONUS) {
-      this.setActiveWeaponBonusRate(Math.min(MAX_WEAPON_BONUS, currentRate + 0.2));
+      this.setActiveWeaponBonusRate(Math.min(MAX_WEAPON_BONUS, currentRate + 0.05));
       this.applyWeaponBonusRate();
     }
   }

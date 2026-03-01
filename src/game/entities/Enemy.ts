@@ -702,6 +702,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       } else if (isFrigate) {
         // Frigate is heavier but should still track the player a bit.
         this.aiMode = "hunt";
+      } else if (isBattlecruiser) {
+        // Battlecruiser should always have some lateral behavior (never "none").
+        const huntChance = this._isElite ? 0.85 : 0.7;
+        this.aiMode = Phaser.Math.FloatBetween(0, 1) < huntChance ? "hunt" : "zigzag";
       } else if (this.kind === "scout") {
         this.aiMode = Phaser.Math.FloatBetween(0, 1) < (this._isElite ? 0.8 : 0.65) ? "zigzag" : "none";
       }
@@ -729,10 +733,18 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
           ? Phaser.Math.Between(70, 120)
           : isFrigate
             ? Phaser.Math.Between(65, 105)
-            : Phaser.Math.Between(90, 150);
-        this.aiHuntK = isTorpedo ? Phaser.Math.FloatBetween(1.2, 1.8) : isFrigate ? Phaser.Math.FloatBetween(1.0, 1.6) : Phaser.Math.FloatBetween(1.6, 2.4);
+            : isBattlecruiser
+              ? Phaser.Math.Between(55, 95)
+              : Phaser.Math.Between(90, 150);
+        this.aiHuntK = isTorpedo
+          ? Phaser.Math.FloatBetween(1.2, 1.8)
+          : isFrigate
+            ? Phaser.Math.FloatBetween(1.0, 1.6)
+            : isBattlecruiser
+              ? Phaser.Math.FloatBetween(0.85, 1.35)
+              : Phaser.Math.FloatBetween(1.6, 2.4);
         this.aiHuntDeadzonePx = Phaser.Math.Between(3, 6);
-        const offsetRange = isTorpedo ? 18 : isFrigate ? 14 : 12;
+        const offsetRange = isTorpedo ? 18 : isFrigate ? 14 : isBattlecruiser ? 10 : 12;
         this.aiHuntTargetOffsetX = Phaser.Math.Between(-offsetRange, offsetRange);
 
         if (this._isElite) {

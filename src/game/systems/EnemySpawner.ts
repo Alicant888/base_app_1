@@ -14,6 +14,7 @@ export class EnemySpawner {
   private formationCooldownUntil = 0;
   private eliteWaveBudget = 0;
   private waveMode: EnemyWaveMode = "normal";
+  private suppressedKinds = new Set<EnemyKind>();
 
   constructor(
     private scene: Phaser.Scene,
@@ -33,11 +34,18 @@ export class EnemySpawner {
     this.formationCooldownUntil = 0;
     this.eliteWaveBudget = 0;
     this.waveMode = "normal";
+    this.suppressedKinds.clear();
   }
 
   /** Scripted spawner mode (used by LevelSectionDirector). */
   setWaveMode(mode: EnemyWaveMode) {
     this.waveMode = mode;
+  }
+
+  /** Temporarily suppress a kind from being spawned by weighted picks / formations. */
+  setKindSuppressed(kind: EnemyKind, suppressed: boolean) {
+    if (suppressed) this.suppressedKinds.add(kind);
+    else this.suppressedKinds.delete(kind);
   }
 
   /** True once the Dreadnought has been spawned and then destroyed. */
@@ -175,11 +183,12 @@ export class EnemySpawner {
     const speedY = Phaser.Math.Between(minSpd, maxSpd);
 
     // Weighted random pick.
-    const entries = this.levelConfig.enemies;
-    const totalWeight = entries.reduce((sum, e) => sum + e.weight, 0);
+    const entries = this.levelConfig.enemies.filter(e => !this.suppressedKinds.has(e.kind));
+    const effectiveEntries = entries.length ? entries : this.levelConfig.enemies;
+    const totalWeight = effectiveEntries.reduce((sum, e) => sum + e.weight, 0);
     let r = Phaser.Math.FloatBetween(0, totalWeight);
-    let picked = entries[entries.length - 1];
-    for (const entry of entries) {
+    let picked = effectiveEntries[effectiveEntries.length - 1];
+    for (const entry of effectiveEntries) {
       r -= entry.weight;
       if (r <= 0) {
         picked = entry;
@@ -188,6 +197,12 @@ export class EnemySpawner {
     }
 
     const kind: EnemyKind = picked.kind;
+
+    // Heavy ships should arrive with an escort to create more interesting engagements.
+    if ((kind === "battlecruiser" || kind === "frigate") && !this.suppressedKinds.has(kind)) {
+      const escorted = this.spawnCapitalEscortWave(kind, picked.shieldChance, speedY);
+      if (escorted > 0) return escorted;
+    }
 
     const formationSpawned = this.trySpawnFormation(time, picked.kind, picked.shieldChance, speedY);
     if (formationSpawned > 0) return formationSpawned;
@@ -212,6 +227,7 @@ export class EnemySpawner {
   ): number {
     if (!this.levelConfig) return 0;
     if (time < this.formationCooldownUntil) return 0;
+    if (this.suppressedKinds.has(kind)) return 0;
 
     const level = this.levelConfig.level;
 
@@ -233,8 +249,9 @@ export class EnemySpawner {
 
     // Gate some formations to later levels / require escorts to exist in this level.
     if (kind === "bomber" && level < 4) return 0;
-    if (kind === "frigate" && (level < 4 || !this.isKindAllowed("fighter"))) return 0;
-    if (kind === "battlecruiser" && level < 7) return 0;
+    const hasBasicEscorts = this.isKindAllowed("scout") || this.isKindAllowed("fighter");
+    if (kind === "frigate" && (level < 4 || !hasBasicEscorts)) return 0;
+    if (kind === "battlecruiser" && (level < 7 || !hasBasicEscorts)) return 0;
 
     // Level- and kind-based formation chance.
     const levelFactor = level <= 3 ? 0.65 : level <= 7 ? 0.85 : 1.0;
@@ -259,7 +276,9 @@ export class EnemySpawner {
       // Cooldown prevents back-to-back waves.
       const minCd = this.waveMode === "formations" ? 1600 : this.waveMode === "hazard" ? 3000 : 2400;
       const maxCd = this.waveMode === "formations" ? 3800 : this.waveMode === "hazard" ? 6200 : 5200;
-      this.formationCooldownUntil = time + Phaser.Math.Between(minCd, maxCd);
+      const baseCd = Phaser.Math.Between(minCd, maxCd);
+      const sizeMult = spawned >= 14 ? 1.9 : spawned >= 10 ? 1.6 : spawned >= 6 ? 1.3 : 1;
+      this.formationCooldownUntil = time + Math.round(baseCd * sizeMult);
     }
     return spawned;
   }
@@ -273,27 +292,35 @@ export class EnemySpawner {
     try {
       const level = this.levelConfig.level;
 
+      // Extra-large coordinated waves (mostly used when LevelSectionDirector sets formations-mode).
+      if (this.waveMode === "formations") {
+        const roll = Phaser.Math.FloatBetween(0, 1);
+        const massChance =
+          kind === "scout"
+            ? level >= 6
+              ? 0.22
+              : 0.12
+            : kind === "fighter"
+              ? level >= 8
+                ? 0.18
+                : 0.1
+              : kind === "torpedo"
+                ? level >= 9
+                  ? 0.16
+                  : 0.08
+                : 0;
+        if (massChance > 0 && roll < massChance) {
+          const spawned = this.spawnBigWave(kind, shieldChance, baseSpeedY);
+          if (spawned > 0) return spawned;
+        }
+      }
+
       // Mixed formations (leader + escorts).
       if (kind === "frigate") {
         return this.spawnFrigateEscort(shieldChance, baseSpeedY);
       }
       if (kind === "battlecruiser") {
-        const canFrigateWing = this.isKindAllowed("frigate");
-        const canScoutScreen = this.isKindAllowed("scout");
-
-        // Prefer frigate wing sometimes (feels like a heavier "task force").
-        if (canFrigateWing && (!canScoutScreen || Phaser.Math.FloatBetween(0, 1) < 0.55)) {
-          const spawned = this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
-          if (spawned > 0) return spawned;
-        }
-        if (canScoutScreen) {
-          const spawned = this.spawnBattlecruiserScreen(shieldChance, baseSpeedY);
-          if (spawned > 0) return spawned;
-        }
-        if (canFrigateWing) {
-          return this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
-        }
-        return 0;
+        return this.spawnBattlecruiserEscort(shieldChance, baseSpeedY);
       }
       if (kind === "bomber") {
         return this.spawnBomberRush(baseSpeedY);
@@ -415,74 +442,102 @@ export class EnemySpawner {
   }
 
   private spawnFrigateEscort(frigateShieldChance: number, baseSpeedY: number): number {
-    if (!this.levelConfig) return 0;
-    if (!this.isKindAllowed("fighter")) return 0;
-
-    const baseY = -24;
-    const wingDx = Phaser.Math.Between(56, 66);
-    const margin = 24 + wingDx;
-    const centerX = Phaser.Math.Between(margin, GAME_WIDTH - margin);
-
-    const fighterShieldChance = this.getShieldChanceFor("fighter");
-
-    let spawned = 0;
-    // Leader.
-    if (this.spawnEnemyAt(centerX, baseY, baseSpeedY, "frigate", frigateShieldChance)) spawned += 1;
-
-    // Escorts: slightly behind so they "wrap" the leader.
-    const escortSpeedY = baseSpeedY + 15;
-    const yJitter = Phaser.Math.Between(-4, 4);
-    if (this.spawnEnemyAt(centerX - wingDx, baseY - 24 + yJitter, escortSpeedY, "fighter", fighterShieldChance)) spawned += 1;
-    if (this.spawnEnemyAt(centerX + wingDx, baseY - 34 - yJitter, escortSpeedY, "fighter", fighterShieldChance)) spawned += 1;
-
-    return spawned;
+    return this.spawnCapitalEscortWave("frigate", frigateShieldChance, baseSpeedY);
   }
 
-  private spawnBattlecruiserScreen(battlecruiserShieldChance: number, baseSpeedY: number): number {
-    if (!this.levelConfig) return 0;
-    if (!this.isKindAllowed("scout")) return 0;
-
-    const baseY = -24;
-    const wideDx = Phaser.Math.Between(70, 82);
-    const midDx = Phaser.Math.Between(34, 44);
-    const margin = 24 + wideDx;
-    const centerX = Phaser.Math.Between(margin, GAME_WIDTH - margin);
-
-    const scoutShieldChance = this.getShieldChanceFor("scout");
-
-    let spawned = 0;
-    // Leader.
-    if (this.spawnEnemyAt(centerX, baseY, baseSpeedY, "battlecruiser", battlecruiserShieldChance)) spawned += 1;
-
-    // Screen (4 scouts) — staggered to avoid perfect symmetry.
-    const scoutSpeedY = baseSpeedY + 20;
-    if (this.spawnEnemyAt(centerX - wideDx, baseY - 10, scoutSpeedY, "scout", scoutShieldChance)) spawned += 1;
-    if (this.spawnEnemyAt(centerX + wideDx, baseY - 22, scoutSpeedY, "scout", scoutShieldChance)) spawned += 1;
-    if (this.spawnEnemyAt(centerX - midDx, baseY - 46, scoutSpeedY, "scout", scoutShieldChance)) spawned += 1;
-    if (this.spawnEnemyAt(centerX + midDx, baseY - 58, scoutSpeedY, "scout", scoutShieldChance)) spawned += 1;
-
-    return spawned;
+  private spawnBattlecruiserEscort(battlecruiserShieldChance: number, baseSpeedY: number): number {
+    return this.spawnCapitalEscortWave("battlecruiser", battlecruiserShieldChance, baseSpeedY);
   }
 
-  private spawnBattlecruiserFrigateWing(battlecruiserShieldChance: number, baseSpeedY: number): number {
+  private getEscortScoutMax(level: number, leaderKind: "frigate" | "battlecruiser"): number {
+    const hardMax = 20;
+    const softMax = level < 6 ? 10 : level < 8 ? 12 : level < 10 ? 14 : level < 12 ? 16 : hardMax;
+    const bonus = leaderKind === "battlecruiser" && level >= 10 ? 2 : 0;
+    return Math.max(8, Math.min(hardMax, softMax + bonus));
+  }
+
+  private getEscortFighterMax(level: number, leaderKind: "frigate" | "battlecruiser"): number {
+    const hardMax = 10;
+    const softMax = level < 6 ? 5 : level < 8 ? 6 : level < 10 ? 8 : hardMax;
+    const bonus = leaderKind === "battlecruiser" && level >= 8 ? 1 : 0;
+    return Math.max(3, Math.min(hardMax, softMax + bonus));
+  }
+
+  private spawnCapitalEscortWave(
+    leaderKind: Extract<EnemyKind, "frigate" | "battlecruiser">,
+    leaderShieldChance: number,
+    baseSpeedY: number,
+  ): number {
     if (!this.levelConfig) return 0;
-    if (!this.isKindAllowed("frigate")) return 0;
 
-    const baseY = -24;
-    const wingDx = Phaser.Math.Between(98, 116);
-    const margin = 24 + wingDx;
-    const centerX = Phaser.Math.Between(margin, GAME_WIDTH - margin);
+    const canScout = this.isKindAllowed("scout");
+    const canFighter = this.isKindAllowed("fighter");
+    if (!canScout && !canFighter) return 0;
 
-    const frigateShieldChance = this.getShieldChanceFor("frigate");
+    const escortKind: Extract<EnemyKind, "scout" | "fighter"> =
+      canScout && canFighter
+        ? Phaser.Math.FloatBetween(0, 1) < (leaderKind === "battlecruiser" ? 0.65 : 0.55)
+          ? "scout"
+          : "fighter"
+        : canScout
+          ? "scout"
+          : "fighter";
+
+    const level = this.levelConfig.level;
+
+    const escortCount =
+      escortKind === "scout"
+        ? Phaser.Math.Between(8, this.getEscortScoutMax(level, leaderKind))
+        : Phaser.Math.Between(3, this.getEscortFighterMax(level, leaderKind));
+
+    const escortShieldChance = this.getShieldChanceFor(escortKind);
+
+    const frontY = -14;
+    const rowSpacing = 26;
+    const dx = escortKind === "fighter" ? 30 : 26;
+
+    const perRowMax = Math.max(3, Math.min(12, Math.floor((GAME_WIDTH - 48) / dx) + 1));
+    const desiredMin = escortKind === "scout" ? 6 : 4;
+    const desiredMax = escortKind === "scout" ? 12 : 9;
+    const perRowMin = Math.min(perRowMax, desiredMin);
+    const perRowMaxClamped = Math.min(perRowMax, desiredMax);
+    const perRow = Phaser.Math.Between(perRowMin, perRowMaxClamped);
+    const perRowUsed = Math.max(1, Math.min(perRow, escortCount));
+
+    // Pick a centerX that fits the widest row.
+    const span = dx * (perRowUsed - 1);
+    const halfSpan = span * 0.5;
+    const margin = 24 + halfSpan;
+    const centerX = Phaser.Math.Between(Math.ceil(margin), Math.floor(GAME_WIDTH - margin));
 
     let spawned = 0;
-    // Leader.
-    if (this.spawnEnemyAt(centerX, baseY, baseSpeedY, "battlecruiser", battlecruiserShieldChance)) spawned += 1;
 
-    // Wings: slightly behind to feel like escorts.
-    const wingSpeedY = baseSpeedY + 15;
-    if (this.spawnEnemyAt(centerX - wingDx, baseY - 42, wingSpeedY, "frigate", frigateShieldChance)) spawned += 1;
-    if (this.spawnEnemyAt(centerX + wingDx, baseY - 60, wingSpeedY, "frigate", frigateShieldChance)) spawned += 1;
+    // Escort screen spawns in front of the leader (closer to the player).
+    const escortSpeedYBase = baseSpeedY + (escortKind === "scout" ? 28 : 20);
+    const rows = Math.ceil(escortCount / perRowUsed);
+    let remaining = escortCount;
+    for (let row = 0; row < rows && remaining > 0; row += 1) {
+      const count = Math.min(perRowUsed, remaining);
+      const rowSpan = dx * (count - 1);
+      const startX = centerX - rowSpan * 0.5;
+      const y = frontY - row * rowSpacing;
+      const speedY = escortSpeedYBase + row * 6;
+
+      for (let i = 0; i < count; i += 1) {
+        const x = startX + i * dx;
+        const xJitter = escortKind === "scout" ? Phaser.Math.FloatBetween(-2, 2) : Phaser.Math.FloatBetween(-1, 1);
+        const yJitter = Phaser.Math.FloatBetween(-2, 2);
+        if (this.spawnEnemyAt(x + xJitter, y + yJitter, speedY, escortKind, escortShieldChance)) spawned += 1;
+      }
+
+      remaining -= count;
+    }
+
+    // Leader behind the screen.
+    const leadGap = leaderKind === "battlecruiser" ? Phaser.Math.Between(72, 96) : Phaser.Math.Between(56, 82);
+    const leaderY = frontY - (rows - 1) * rowSpacing - leadGap;
+    const leaderX = centerX + Phaser.Math.FloatBetween(-6, 6);
+    if (this.spawnEnemyAt(leaderX, leaderY, baseSpeedY, leaderKind, leaderShieldChance)) spawned += 1;
 
     return spawned;
   }
@@ -537,6 +592,90 @@ export class EnemySpawner {
     enemy.spawn(x, y, spd, this.enemyBullets, kind, hasShield, undefined, undefined, isElite);
     if (!isElite) this.maybeEnableMiniBoss(enemy, kind, hasShield);
     return true;
+  }
+
+  private spawnBigWave(kind: EnemyKind, shieldChance: number, baseSpeedY: number): number {
+    const count =
+      kind === "scout"
+        ? Phaser.Math.Between(10, 20)
+        : kind === "fighter"
+          ? Phaser.Math.Between(3, 10)
+          : kind === "torpedo"
+            ? Phaser.Math.Between(3, 5)
+            : 0;
+    if (count <= 0) return 0;
+
+    const useV = Phaser.Math.FloatBetween(0, 1) < 0.55;
+    return useV ? this.spawnWedge(kind, shieldChance, baseSpeedY, count) : this.spawnMultiRowLine(kind, shieldChance, baseSpeedY, count);
+  }
+
+  private spawnWedge(kind: EnemyKind, shieldChance: number, baseSpeedY: number, count: number): number {
+    const baseY = -24;
+    const dx = kind === "fighter" ? 30 : kind === "torpedo" ? 34 : 26;
+    const dy = 26;
+
+    // Wedge has 1 + 3 + 5 + ... ships; find the smallest wedge that can hold `count`.
+    let arm = 0;
+    while ((arm + 1) * (arm + 1) < count) arm += 1;
+    arm = Math.min(arm, kind === "scout" ? 5 : 4);
+
+    const margin = 24 + arm * dx;
+    if (margin >= GAME_WIDTH * 0.5) return 0;
+    const centerX = Phaser.Math.Between(Math.ceil(margin), Math.floor(GAME_WIDTH - margin));
+
+    let spawned = 0;
+    for (let row = 0; row <= arm && spawned < count; row += 1) {
+      const rowCount = 1 + row * 2;
+      const startX = centerX - row * dx;
+      const y = baseY - row * dy;
+      const speedY = baseSpeedY + row * 8;
+
+      for (let i = 0; i < rowCount && spawned < count; i += 1) {
+        const x = startX + i * dx;
+        const yJitter = Phaser.Math.Between(-2, 2);
+        if (this.spawnEnemyAt(x, y + yJitter, speedY, kind, shieldChance)) spawned += 1;
+      }
+    }
+
+    return spawned;
+  }
+
+  private spawnMultiRowLine(kind: EnemyKind, shieldChance: number, baseSpeedY: number, count: number): number {
+    const baseY = -24;
+    const rowSpacing = 26;
+    const dx = kind === "fighter" ? 30 : kind === "torpedo" ? 34 : 26;
+
+    const perRowMax = Math.max(3, Math.min(12, Math.floor((GAME_WIDTH - 48) / dx) + 1));
+    const desiredPerRow = kind === "scout" ? 10 : kind === "fighter" ? 8 : 5;
+    const perRow = Math.max(1, Math.min(count, Math.min(perRowMax, desiredPerRow)));
+
+    const span = dx * (perRow - 1);
+    const halfSpan = span * 0.5;
+    const margin = 24 + halfSpan;
+    if (margin >= GAME_WIDTH * 0.5) return 0;
+    const centerX = Phaser.Math.Between(Math.ceil(margin), Math.floor(GAME_WIDTH - margin));
+
+    const rows = Math.ceil(count / perRow);
+    let spawned = 0;
+    let remaining = count;
+
+    for (let row = 0; row < rows && remaining > 0; row += 1) {
+      const rowCount = Math.min(perRow, remaining);
+      const rowSpan = dx * (rowCount - 1);
+      const startX = centerX - rowSpan * 0.5;
+      const y = baseY - row * rowSpacing;
+      const speedY = baseSpeedY + row * 8;
+
+      for (let i = 0; i < rowCount; i += 1) {
+        const x = startX + i * dx;
+        const yJitter = Phaser.Math.Between(-2, 2);
+        if (this.spawnEnemyAt(x, y + yJitter, speedY, kind, shieldChance)) spawned += 1;
+      }
+
+      remaining -= rowCount;
+    }
+
+    return spawned;
   }
 
   private spawnV(kind: EnemyKind, shieldChance: number, baseSpeedY: number, arms: number): number {

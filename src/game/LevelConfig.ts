@@ -13,29 +13,29 @@ export type EnemyWaveMode = "normal" | "rush" | "formations" | "hazard";
 /** Scripted level section (distance-based). */
 export type LevelSection =
   | {
-      type: "meteorStorm";
-      /** Inclusive start distance (scroll units). */
-      from: number;
-      /** Exclusive end distance (scroll units). */
-      to: number;
-      /** 1..3 (higher = denser + faster meteors). */
-      intensity?: 1 | 2 | 3;
-    }
+    type: "meteorStorm";
+    /** Inclusive start distance (scroll units). */
+    from: number;
+    /** Exclusive end distance (scroll units). */
+    to: number;
+    /** 1..3 (higher = denser + faster meteors). */
+    intensity?: 1 | 2 | 3;
+  }
   | {
-      type: "asteroidWall";
-      from: number;
-      to: number;
-      /** Time between wall rows (ms). */
-      intervalMs?: number;
-      /** Gap width in pixels. */
-      gapWidthPx?: number;
-    }
+    type: "asteroidWall";
+    from: number;
+    to: number;
+    /** Time between wall rows (ms). */
+    intervalMs?: number;
+    /** Gap width in pixels. */
+    gapWidthPx?: number;
+  }
   | {
-      type: "waveMode";
-      from: number;
-      to: number;
-      mode: EnemyWaveMode;
-    };
+    type: "waveMode";
+    from: number;
+    to: number;
+    mode: EnemyWaveMode;
+  };
 
 /** Spawn-weight + shield probability for one enemy kind inside a level. */
 export interface EnemySpawnRate {
@@ -133,8 +133,8 @@ export const LEVELS: LevelConfig[] = [
     level: 2, distanceGoal: 400, bgSet: "none",
     asteroidMultiplier: 0, spawnInterval: [750, 1100], enemySpeed: [75, 130],
     enemies: [
-      { kind: "scout", weight: 0.85, shieldChance: 0 },
-      { kind: "fighter", weight: 0.15, shieldChance: 0 },
+      { kind: "scout", weight: 0.75, shieldChance: 0 },
+      { kind: "fighter", weight: 0.25, shieldChance: 0 },
     ],
     drops: { health: 0.02, shield: 0.1, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
@@ -146,9 +146,9 @@ export const LEVELS: LevelConfig[] = [
     level: 3, distanceGoal: 400, bgSet: "none",
     asteroidMultiplier: 0, spawnInterval: [700, 1050], enemySpeed: [80, 140],
     enemies: [
-      { kind: "scout", weight: 0.60, shieldChance: 0.05 },
-      { kind: "fighter", weight: 0.30, shieldChance: 0 },
-      { kind: "bomber", weight: 0.10, shieldChance: 1 },
+      { kind: "scout", weight: 0.50, shieldChance: 0.05 },
+      { kind: "fighter", weight: 0.35, shieldChance: 0 },
+      { kind: "bomber", weight: 0.15, shieldChance: 1 },
     ],
     drops: { health: 0.02, shield: 0.1, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
@@ -235,10 +235,10 @@ export const LEVELS: LevelConfig[] = [
     asteroidMultiplier: 3.0, spawnInterval: [500, 800], enemySpeed: [100, 170],
     enemies: [
       { kind: "scout", weight: 0.10, shieldChance: 0.20 },
-      { kind: "fighter", weight: 0.15, shieldChance: 0.40 },
+      { kind: "fighter", weight: 0.20, shieldChance: 0.40 },
       { kind: "torpedo", weight: 0.15, shieldChance: 0.50 },
       { kind: "frigate", weight: 0.25, shieldChance: 0.60 },
-      { kind: "battlecruiser", weight: 0.15, shieldChance: 0.30 },
+      { kind: "battlecruiser", weight: 0.1, shieldChance: 0.30 },
       { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
     drops: { health: 0.02, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
@@ -257,10 +257,10 @@ export const LEVELS: LevelConfig[] = [
     enemies: [
       { kind: "scout", weight: 0.05, shieldChance: 0.25 },
       { kind: "fighter", weight: 0.10, shieldChance: 0.50 },
-      { kind: "torpedo", weight: 0.15, shieldChance: 0.60 },
-      { kind: "frigate", weight: 0.25, shieldChance: 0.70 },
-      { kind: "battlecruiser", weight: 0.25, shieldChance: 0.50 },
-      { kind: "bomber", weight: 0.20, shieldChance: 1 },
+      { kind: "torpedo", weight: 0.20, shieldChance: 0.60 },
+      { kind: "frigate", weight: 0.30, shieldChance: 0.70 },
+      { kind: "battlecruiser", weight: 0.1, shieldChance: 0.50 },
+      { kind: "bomber", weight: 0.25, shieldChance: 1 },
     ],
     drops: { health: 0.02, shield: 0.10, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     sections: [
@@ -277,10 +277,10 @@ export const LEVELS: LevelConfig[] = [
     asteroidMultiplier: 4, spawnInterval: [480, 720], enemySpeed: [105, 180],
     enemies: [
       { kind: "scout", weight: 0.05, shieldChance: 0.30 },
-      { kind: "fighter", weight: 0.10, shieldChance: 0.55 },
+      { kind: "fighter", weight: 0.15, shieldChance: 0.55 },
       { kind: "torpedo", weight: 0.15, shieldChance: 0.65 },
-      { kind: "frigate", weight: 0.25, shieldChance: 0.75 },
-      { kind: "battlecruiser", weight: 0.25, shieldChance: 0.55 },
+      { kind: "frigate", weight: 0.35, shieldChance: 0.75 },
+      { kind: "battlecruiser", weight: 0.1, shieldChance: 0.55 },
       { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
     drops: { health: 0.02, shield: 0.10, firingRate: 0.02, firingRate2: 0.02, ...NWD },
@@ -300,8 +300,8 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.05, shieldChance: 0.35 },
       { kind: "fighter", weight: 0.10, shieldChance: 0.55 },
       { kind: "torpedo", weight: 0.15, shieldChance: 0.70 },
-      { kind: "frigate", weight: 0.30, shieldChance: 0.80 },
-      { kind: "battlecruiser", weight: 0.25, shieldChance: 0.60 },
+      { kind: "frigate", weight: 0.40, shieldChance: 0.80 },
+      { kind: "battlecruiser", weight: 0.15, shieldChance: 0.60 },
       { kind: "bomber", weight: 0.15, shieldChance: 1 },
     ],
     drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
@@ -317,9 +317,9 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.05, shieldChance: 0.40 },
       { kind: "fighter", weight: 0.10, shieldChance: 0.60 },
       { kind: "torpedo", weight: 0.10, shieldChance: 0.70 },
-      { kind: "frigate", weight: 0.30, shieldChance: 0.85 },
-      { kind: "battlecruiser", weight: 0.30, shieldChance: 0.65 },
-      { kind: "bomber", weight: 0.15, shieldChance: 1 },
+      { kind: "frigate", weight: 0.40, shieldChance: 0.85 },
+      { kind: "battlecruiser", weight: 0.15, shieldChance: 0.65 },
+      { kind: "bomber", weight: 0.2, shieldChance: 1 },
     ],
     drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
     isBossLevel: false,
@@ -334,9 +334,9 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.05, shieldChance: 0.45 },
       { kind: "fighter", weight: 0.10, shieldChance: 0.65 },
       { kind: "torpedo", weight: 0.10, shieldChance: 0.75 },
-      { kind: "frigate", weight: 0.30, shieldChance: 0.90 },
-      { kind: "battlecruiser", weight: 0.30, shieldChance: 0.70 },
-      { kind: "bomber", weight: 0.15, shieldChance: 1 },
+      { kind: "frigate", weight: 0.35, shieldChance: 0.90 },
+      { kind: "battlecruiser", weight: 0.20, shieldChance: 0.70 },
+      { kind: "bomber", weight: 0.2, shieldChance: 1 },
     ],
     drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
     isBossLevel: false,
@@ -351,9 +351,9 @@ export const LEVELS: LevelConfig[] = [
       { kind: "scout", weight: 0.05, shieldChance: 0.50 },
       { kind: "fighter", weight: 0.10, shieldChance: 0.70 },
       { kind: "torpedo", weight: 0.10, shieldChance: 0.80 },
-      { kind: "frigate", weight: 0.25, shieldChance: 0.90 },
-      { kind: "battlecruiser", weight: 0.35, shieldChance: 0.75 },
-      { kind: "bomber", weight: 0.15, shieldChance: 1 },
+      { kind: "frigate", weight: 0.35, shieldChance: 0.90 },
+      { kind: "battlecruiser", weight: 0.20, shieldChance: 0.75 },
+      { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
     drops: { health: 0.05, shield: 0.20, firingRate: 0.02, firingRate2: 0.02, ...NWD },
     isBossLevel: false,
@@ -369,8 +369,8 @@ export const LEVELS: LevelConfig[] = [
       { kind: "fighter", weight: 0.10, shieldChance: 0.70 },
       { kind: "torpedo", weight: 0.10, shieldChance: 0.80 },
       { kind: "frigate", weight: 0.25, shieldChance: 0.90 },
-      { kind: "battlecruiser", weight: 0.35, shieldChance: 0.90 },
-      { kind: "bomber", weight: 0.15, shieldChance: 1 },
+      { kind: "battlecruiser", weight: 0.25, shieldChance: 0.90 },
+      { kind: "bomber", weight: 0.25, shieldChance: 1 },
     ],
     drops: { health: 0.05, shield: 0.20, firingRate: 0.1, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
@@ -382,14 +382,14 @@ export const LEVELS: LevelConfig[] = [
     level: 16, distanceGoal: 600, bgSet: "planets",
     asteroidMultiplier: 3.5, spawnInterval: [430, 620], enemySpeed: [115, 200],
     enemies: [
-      { kind: "scout", weight: 0.05, shieldChance: 1 },
+      { kind: "scout", weight: 0.01, shieldChance: 1 },
       { kind: "fighter", weight: 0.10, shieldChance: 1 },
-      { kind: "torpedo", weight: 0.10, shieldChance: 1 },
+      { kind: "torpedo", weight: 0.19, shieldChance: 1 },
       { kind: "frigate", weight: 0.25, shieldChance: 1 },
-      { kind: "battlecruiser", weight: 0.35, shieldChance: 1 },
-      { kind: "bomber", weight: 0.15, shieldChance: 1 },
+      { kind: "battlecruiser", weight: 0.25, shieldChance: 1 },
+      { kind: "bomber", weight: 0.20, shieldChance: 1 },
     ],
-    drops: { health: 0.05, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
+    drops: { health: 0.15, shield: 0.20, firingRate: 0.01, firingRate2: 0.01, ...NWD },
     isBossLevel: false,
     bossAfterDistance: true,
     bossHp: 5000, bossShieldHp: 5000, escortWaveIntervalMs: 4_000,
