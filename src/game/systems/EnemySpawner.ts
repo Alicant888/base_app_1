@@ -12,6 +12,7 @@ export class EnemySpawner {
   private nextEscortWaveAt = 0;
   private escortWaveIndex = 0;
   private formationCooldownUntil = 0;
+  private eliteWaveBudget = 0;
 
   constructor(
     private scene: Phaser.Scene,
@@ -29,6 +30,7 @@ export class EnemySpawner {
     this.nextEscortWaveAt = 0;
     this.nextSpawnAt = 0;
     this.formationCooldownUntil = 0;
+    this.eliteWaveBudget = 0;
   }
 
   /** True once the Dreadnought has been spawned and then destroyed. */
@@ -186,9 +188,10 @@ export class EnemySpawner {
 
     const enemy = this.enemies.get(x, y) as Enemy | null;
     if (!enemy) return 0;
-    enemy.spawn(x, y, speedY, this.enemyBullets, kind, hasShield);
+    const isElite = this.shouldSpawnElite(kind, false);
+    enemy.spawn(x, y, speedY, this.enemyBullets, kind, hasShield, undefined, undefined, isElite);
 
-    this.maybeEnableMiniBoss(enemy, kind, hasShield);
+    if (!isElite) this.maybeEnableMiniBoss(enemy, kind, hasShield);
 
     return 1;
   }
@@ -253,75 +256,82 @@ export class EnemySpawner {
   private spawnFormation(kind: EnemyKind, shieldChance: number, baseSpeedY: number): number {
     if (!this.levelConfig) return 0;
 
-    const level = this.levelConfig.level;
+    const prevEliteBudget = this.eliteWaveBudget;
+    this.eliteWaveBudget = 1; // at most 1 elite per formation
 
-    // Mixed formations (leader + escorts).
-    if (kind === "frigate") {
-      return this.spawnFrigateEscort(shieldChance, baseSpeedY);
-    }
-    if (kind === "battlecruiser") {
-      const canFrigateWing = this.isKindAllowed("frigate");
-      const canScoutScreen = this.isKindAllowed("scout");
+    try {
+      const level = this.levelConfig.level;
 
-      // Prefer frigate wing sometimes (feels like a heavier "task force").
-      if (canFrigateWing && (!canScoutScreen || Phaser.Math.FloatBetween(0, 1) < 0.55)) {
-        const spawned = this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
-        if (spawned > 0) return spawned;
+      // Mixed formations (leader + escorts).
+      if (kind === "frigate") {
+        return this.spawnFrigateEscort(shieldChance, baseSpeedY);
       }
-      if (canScoutScreen) {
-        const spawned = this.spawnBattlecruiserScreen(shieldChance, baseSpeedY);
-        if (spawned > 0) return spawned;
+      if (kind === "battlecruiser") {
+        const canFrigateWing = this.isKindAllowed("frigate");
+        const canScoutScreen = this.isKindAllowed("scout");
+
+        // Prefer frigate wing sometimes (feels like a heavier "task force").
+        if (canFrigateWing && (!canScoutScreen || Phaser.Math.FloatBetween(0, 1) < 0.55)) {
+          const spawned = this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
+          if (spawned > 0) return spawned;
+        }
+        if (canScoutScreen) {
+          const spawned = this.spawnBattlecruiserScreen(shieldChance, baseSpeedY);
+          if (spawned > 0) return spawned;
+        }
+        if (canFrigateWing) {
+          return this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
+        }
+        return 0;
       }
-      if (canFrigateWing) {
-        return this.spawnBattlecruiserFrigateWing(shieldChance, baseSpeedY);
+      if (kind === "bomber") {
+        return this.spawnBomberRush(baseSpeedY);
       }
-      return 0;
-    }
-    if (kind === "bomber") {
-      return this.spawnBomberRush(baseSpeedY);
-    }
 
-    // Formation selection.
-    // Keep it simple: V-waves, horizontal lines, and flankers.
-    const roll = Phaser.Math.FloatBetween(0, 1);
-    const pattern: "v" | "line" | "pincer" | "column" | "strike" | "escort" =
-      kind === "torpedo"
-        ? roll < 0.28
-          ? "strike"
-          : this.isKindAllowed("fighter") && roll < 0.52
-            ? "escort"
-            : roll < 0.76
-              ? "pincer"
-              : "column"
-        : kind === "fighter"
-          ? (roll < 0.40 ? "pincer" : roll < 0.75 ? "v" : "line")
-          : roll < 0.55
-            ? "v"
-            : roll < 0.85
-              ? "line"
-              : "column";
+      // Formation selection.
+      // Keep it simple: V-waves, horizontal lines, and flankers.
+      const roll = Phaser.Math.FloatBetween(0, 1);
+      const pattern: "v" | "line" | "pincer" | "column" | "strike" | "escort" =
+        kind === "torpedo"
+          ? roll < 0.28
+            ? "strike"
+            : this.isKindAllowed("fighter") && roll < 0.52
+              ? "escort"
+              : roll < 0.76
+                ? "pincer"
+                : "column"
+          : kind === "fighter"
+            ? (roll < 0.40 ? "pincer" : roll < 0.75 ? "v" : "line")
+            : roll < 0.55
+              ? "v"
+              : roll < 0.85
+                ? "line"
+                : "column";
 
-    if (pattern === "strike") {
-      return this.spawnTorpedoBomberWave(shieldChance, baseSpeedY);
-    }
-    if (pattern === "escort") {
-      return this.spawnTorpedoFighterEscort(shieldChance, baseSpeedY);
-    }
-    if (pattern === "pincer") {
-      return this.spawnPincer(kind, shieldChance, baseSpeedY);
-    }
-    if (pattern === "column") {
-      const count = kind === "torpedo" ? 2 : Phaser.Math.Between(2, 3);
-      return this.spawnColumn(kind, shieldChance, baseSpeedY, count);
-    }
-    if (pattern === "line") {
-      const count = kind === "scout" ? (level >= 6 ? 4 : 3) : 3;
-      return this.spawnLine(kind, shieldChance, baseSpeedY, count);
-    }
+      if (pattern === "strike") {
+        return this.spawnTorpedoBomberWave(shieldChance, baseSpeedY);
+      }
+      if (pattern === "escort") {
+        return this.spawnTorpedoFighterEscort(shieldChance, baseSpeedY);
+      }
+      if (pattern === "pincer") {
+        return this.spawnPincer(kind, shieldChance, baseSpeedY);
+      }
+      if (pattern === "column") {
+        const count = kind === "torpedo" ? 2 : Phaser.Math.Between(2, 3);
+        return this.spawnColumn(kind, shieldChance, baseSpeedY, count);
+      }
+      if (pattern === "line") {
+        const count = kind === "scout" ? (level >= 6 ? 4 : 3) : 3;
+        return this.spawnLine(kind, shieldChance, baseSpeedY, count);
+      }
 
-    // V pattern.
-    const arms = kind === "scout" ? (level >= 6 ? 2 : 1) : 1;
-    return this.spawnV(kind, shieldChance, baseSpeedY, arms);
+      // V pattern.
+      const arms = kind === "scout" ? (level >= 6 ? 2 : 1) : 1;
+      return this.spawnV(kind, shieldChance, baseSpeedY, arms);
+    } finally {
+      this.eliteWaveBudget = prevEliteBudget;
+    }
   }
 
   private maybeEnableMiniBoss(enemy: Enemy, kind: EnemyKind, hasShield: boolean) {
@@ -349,6 +359,48 @@ export class EnemySpawner {
   private getShieldChanceFor(kind: EnemyKind): number {
     const entry = this.levelConfig?.enemies?.find(e => e.kind === kind);
     return entry?.shieldChance ?? 0;
+  }
+
+  private shouldSpawnElite(kind: EnemyKind, inFormation: boolean): boolean {
+    if (!this.levelConfig) return false;
+    const level = this.levelConfig.level;
+
+    // Avoid big difficulty spikes early.
+    if (level < 3) return false;
+    if (kind === "dreadnought") return false;
+
+    const baseChance =
+      kind === "scout"
+        ? 0.05
+        : kind === "fighter"
+          ? 0.045
+          : kind === "torpedo"
+            ? 0.035
+            : kind === "frigate"
+              ? 0.03
+              : kind === "bomber"
+                ? 0.025
+                : kind === "battlecruiser"
+                  ? 0.02
+                  : 0;
+
+    const levelBonus = Math.min(0.06, Math.max(0, level - 3) * 0.005);
+    const cap =
+      kind === "battlecruiser"
+        ? 0.04
+        : kind === "bomber"
+          ? 0.05
+          : kind === "frigate"
+            ? 0.06
+            : kind === "torpedo"
+              ? 0.08
+              : kind === "fighter"
+                ? 0.1
+                : 0.12;
+
+    let chance = Math.min(cap, baseChance + levelBonus);
+    if (inFormation) chance *= 0.65;
+    return Phaser.Math.FloatBetween(0, 1) < chance;
   }
 
   private spawnFrigateEscort(frigateShieldChance: number, baseSpeedY: number): number {
@@ -464,8 +516,15 @@ export class EnemySpawner {
 
     const hasShield = Phaser.Math.FloatBetween(0, 1) < shieldChance;
     const spd = Math.max(40, speedY + Phaser.Math.Between(-10, 10));
-    enemy.spawn(x, y, spd, this.enemyBullets, kind, hasShield);
-    this.maybeEnableMiniBoss(enemy, kind, hasShield);
+
+    let isElite = false;
+    if (this.eliteWaveBudget > 0 && this.shouldSpawnElite(kind, true)) {
+      isElite = true;
+      this.eliteWaveBudget = Math.max(0, this.eliteWaveBudget - 1);
+    }
+
+    enemy.spawn(x, y, spd, this.enemyBullets, kind, hasShield, undefined, undefined, isElite);
+    if (!isElite) this.maybeEnableMiniBoss(enemy, kind, hasShield);
     return true;
   }
 

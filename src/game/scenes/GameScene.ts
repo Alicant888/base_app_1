@@ -1496,8 +1496,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   /** XP earned when killing an enemy. */
-  private getXpForKill(kind: EnemyKind): number {
-    return getEnemyXp(kind);
+  private getXpForKill(enemy: Enemy): number {
+    const baseXp = getEnemyXp(enemy.getKind());
+    const eliteMult = enemy.isElite ? 1.5 : 1;
+    return Math.round(baseXp * eliteMult);
   }
 
   private onBulletHitsEnemy(bulletObj: Phaser.GameObjects.GameObject, enemyObj: Phaser.GameObjects.GameObject) {
@@ -1517,7 +1519,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += this.getXpForKill(enemy.getKind());
+      this.score += this.getXpForKill(enemy);
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1545,7 +1547,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += this.getXpForKill(enemy.getKind());
+      this.score += this.getXpForKill(enemy);
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1573,7 +1575,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += getEnemyXp(enemy.getKind());
+      this.score += this.getXpForKill(enemy);
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1601,7 +1603,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += this.getXpForKill(enemy.getKind());
+      this.score += this.getXpForKill(enemy);
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {
@@ -1723,7 +1725,7 @@ export class GameScene extends Phaser.Scene {
       this.spawnExplosion(enemy.x, enemy.y, enemy.getKind());
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
-      this.score += this.getXpForKill(enemy.getKind());
+      this.score += this.getXpForKill(enemy);
       this.scoreText.setText(`${this.score}`);
 
       if (wasMiniBoss) {

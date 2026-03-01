@@ -114,6 +114,14 @@ const DREADNOUGHT_WEAPON_SFX_FRAME_28 = `${SPRITE_FRAMES.dreadnoughtWeaponPrefix
 const MINI_BOSS_HOVER_Y = 160;
 const MINI_BOSS_DRIFT_SPEED = 25;
 
+const ELITE_TINT_DEFAULT = 0xffd166;
+const ELITE_TINT_SNIPER = 0x4cc9f0;
+const ELITE_TINT_BERSERK = 0xff4d6d;
+const DEFAULT_ENEMY_BULLET_SPEED_Y = 240;
+
+const SNIPER_HOLD_MIN_MS = 900;
+const SNIPER_HOLD_MAX_MS = 1450;
+
 // Scout / Fighter / Frigate bullet speed (+50% over default 240).
 const SCOUT_FIGHTER_FRIGATE_BULLET_SPEED = 360;
 
@@ -155,6 +163,7 @@ type TorpedoShipShotConfig = {
 };
 
 type StandardEnemyAiMode = "none" | "zigzag" | "hunt";
+type EliteRole = "none" | "sniper" | "berserk";
 
 // Later you can tune each shot position (offsetX/offsetY) and sync frameIndex independently.
 const TORPEDO_SHIP_SALVO_SHOTS: TorpedoShipShotConfig[] = [
@@ -193,6 +202,10 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   }
   /** Whether the enemy was spawned with a shield (read-only). */
   public get spawnedWithShield() { return this._spawnedWithShield; }
+  /** Elite enemies are rarer, tougher variants (read-only). */
+  public get isElite() { return this._isElite; }
+  /** Elite role controls behavior & tint (read-only). */
+  public get eliteRole() { return this._eliteRole; }
 
   private engineFx: Phaser.GameObjects.Sprite;
   private engineFxL?: Phaser.GameObjects.Sprite;
@@ -210,6 +223,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private shieldSuppressed = false;
   private _spawnedWithShield = false;
   private _isMiniBoss = false;
+  private _isElite = false;
+  private _eliteRole: EliteRole = "none";
+  private baseSpeedY = 0;
+  private sniperHoldUntil = 0;
+  private sniperHoldUsed = false;
 
   // "Standard" enemy AI (non-bomber / non-boss / non-mini-boss).
   private aiMode: StandardEnemyAiMode = "none";
@@ -263,6 +281,35 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       .setVisible(false);
   }
 
+  private applyBaseTint() {
+    if (!this._isElite) {
+      this.clearTint();
+      return;
+    }
+
+    const tint =
+      this._eliteRole === "sniper"
+        ? ELITE_TINT_SNIPER
+        : this._eliteRole === "berserk"
+          ? ELITE_TINT_BERSERK
+          : ELITE_TINT_DEFAULT;
+    this.setTint(tint);
+  }
+
+  private rollEliteRole(kind: EnemyKind): EliteRole {
+    // Roles are meant to be readable and fair; heavy ships lean towards Sniper.
+    if (kind === "bomber") return "berserk";
+    if (kind === "battlecruiser") return "sniper";
+
+    const r = Phaser.Math.FloatBetween(0, 1);
+
+    if (kind === "torpedo") return r < 0.75 ? "sniper" : "berserk";
+    if (kind === "frigate") return r < 0.65 ? "sniper" : "berserk";
+    if (kind === "scout") return r < 0.65 ? "berserk" : "sniper";
+    // fighter
+    return r < 0.5 ? "sniper" : "berserk";
+  }
+
   spawn(
     x: number,
     y: number,
@@ -272,12 +319,18 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     hasShield: boolean,
     hpOverride?: number,
     shieldHpOverride?: number,
+    isElite?: boolean,
   ) {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return;
 
     this.kind = kind;
     this.enemyBullets = enemyBullets;
+    this._isElite = Boolean(isElite) && this.kind !== "dreadnought";
+    this._eliteRole = this._isElite ? this.rollEliteRole(this.kind) : "none";
+    this.baseSpeedY = 0;
+    this.sniperHoldUntil = 0;
+    this.sniperHoldUsed = false;
 
     const isFighter = this.kind === "fighter";
     const isTorpedo = this.kind === "torpedo";
@@ -330,6 +383,20 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this._spawnedWithShield = hasShield || (shieldHpOverride ?? 0) > 0;
     this._isMiniBoss = false;
 
+    if (this._isElite) {
+      const hpMult =
+        this.kind === "scout"
+          ? 2
+          : this.kind === "battlecruiser"
+            ? 1.2
+            : this.kind === "bomber"
+              ? 1.35
+              : 1.5;
+      const shieldMult = this.kind === "battlecruiser" ? 1.15 : 1.25;
+      this.hp = Math.max(1, Math.ceil(this.hp * hpMult));
+      if (this.shieldHp > 0) this.shieldHp = Math.max(1, Math.ceil(this.shieldHp * shieldMult));
+    }
+
     // Bomber lives in FX3 atlas; all others use Enemy atlas.
     if (isBomber) {
       this.setTexture(ATLAS_KEYS.fx3, SPRITE_FRAMES.bomberBase);
@@ -347,8 +414,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
                 : isFighter
                   ? SPRITE_FRAMES.fighterBase
                   : SPRITE_FRAMES.enemyBase,
-      );
+        );
     }
+
+    // Reset pooled tinting (and apply elite tint if needed).
+    this.applyBaseTint();
 
     // Keep large enemies within bounds.
     // Dreadnought is a boss: allow it to go partially off-screen so its center weapon can still reach edge players.
@@ -367,7 +437,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     body.reset(clampedX, spawnY);
 
     body.allowGravity = false;
-    this.setVelocity(0, isDreadnought ? 0 : speedY);
+
+    // Base vertical speed (used by standard enemies; bosses/bombers override it).
+    const eliteSpeedY = this._isElite ? Math.round(speedY * 1.05) : speedY;
+    const sniperSpeedY = this._eliteRole === "sniper" ? Math.round(eliteSpeedY * 0.92) : eliteSpeedY;
+    const finalSpeedY = this._eliteRole === "berserk" ? Math.round(eliteSpeedY * 1.25) : sniperSpeedY;
+    this.baseSpeedY = finalSpeedY;
+
+    this.setVelocity(0, isDreadnought ? 0 : finalSpeedY);
 
     // Smaller, forgiving hitbox.
     const hitboxWMult = isDreadnought
@@ -575,27 +652,44 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       // Torpedo ship should start aiming/firing quickly so it feels like a threat (it only fires once per spawn).
       const minDelayMs = isDreadnought ? 400 : isTorpedo ? 180 : 850;
       const maxDelayMs = isDreadnought ? 633 : isTorpedo ? 320 : 1400;
-      this.nextFireAt = this.scene.time.now + Phaser.Math.Between(minDelayMs, maxDelayMs);
+      const now = this.scene.time.now;
+      const delayMs = Phaser.Math.Between(minDelayMs, maxDelayMs);
+      const eliteAdvanceMs = this._isElite ? Phaser.Math.Between(80, 200) : 0;
+      const roleAdvanceMs = this._eliteRole === "berserk" ? Phaser.Math.Between(120, 260) : 0;
+      const totalAdvanceMs = eliteAdvanceMs + roleAdvanceMs;
+      this.nextFireAt = now + Math.max(120, delayMs - totalAdvanceMs);
     }
 
     // Standard enemies get a small amount of per-spawn movement variety.
     // Keep it lightweight: no pathfinding, just simple lateral modes.
     if (!isBomber && !isDreadnought) {
       if (isFighter) {
-        this.aiMode = Phaser.Math.FloatBetween(0, 1) < 0.95 ? "hunt" : "zigzag";
+        this.aiMode = Phaser.Math.FloatBetween(0, 1) < (this._isElite ? 0.98 : 0.95) ? "hunt" : "zigzag";
       } else if (isTorpedo) {
-        this.aiMode = Phaser.Math.FloatBetween(0, 1) < 0.20 ? "hunt" : "none";
+        const huntChance = this._isElite ? 0.65 : 0.2;
+        this.aiMode = Phaser.Math.FloatBetween(0, 1) < huntChance ? "hunt" : "none";
       } else if (isFrigate) {
         // Frigate is heavier but should still track the player a bit.
         this.aiMode = "hunt";
       } else if (this.kind === "scout") {
-        this.aiMode = Phaser.Math.FloatBetween(0, 1) < 0.65 ? "zigzag" : "none";
+        this.aiMode = Phaser.Math.FloatBetween(0, 1) < (this._isElite ? 0.8 : 0.65) ? "zigzag" : "none";
+      }
+
+      // Elite roles can override the baseline AI selection for readability.
+      if (this._eliteRole === "berserk") {
+        this.aiMode = "hunt";
+      } else if (this._eliteRole === "sniper") {
+        if (this.kind === "scout" || this.kind === "torpedo") this.aiMode = "hunt";
       }
 
       if (this.aiMode === "zigzag") {
         this.aiZigzagDir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
         this.aiZigzagSpeedX = isTorpedo ? Phaser.Math.Between(45, 85) : isFighter ? Phaser.Math.Between(70, 125) : Phaser.Math.Between(40, 80);
         this.aiZigzagNextToggleAt = this.scene.time.now + Phaser.Math.Between(280, 520);
+
+        if (this._isElite) {
+          this.aiZigzagSpeedX = Math.round(this.aiZigzagSpeedX * 1.25);
+        }
       } else if (this.aiMode === "hunt") {
         this.aiHuntMaxSpeedX = isTorpedo
           ? Phaser.Math.Between(70, 120)
@@ -606,6 +700,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.aiHuntDeadzonePx = Phaser.Math.Between(3, 6);
         const offsetRange = isTorpedo ? 18 : isFrigate ? 14 : 12;
         this.aiHuntTargetOffsetX = Phaser.Math.Between(-offsetRange, offsetRange);
+
+        if (this._isElite) {
+          this.aiHuntMaxSpeedX = Math.round(this.aiHuntMaxSpeedX * 1.25);
+          this.aiHuntK = this.aiHuntK * 1.15;
+          this.aiHuntDeadzonePx = Math.max(2, this.aiHuntDeadzonePx - 1);
+          this.aiHuntTargetOffsetX = Math.round(this.aiHuntTargetOffsetX * 0.6);
+        }
+
+        if (this._eliteRole === "sniper") {
+          this.aiHuntTargetOffsetX = Math.round(this.aiHuntTargetOffsetX * 0.35);
+          this.aiHuntDeadzonePx = Math.max(1, this.aiHuntDeadzonePx - 1);
+        } else if (this._eliteRole === "berserk") {
+          this.aiHuntMaxSpeedX = Math.round(this.aiHuntMaxSpeedX * 1.15);
+          this.aiHuntK = this.aiHuntK * 1.12;
+          this.aiHuntTargetOffsetX = Math.round(this.aiHuntTargetOffsetX * 0.15);
+          this.aiHuntDeadzonePx = Math.max(1, this.aiHuntDeadzonePx - 2);
+        }
       }
     }
 
@@ -636,6 +747,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.shieldSuppressed = false;
     this._spawnedWithShield = false;
     this._isMiniBoss = false;
+    this._isElite = false;
+    this._eliteRole = "none";
+    this.baseSpeedY = 0;
+    this.sniperHoldUntil = 0;
+    this.sniperHoldUsed = false;
     this.dreadnoughtState = "idle";
     this.bomberPhase = "approach";
     this.bomberSlowUntil = 0;
@@ -834,7 +950,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Use a real-time setTimeout so the flash clears even when scene time is paused.
     setTimeout(() => {
       if (!this.active) return;
-      this.clearTint();
+      this.applyBaseTint();
     }, 70);
   }
 
@@ -856,6 +972,38 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private updateStandardEnemyAi(time: number): boolean {
     const body = this.body as Phaser.Physics.Arcade.Body | null;
     if (!body) return false;
+
+    // Maintain the base vertical speed unless a role temporarily overrides it.
+    if (this.baseSpeedY > 0) body.velocity.y = this.baseSpeedY;
+
+    // Sniper elites occasionally "hold" to aim (feels intentional + gives the player a read).
+    if (this._eliteRole === "sniper") {
+      const holdTriggerY =
+        this.kind === "battlecruiser"
+          ? 150
+          : this.kind === "frigate"
+            ? 145
+            : this.kind === "torpedo"
+              ? 140
+              : 125;
+
+      if (!this.sniperHoldUsed && this.sniperHoldUntil === 0 && !this.isFiring && this.y >= holdTriggerY) {
+        this.sniperHoldUsed = true;
+        this.sniperHoldUntil = time + Phaser.Math.Between(SNIPER_HOLD_MIN_MS, SNIPER_HOLD_MAX_MS);
+        body.velocity.y = 0;
+
+        // Ensure a shot happens during the hold window.
+        this.nextFireAt = Math.min(this.nextFireAt, time + Phaser.Math.Between(180, 320));
+      }
+
+      if (this.sniperHoldUntil > 0) {
+        if (time < this.sniperHoldUntil) {
+          body.velocity.y = 0;
+        } else {
+          this.sniperHoldUntil = 0;
+        }
+      }
+    }
 
     // Keep enemies readable: don't drift while weapon FX is playing.
     if (this.isFiring) {
@@ -908,6 +1056,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Only for standard enemies (not mini-boss / boss / bomber).
     if (this._isMiniBoss) return false;
     if (this.kind === "bomber" || this.kind === "dreadnought") return false;
+
+    // Elite roles.
+    if (this._eliteRole === "sniper") return true;
+    if (this._eliteRole === "berserk") return this.kind === "torpedo";
+
     return this.kind === "fighter" || this.kind === "torpedo";
   }
 
@@ -925,7 +1078,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const isFrigate = this.kind === "frigate";
     const isBattlecruiser = this.kind === "battlecruiser";
 
-    const offsetRange = isTorpedo ? 18 : isBattlecruiser ? 18 : isFrigate ? 14 : isScout ? 10 : 12;
+    let offsetRange = isTorpedo ? 18 : isBattlecruiser ? 18 : isFrigate ? 14 : isScout ? 10 : 12;
+    if (this._eliteRole === "sniper") offsetRange = Math.max(0, Math.round(offsetRange * 0.25));
     const targetX = Phaser.Math.Clamp(playerX + Phaser.Math.Between(-offsetRange, offsetRange), minX, maxX);
     const dx = targetX - this.x;
     const dist = Math.abs(dx);
@@ -951,6 +1105,22 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // but keep a hard cap so enemies don't get stuck aligning forever.
     const etaMs = (dist / Math.max(1, this.preFireAlignSpeedX)) * 1000;
     this.preFireAlignUntil = time + Math.min(1200, Math.max(260, Math.round(etaMs + 140)));
+
+    if (this._isElite) {
+      this.preFireAlignSpeedX = Math.min(maxSpeedX * 1.15, this.preFireAlignSpeedX * 1.15);
+      this.preFireAlignEpsPx = Math.max(3, this.preFireAlignEpsPx - 1);
+      const eliteEtaMs = (dist / Math.max(1, this.preFireAlignSpeedX)) * 1000;
+      this.preFireAlignUntil = time + Math.min(1000, Math.max(220, Math.round(eliteEtaMs + 120)));
+
+      if (this._eliteRole === "sniper") {
+        this.preFireAlignEpsPx = Math.max(2, this.preFireAlignEpsPx - 1);
+      } else if (this._eliteRole === "berserk") {
+        this.preFireAlignSpeedX = Math.min(maxSpeedX * 1.35, this.preFireAlignSpeedX * 1.2);
+        this.preFireAlignEpsPx = Math.max(4, this.preFireAlignEpsPx);
+        const berserkEtaMs = (dist / Math.max(1, this.preFireAlignSpeedX)) * 1000;
+        this.preFireAlignUntil = time + Math.min(800, Math.max(200, Math.round(berserkEtaMs + 110)));
+      }
+    }
 
     body.velocity.x = Math.sign(dx || 1) * this.preFireAlignSpeedX;
   }
@@ -1231,6 +1401,28 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.weaponFx.play("dreadnought_weapon", true);
   }
 
+  private rollFireCooldownMs(minMs: number, maxMs: number): number {
+    let min = minMs;
+    let max = maxMs;
+
+    if (this._eliteRole === "sniper") {
+      min = Math.round(min * 1.25);
+      max = Math.round(max * 1.45);
+    } else if (this._eliteRole === "berserk") {
+      min = Math.round(min * 0.55);
+      max = Math.round(max * 0.75);
+    }
+
+    // Safety.
+    min = Math.max(120, min);
+    max = Math.max(min, max);
+    return Phaser.Math.Between(min, max);
+  }
+
+  private scheduleNextFire(minMs: number, maxMs: number) {
+    this.nextFireAt = this.scene.time.now + this.rollFireCooldownMs(minMs, maxMs);
+  }
+
   private startFiringSequence() {
     if (!this.enemyBullets) return;
 
@@ -1368,7 +1560,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.weaponFx.removeAllListeners();
 
         this.isFiring = false;
-        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+        this.scheduleNextFire(900, 1600);
       });
 
       this.weaponFx.play("battlecruiser_weapon", true);
@@ -1427,7 +1619,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.weaponFx.removeAllListeners();
 
         this.isFiring = false;
-        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+        this.scheduleNextFire(900, 1600);
       });
 
       this.weaponFx.play("frigate_weapon", true);
@@ -1477,7 +1669,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.weaponFx.removeAllListeners();
 
         this.isFiring = false;
-        this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+        this.scheduleNextFire(900, 1600);
       });
 
       this.weaponFx.play("fighter_weapon_flame", true);
@@ -1491,7 +1683,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       this.spawnBullets();
 
       this.isFiring = false;
-      this.nextFireAt = this.scene.time.now + Phaser.Math.Between(900, 1600);
+      this.scheduleNextFire(900, 1600);
     });
 
     this.weaponFx.play("enemy_weapon_flame", true);
@@ -1501,7 +1693,24 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     if (!this.enemyBullets) return false;
     const bullet = this.enemyBullets.get(x, y) as EnemyBullet | null;
     if (!bullet) return false;
-    bullet.fire(x, y, options);
+
+    let patchedOptions = options;
+    if (this._eliteRole !== "none") {
+      const baseSpeedY = options?.speedY ?? DEFAULT_ENEMY_BULLET_SPEED_Y;
+      const mult =
+        this._eliteRole === "sniper"
+          ? (this.kind === "torpedo" || this.kind === "battlecruiser" ? 1.35 : 1.5)
+          : this._eliteRole === "berserk"
+            ? 1.15
+            : 1;
+
+      if (mult !== 1) {
+        const speedY = Math.min(720, Math.round(baseSpeedY * mult));
+        patchedOptions = { ...(options ?? {}), speedY };
+      }
+    }
+
+    bullet.fire(x, y, patchedOptions);
     return true;
   }
 
