@@ -4353,12 +4353,7 @@ export class GameScene extends Phaser.Scene {
           const area = img.input?.hitArea as Phaser.Geom.Rectangle | undefined;
           if (area) {
             const hitPadding = 10;
-            area.setTo(
-              -img.width * img.originX - hitPadding,
-              -img.height * img.originY - hitPadding,
-              img.width + hitPadding * 2,
-              img.height + hitPadding * 2,
-            );
+            area.setTo(-hitPadding, -hitPadding, img.width + hitPadding * 2, img.height + hitPadding * 2);
           }
           if (img.input) img.input.cursor = "pointer";
           img.on("pointerover", () => img.setTint(0xcccccc));
