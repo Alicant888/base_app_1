@@ -117,10 +117,16 @@ const MINI_BOSS_DRIFT_SPEED = 25;
 const ELITE_TINT_DEFAULT = 0xffd166;
 const ELITE_TINT_SNIPER = 0x4cc9f0;
 const ELITE_TINT_BERSERK = 0xff4d6d;
+const ELITE_TINT_SUPPORT = 0x06d6a0;
 const DEFAULT_ENEMY_BULLET_SPEED_Y = 240;
 
 const SNIPER_HOLD_MIN_MS = 900;
 const SNIPER_HOLD_MAX_MS = 1450;
+
+const SUPPORT_OFFSET_MIN_PX = 56;
+const SUPPORT_OFFSET_MAX_PX = 96;
+const SUPPORT_FLIP_MIN_MS = 1600;
+const SUPPORT_FLIP_MAX_MS = 2800;
 
 // Scout / Fighter / Frigate bullet speed (+50% over default 240).
 const SCOUT_FIGHTER_FRIGATE_BULLET_SPEED = 360;
@@ -163,7 +169,7 @@ type TorpedoShipShotConfig = {
 };
 
 type StandardEnemyAiMode = "none" | "zigzag" | "hunt";
-type EliteRole = "none" | "sniper" | "berserk";
+type EliteRole = "none" | "sniper" | "berserk" | "support";
 
 // Later you can tune each shot position (offsetX/offsetY) and sync frameIndex independently.
 const TORPEDO_SHIP_SALVO_SHOTS: TorpedoShipShotConfig[] = [
@@ -228,6 +234,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
   private baseSpeedY = 0;
   private sniperHoldUntil = 0;
   private sniperHoldUsed = false;
+  private supportOffsetX = 0;
+  private supportFlipAt = 0;
 
   // "Standard" enemy AI (non-bomber / non-boss / non-mini-boss).
   private aiMode: StandardEnemyAiMode = "none";
@@ -292,6 +300,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         ? ELITE_TINT_SNIPER
         : this._eliteRole === "berserk"
           ? ELITE_TINT_BERSERK
+          : this._eliteRole === "support"
+            ? ELITE_TINT_SUPPORT
           : ELITE_TINT_DEFAULT;
     this.setTint(tint);
   }
@@ -304,10 +314,23 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     const r = Phaser.Math.FloatBetween(0, 1);
 
     if (kind === "torpedo") return r < 0.75 ? "sniper" : "berserk";
-    if (kind === "frigate") return r < 0.65 ? "sniper" : "berserk";
-    if (kind === "scout") return r < 0.65 ? "berserk" : "sniper";
+
+    if (kind === "frigate") {
+      if (r < 0.45) return "sniper";
+      if (r < 0.70) return "support";
+      return "berserk";
+    }
+
+    if (kind === "scout") {
+      if (r < 0.45) return "berserk";
+      if (r < 0.80) return "support";
+      return "sniper";
+    }
+
     // fighter
-    return r < 0.5 ? "sniper" : "berserk";
+    if (r < 0.35) return "sniper";
+    if (r < 0.65) return "support";
+    return "berserk";
   }
 
   spawn(
@@ -331,6 +354,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.baseSpeedY = 0;
     this.sniperHoldUntil = 0;
     this.sniperHoldUsed = false;
+    this.supportOffsetX = 0;
+    this.supportFlipAt = 0;
+
+    if (this._eliteRole === "support") {
+      const dir = Phaser.Math.Between(0, 1) === 0 ? -1 : 1;
+      this.supportOffsetX = dir * Phaser.Math.Between(SUPPORT_OFFSET_MIN_PX, SUPPORT_OFFSET_MAX_PX);
+      this.supportFlipAt = this.scene.time.now + Phaser.Math.Between(SUPPORT_FLIP_MIN_MS, SUPPORT_FLIP_MAX_MS);
+    }
 
     const isFighter = this.kind === "fighter";
     const isTorpedo = this.kind === "torpedo";
@@ -680,6 +711,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
         this.aiMode = "hunt";
       } else if (this._eliteRole === "sniper") {
         if (this.kind === "scout" || this.kind === "torpedo") this.aiMode = "hunt";
+      } else if (this._eliteRole === "support") {
+        // Support elites try to flank the player to create crossfire.
+        this.aiMode = "hunt";
       }
 
       if (this.aiMode === "zigzag") {
@@ -716,6 +750,11 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
           this.aiHuntK = this.aiHuntK * 1.12;
           this.aiHuntTargetOffsetX = Math.round(this.aiHuntTargetOffsetX * 0.15);
           this.aiHuntDeadzonePx = Math.max(1, this.aiHuntDeadzonePx - 2);
+        } else if (this._eliteRole === "support") {
+          this.aiHuntMaxSpeedX = Math.round(this.aiHuntMaxSpeedX * 1.05);
+          this.aiHuntK = this.aiHuntK * 1.05;
+          this.aiHuntDeadzonePx = Math.max(2, this.aiHuntDeadzonePx);
+          if (this.supportOffsetX !== 0) this.aiHuntTargetOffsetX = this.supportOffsetX;
         }
       }
     }
@@ -752,6 +791,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     this.baseSpeedY = 0;
     this.sniperHoldUntil = 0;
     this.sniperHoldUsed = false;
+    this.supportOffsetX = 0;
+    this.supportFlipAt = 0;
     this.dreadnoughtState = "idle";
     this.bomberPhase = "approach";
     this.bomberSlowUntil = 0;
@@ -1025,6 +1066,14 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
       const playerXRaw = this.scene.registry.get("playerX");
       const playerX = typeof playerXRaw === "number" ? playerXRaw : this.x;
       const { minX, maxX } = this.getStandardBoundsX();
+
+      // Support elites periodically swap flanks so they don't get stuck on one side.
+      if (this._eliteRole === "support" && this.supportOffsetX !== 0 && time >= this.supportFlipAt) {
+        this.supportOffsetX = -this.supportOffsetX;
+        this.aiHuntTargetOffsetX = this.supportOffsetX;
+        this.supportFlipAt = time + Phaser.Math.Between(SUPPORT_FLIP_MIN_MS, SUPPORT_FLIP_MAX_MS);
+      }
+
       const targetX = Phaser.Math.Clamp(playerX + this.aiHuntTargetOffsetX, minX, maxX);
       const dx = targetX - this.x;
       if (Math.abs(dx) <= this.aiHuntDeadzonePx) {
@@ -1060,6 +1109,7 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     // Elite roles.
     if (this._eliteRole === "sniper") return true;
     if (this._eliteRole === "berserk") return this.kind === "torpedo";
+    if (this._eliteRole === "support") return false;
 
     return this.kind === "fighter" || this.kind === "torpedo";
   }
@@ -1411,6 +1461,9 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
     } else if (this._eliteRole === "berserk") {
       min = Math.round(min * 0.55);
       max = Math.round(max * 0.75);
+    } else if (this._eliteRole === "support") {
+      min = Math.round(min * 0.8);
+      max = Math.round(max * 0.95);
     }
 
     // Safety.
@@ -1702,6 +1755,8 @@ export class Enemy extends Phaser.Physics.Arcade.Sprite {
           ? (this.kind === "torpedo" || this.kind === "battlecruiser" ? 1.35 : 1.5)
           : this._eliteRole === "berserk"
             ? 1.15
+            : this._eliteRole === "support"
+              ? 1.25
             : 1;
 
       if (mult !== 1) {
