@@ -2112,27 +2112,28 @@ export class GameScene extends Phaser.Scene {
     // Each pack unlocks a pair of drops at a fixed base rate.
     const WPN = 0.03; // weapon drop rate per pack
     const ENG = 0.02; // engine drop rate per pack
+    const level = this.currentLevel;
 
     const r = Phaser.Math.FloatBetween(0, 1);
     let threshold = 0;
 
     // Pack: Maxi – Big Space Gun + Big Pulse Engine
-    if (this.packMaxi) {
+    if (this.packMaxi && level >= 12) {
       threshold += WPN; if (r < threshold) return this.spawnBigSpaceGunPickup(x, y);
       threshold += ENG; if (r < threshold) return this.spawnBigPulseEnginePickup(x, y);
     }
     // Pack: Big – Zapper + Burst Engine
-    if (this.packBig) {
+    if (this.packBig && level >= 9) {
       threshold += WPN; if (r < threshold) return this.spawnZapperPickup(x, y);
       threshold += ENG; if (r < threshold) return this.spawnBurstEnginePickup(x, y);
     }
     // Pack: Medium – Rocket + Supercharged Engine
-    if (this.packMedium) {
+    if (this.packMedium && level >= 5) {
       threshold += WPN; if (r < threshold) return this.spawnRocketPickup(x, y);
       threshold += ENG; if (r < threshold) return this.spawnSuperchargedEnginePickup(x, y);
     }
     // Pack: Base – Auto Cannons + Base Engine
-    if (this.packBase) {
+    if (this.packBase && level >= 2) {
       threshold += WPN; if (r < threshold) return this.spawnAutoCannonsPickup(x, y);
       threshold += ENG; if (r < threshold) return this.spawnBaseEnginePickup(x, y);
     }
@@ -2148,9 +2149,11 @@ export class GameScene extends Phaser.Scene {
     threshold += d.firingRate2;
     if (r < threshold) return this.spawnFiringRate2Pickup(x, y);
 
-    // Drone (satellite) pickup — 2% base drop chance, always available.
-    threshold += 0.05;
-    if (r < threshold) return this.spawnDronePickup(x, y);
+    // Drone (satellite) pickup — 5% base drop chance, available starting at level 3.
+    if (level >= 3) {
+      threshold += 0.01;
+      if (r < threshold) return this.spawnDronePickup(x, y);
+    }
 
     threshold += d.shield;
     if (r < threshold) {
