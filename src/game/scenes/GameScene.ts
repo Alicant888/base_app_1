@@ -174,6 +174,9 @@ const DEFAULT_DROPS = {
 const BASE_HP = 5;
 const XP_PACK_HP_BONUS = 5;
 const HUD_EDGE_PADDING = 5;
+const HUD_FONT_SIZE_NORMAL = 16;
+const HUD_FONT_SIZE_COMPACT = 14;
+const HUD_SCORE_COMPACT_THRESHOLD = 19999;
 const LIFE_ICON_START_X = 10;
 const LIFE_ICON_TOP_Y = 10;
 const LIFE_ICON_SCALE = 0.58;
@@ -242,6 +245,7 @@ export class GameScene extends Phaser.Scene {
   private kills = 0;
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
+  private topHudFontSize = HUD_FONT_SIZE_NORMAL;
   private menuBtn!: Phaser.GameObjects.Container;
   private pauseBtn!: Phaser.GameObjects.Container;
   private bottomUIButtons: Phaser.GameObjects.GameObject[] = [];
@@ -954,10 +958,10 @@ export class GameScene extends Phaser.Scene {
         case "bigPulse": this.activateBigPulseEngine(); break;
       }
       // Restore XP from previous level.
-      if (this._pendingSave.score > 0) {
-        this.score = this._pendingSave.score;
-        this.scoreText.setText(`${this.score}`);
-      }
+        if (this._pendingSave.score > 0) {
+          this.score = this._pendingSave.score;
+          this.updateScoreText();
+        }
       // Restore fire-rate multipliers.
       if (this._pendingSave.fireRateMultiplier < 1) {
         this.fireRateMultiplier = this._pendingSave.fireRateMultiplier;
@@ -1535,7 +1539,7 @@ export class GameScene extends Phaser.Scene {
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
       this.score += this.getXpForKill(enemy);
-      this.scoreText.setText(`${this.score}`);
+      this.updateScoreText();
 
       if (wasMiniBoss) {
         this.spawnHealthPickup(enemy.x, enemy.y);
@@ -1563,7 +1567,7 @@ export class GameScene extends Phaser.Scene {
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
       this.score += this.getXpForKill(enemy);
-      this.scoreText.setText(`${this.score}`);
+      this.updateScoreText();
 
       if (wasMiniBoss) {
         this.spawnHealthPickup(enemy.x, enemy.y);
@@ -1591,7 +1595,7 @@ export class GameScene extends Phaser.Scene {
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
       this.score += this.getXpForKill(enemy);
-      this.scoreText.setText(`${this.score}`);
+      this.updateScoreText();
 
       if (wasMiniBoss) {
         this.spawnHealthPickup(enemy.x, enemy.y);
@@ -1619,7 +1623,7 @@ export class GameScene extends Phaser.Scene {
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
       this.score += this.getXpForKill(enemy);
-      this.scoreText.setText(`${this.score}`);
+      this.updateScoreText();
 
       if (wasMiniBoss) {
         this.spawnHealthPickup(enemy.x, enemy.y);
@@ -1741,7 +1745,7 @@ export class GameScene extends Phaser.Scene {
       this.playSfx(AUDIO_KEYS.explosionScout, 0.55);
       this.kills += 1;
       this.score += this.getXpForKill(enemy);
-      this.scoreText.setText(`${this.score}`);
+      this.updateScoreText();
 
       if (wasMiniBoss) {
         this.spawnHealthPickup(enemy.x, enemy.y);
@@ -3306,6 +3310,26 @@ export class GameScene extends Phaser.Scene {
     this.repositionLevelText();
   }
 
+  private updateTopHudFontSize() {
+    const desiredFontSize = this.score >= HUD_SCORE_COMPACT_THRESHOLD
+      ? HUD_FONT_SIZE_COMPACT
+      : HUD_FONT_SIZE_NORMAL;
+
+    if (desiredFontSize === this.topHudFontSize) return;
+    this.topHudFontSize = desiredFontSize;
+
+    // Keep both texts in sync to avoid jarring size differences.
+    this.scoreText?.setFontSize(`${desiredFontSize}px`);
+    this.levelProgressText?.setFontSize(`${desiredFontSize}px`);
+  }
+
+  private updateScoreText() {
+    if (!this.scoreText?.active) return;
+    this.updateTopHudFontSize();
+    this.scoreText.setText(`${this.score}`);
+    this.repositionLevelText();
+  }
+
   /** Keep level text to the left of score text. */
   private repositionLevelText() {
     if (this.levelProgressText && this.scoreText) {
@@ -4386,7 +4410,7 @@ export class GameScene extends Phaser.Scene {
                 this.score -= pack.costPoints;
                 sv3.score = this.score;
                 SaveManager.save(sv3);
-                this.scoreText.setText(`${this.score}`);
+                this.updateScoreText();
                 this.applyPackFlags(sv3, false);
                 if (isShopUiActive()) refreshAll();
               });
