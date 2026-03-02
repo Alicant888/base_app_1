@@ -442,6 +442,7 @@ export class GameScene extends Phaser.Scene {
     this.applyPackFlags(SaveManager.load(), false);
 
     // Reset run state (Scene instances are reused between starts).
+    this.topHudFontSize = HUD_FONT_SIZE_NORMAL;
     this.hp = this.maxHp;
     this.kills = 0;
     this.score = 0;
