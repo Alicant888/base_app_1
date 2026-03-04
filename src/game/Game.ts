@@ -2,6 +2,7 @@ import * as Phaser from "phaser";
 import { GAME_HEIGHT, GAME_WIDTH } from "./config";
 import { GameScene } from "./scenes/GameScene";
 import { MenuScene } from "./scenes/MenuScene";
+import { OnboardingScene } from "./scenes/OnboardingScene";
 import { PreloadScene } from "./scenes/PreloadScene";
 
 export type GameRenderer = "auto" | "canvas" | "webgl";
@@ -53,7 +54,7 @@ export function createGame(parent: HTMLElement, options: CreateGameOptions = {})
       width: initialWidth,
       height: initialHeight,
     },
-    scene: [PreloadScene, MenuScene, GameScene],
+    scene: [PreloadScene, MenuScene, OnboardingScene, GameScene],
   };
 
   if (audioMode === "html5") config.audio = { disableWebAudio: true };

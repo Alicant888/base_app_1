@@ -102,6 +102,7 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
 export class MenuScene extends Phaser.Scene {
   private startButton!: Phaser.GameObjects.Image;
   private menuMusic?: Phaser.Sound.BaseSound;
+  private keepMenuMusicOnShutdown = false;
 
   constructor() {
     super("MenuScene");
@@ -109,6 +110,7 @@ export class MenuScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.setBackgroundColor("#000000");
+    this.keepMenuMusicOnShutdown = false;
 
     // Static menu background image.
     const bg = this.add.image(0, 0, IMAGE_KEYS.menuBackground).setDepth(0);
@@ -165,15 +167,25 @@ export class MenuScene extends Phaser.Scene {
     // Cleanup on scene shutdown.
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off(Phaser.Scale.Events.RESIZE, onResize);
-      this.menuMusic?.stop();
-      this.menuMusic?.destroy();
-      this.menuMusic = undefined;
+      if (!this.keepMenuMusicOnShutdown) {
+        this.menuMusic?.stop();
+        this.menuMusic?.destroy();
+        this.menuMusic = undefined;
+      }
     });
   }
 
   private onStart(level: number, save?: SaveData, showMenu = false) {
     this.unlockAudioOnce();
     this.playClick();
+    const shouldShowOnboarding = !SaveManager.load().hasSeenOnboarding;
+    if (shouldShowOnboarding) {
+      // Keep menu music playing through onboarding (stop it when onboarding finishes).
+      this.keepMenuMusicOnShutdown = true;
+      this.scene.start("OnboardingScene", { level, save, showMenu });
+      return;
+    }
+
     this.menuMusic?.stop();
     this.menuMusic?.destroy();
     this.menuMusic = undefined;
@@ -216,4 +228,3 @@ export class MenuScene extends Phaser.Scene {
     }
   }
 }
-

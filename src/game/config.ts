@@ -31,6 +31,9 @@ export const IMAGE_KEYS = {
   uiPackBig: "ui_pack_big",
   uiPackMaxi: "ui_pack_maxi",
   droneSprite: "drone_satm",
+  onboarding1: "onboarding_1",
+  onboarding2: "onboarding_2",
+  onboarding3: "onboarding_3",
 } as const;
 
 export const AUDIO_KEYS = {

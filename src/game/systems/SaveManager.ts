@@ -12,6 +12,8 @@ const SAVE_KEY = "space_shooter_save";
 
 export interface SaveData {
   currentLevel: number;
+  /** Whether the player has completed (or skipped) the first-time onboarding screens. */
+  hasSeenOnboarding: boolean;
   hasAutoCannons: boolean;
   hasRockets: boolean;
   hasZapper: boolean;
@@ -55,6 +57,7 @@ export interface SaveData {
 
 const DEFAULT_SAVE: SaveData = {
   currentLevel: 1,
+  hasSeenOnboarding: false,
   hasAutoCannons: false,
   hasRockets: false,
   hasZapper: false,
@@ -96,7 +99,10 @@ export class SaveManager {
       const raw = localStorage.getItem(SAVE_KEY);
       if (!raw) return { ...DEFAULT_SAVE };
       const parsed = JSON.parse(raw) as Partial<SaveData>;
-      return { ...DEFAULT_SAVE, ...parsed };
+      const merged = { ...DEFAULT_SAVE, ...parsed };
+      // Backwards-compat: older saves didn't have onboarding flag; don't show onboarding to existing players.
+      if (parsed.hasSeenOnboarding === undefined) merged.hasSeenOnboarding = true;
+      return merged;
     } catch {
       return { ...DEFAULT_SAVE };
     }

@@ -2197,14 +2197,16 @@ export class GameScene extends Phaser.Scene {
     this.destroyWeaponFireEvents();
 
     // Persist progress.
+    const prevSave = SaveManager.load();
     const save: SaveData = {
       currentLevel: Math.min(this.currentLevel + 1, TOTAL_LEVELS),
+      hasSeenOnboarding: prevSave.hasSeenOnboarding,
       hasAutoCannons: this.hasAutoCannons,
       hasRockets: this.hasRockets,
       hasZapper: this.hasZapper,
       hasBigSpaceGun: this.hasBigSpaceGun,
       activeEngineType: this.activeEngineType,
-      highScore: Math.max(this.score, SaveManager.load().highScore),
+      highScore: Math.max(this.score, prevSave.highScore),
       score: this.score,
       fireRateMultiplier: this.fireRateMultiplier,
       hasFanShot: this.hasFanShot,
@@ -2292,14 +2294,16 @@ export class GameScene extends Phaser.Scene {
     this.isGameOver = true;
 
     // Persist current progress so score earned this level is not lost.
+    const prevSave = SaveManager.load();
     const deathSave: SaveData = {
       currentLevel: this.currentLevel,
+      hasSeenOnboarding: prevSave.hasSeenOnboarding,
       hasAutoCannons: this.hasAutoCannons,
       hasRockets: this.hasRockets,
       hasZapper: this.hasZapper,
       hasBigSpaceGun: this.hasBigSpaceGun,
       activeEngineType: this.activeEngineType,
-      highScore: Math.max(this.score, SaveManager.load().highScore),
+      highScore: Math.max(this.score, prevSave.highScore),
       score: this.score,
       fireRateMultiplier: this.fireRateMultiplier,
       hasFanShot: this.hasFanShot,
@@ -4075,6 +4079,7 @@ export class GameScene extends Phaser.Scene {
         const prev = SaveManager.load();
         SaveManager.clear();
         const cleared = SaveManager.load();
+        cleared.hasSeenOnboarding = prev.hasSeenOnboarding;
         cleared.packXp = prev.packXp;
         cleared.packBase = prev.packBase;
         cleared.packMedium = prev.packMedium;
