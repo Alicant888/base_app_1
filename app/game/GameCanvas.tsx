@@ -523,7 +523,7 @@ export function GameCanvas() {
         }}
       />
 
-      {status !== "running" ? (
+      {status === "resume" || status === "error" ? (
         <div
           onClick={status === "resume" ? onResume : undefined}
           onTouchEnd={status === "resume" ? onResume : undefined}
@@ -550,12 +550,7 @@ export function GameCanvas() {
           }}
         >
           <div style={{ textAlign: "center", padding: "16px" }}>
-            {attemptText ? (
-              <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 12 }}>{attemptText}</div>
-            ) : null}
-            {status === "loading" ? (
-              <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: "0.08em" }}>LOADING...</div>
-            ) : status === "resume" ? (
+            {status === "resume" ? (
               <div style={{ fontFamily: "Orbitron, sans-serif", fontSize: 18, fontWeight: 400, color: "#ffffff" }}>
                 TAP TO CONTINUE
               </div>
@@ -568,4 +563,3 @@ export function GameCanvas() {
     </>
   );
 }
-
