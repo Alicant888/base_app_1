@@ -35,10 +35,7 @@ Create a `.env.local` file and add your environment variables:
 
 ```bash
 NEXT_PUBLIC_PROJECT_NAME="Your App Name"
-NEXT_PUBLIC_ONCHAINKIT_API_KEY=<Replace-WITH-YOUR-CDP-API-KEY>
-NEXT_PUBLIC_URL=
-NEXT_PUBLIC_PACKS_CONTRACT_ADDRESS=
-NEXT_PUBLIC_PACK_XP_PRICE_ETH=0.0005
+
 ```
 
 ### 4. Run locally:
