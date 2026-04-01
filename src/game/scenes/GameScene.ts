@@ -247,6 +247,7 @@ export class GameScene extends Phaser.Scene {
   private kills = 0;
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
+  private screenHeightText?: Phaser.GameObjects.Text;
   private topHudFontSize = HUD_FONT_SIZE_NORMAL;
   private menuBtn!: Phaser.GameObjects.Container;
   private pauseBtn!: Phaser.GameObjects.Container;
@@ -1032,6 +1033,7 @@ export class GameScene extends Phaser.Scene {
         this.homeBtn.setScale(this.getPauseUiScale());
         this.homeBtn.setPosition(16, worldH - 16);
       }
+      this.updateScreenHeightText(worldH);
 
 
     };
@@ -3314,8 +3316,32 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(1, 0)
       .setDepth(uiDepth);
 
+    this.screenHeightText = this.add
+      .text(GAME_WIDTH - HUD_EDGE_PADDING, GAME_HEIGHT - HUD_EDGE_PADDING, "", {
+        fontFamily: "Orbitron",
+        fontSize: "10px",
+        color: "#ffffff",
+        stroke: "#000000",
+        strokeThickness: 3,
+      })
+      .setOrigin(1, 1)
+      .setDepth(uiDepth);
+
+    this.updateScreenHeightText(GAME_HEIGHT);
+
     // Position level text to the left of score text.
     this.repositionLevelText();
+  }
+
+  private getDeviceViewportHeightPx() {
+    if (typeof window === "undefined") return Math.round(this.scale.height);
+    return Math.round(window.visualViewport?.height ?? window.innerHeight ?? this.scale.height);
+  }
+
+  private updateScreenHeightText(worldHeight: number) {
+    if (!this.screenHeightText) return;
+    this.screenHeightText.setText(`screen h: ${this.getDeviceViewportHeightPx()}px`);
+    this.screenHeightText.setPosition(GAME_WIDTH - HUD_EDGE_PADDING, worldHeight - HUD_EDGE_PADDING);
   }
 
   private updateTopHudFontSize() {
