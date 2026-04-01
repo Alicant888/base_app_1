@@ -181,6 +181,8 @@ const LIFE_ICON_START_X = 10;
 const LIFE_ICON_TOP_Y = 10;
 const LIFE_ICON_SCALE = 0.58;
 const LIFE_ICON_GAP_X = 4;
+const COMPACT_PAUSE_UI_MAX_VIEWPORT_HEIGHT = 600;
+const COMPACT_PAUSE_UI_SCALE_MULTIPLIER = 0.9;
 const SCORE_RIGHT_PADDING = 10; // отступ pts от правого края
 
 const SHOP_ETH_PRICES = {
@@ -1027,6 +1029,7 @@ export class GameScene extends Phaser.Scene {
 
       // Reposition bottom-anchored HUD.
       if (this.homeBtn) {
+        this.homeBtn.setScale(this.getPauseUiScale());
         this.homeBtn.setPosition(16, worldH - 16);
       }
 
@@ -3342,18 +3345,25 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private getPauseUiScale() {
+    return this.scale.height < COMPACT_PAUSE_UI_MAX_VIEWPORT_HEIGHT
+      ? UI_SCALE * COMPACT_PAUSE_UI_SCALE_MULTIPLIER
+      : UI_SCALE;
+  }
+
   private createBottomUI() {
     const depth = 120;
 
     // Home/Pause Button (Bottom Left)
     const padding = 16;
+    const pauseUiScale = this.getPauseUiScale();
 
     this.pauseBtn = this.add.container(0, 0);
 
     const homeBtn = this.add.image(0, 0, IMAGE_KEYS.uiHome)
       .setInteractive({ useHandCursor: true })
       .setOrigin(0, 1) // Anchor to bottom-left
-      .setScale(UI_SCALE) // Reduce size by 20%
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         if (this.isPausedByInput) {
@@ -4156,6 +4166,7 @@ export class GameScene extends Phaser.Scene {
 
   private createPauseUI() {
     const depth = 100;
+    const pauseUiScale = this.getPauseUiScale();
     this.pauseUIContainer = this.add.container(0, 0).setDepth(depth);
 
     // Pause Menu Background
@@ -4171,7 +4182,7 @@ export class GameScene extends Phaser.Scene {
     // ================================================================== //
     //  TOP: Shop pack buttons (20px below scoreText)                       //
     // ================================================================== //
-    const shopBottomY = this.buildShopUI(this.pauseUIContainer);
+    const shopBottomY = this.buildShopUI(this.pauseUIContainer, pauseUiScale);
 
     // ================================================================== //
     //  Buttons flow top-down                                               //
@@ -4179,7 +4190,7 @@ export class GameScene extends Phaser.Scene {
 
     // PLAY / RESUME — 8px below last shop button (xpp)
     const resumeKey = this._showPlayBtn ? IMAGE_KEYS.uiPlayG : IMAGE_KEYS.uiResume;
-    const resumeBtn = this.add.image(centerX, 0, resumeKey).setScale(UI_SCALE);
+    const resumeBtn = this.add.image(centerX, 0, resumeKey).setScale(pauseUiScale);
     resumeBtn.y = shopBottomY + 18 + resumeBtn.displayHeight / 2;
     resumeBtn
       .setInteractive({ useHandCursor: true })
@@ -4193,7 +4204,7 @@ export class GameScene extends Phaser.Scene {
     this.pauseUIContainer.add(resumeBtn);
 
     // Pre-measure music-toggle button height for layout.
-    const musicProbe = this.add.image(-9999, -9999, this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay).setScale(UI_SCALE);
+    const musicProbe = this.add.image(-9999, -9999, this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay).setScale(pauseUiScale);
     const toggleBtnH = musicProbe.displayHeight;
     musicProbe.destroy();
 
@@ -4203,7 +4214,7 @@ export class GameScene extends Phaser.Scene {
 
     const prevBtn = this.add.image(centerX - musicSpacing, musicY, IMAGE_KEYS.uiPrev)
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         this.playPrevTrack();
@@ -4214,7 +4225,7 @@ export class GameScene extends Phaser.Scene {
 
     const toggleBtn = this.add.image(centerX, musicY, this.isMusicOn ? IMAGE_KEYS.uiPause : IMAGE_KEYS.uiPlay)
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         this.toggleMusic();
@@ -4226,7 +4237,7 @@ export class GameScene extends Phaser.Scene {
 
     const nextBtn = this.add.image(centerX + musicSpacing, musicY, IMAGE_KEYS.uiNext)
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         this.playNextTrack();
@@ -4239,7 +4250,7 @@ export class GameScene extends Phaser.Scene {
     const restartY = musicY + toggleBtn.displayHeight / 2 + 4 + resumeBtn.displayHeight / 2;
     const restartBtn = this.add.image(centerX, restartY, IMAGE_KEYS.uiRestart)
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
@@ -4254,7 +4265,7 @@ export class GameScene extends Phaser.Scene {
     const exitY = restartBottom + (GAME_HEIGHT - restartBottom) / 2;
     const exitBtn = this.add.image(centerX, exitY, IMAGE_KEYS.uiExit)
       .setInteractive({ useHandCursor: true })
-      .setScale(UI_SCALE)
+      .setScale(pauseUiScale)
       .on("pointerdown", () => {
         this.playSfx(AUDIO_KEYS.click, 0.7);
         if (this.cameras.main.postFX) this.cameras.main.postFX.clear();
@@ -4271,7 +4282,7 @@ export class GameScene extends Phaser.Scene {
    * in-game scoreText (pts counter). Returns the bottom Y of the last pack
    * button image (xpp) so callers can continue layout.
    */
-  private buildShopUI(container: Phaser.GameObjects.Container): number {
+  private buildShopUI(container: Phaser.GameObjects.Container, pauseUiScale: number): number {
     const centerX = GAME_WIDTH / 2;
     // Anchor top of shop grid 20px below the scoreText bottom edge.
     const scoreBottom = this.scoreText.y + 16; // scoreText origin(1,0), fontSize 16
@@ -4305,8 +4316,8 @@ export class GameScene extends Phaser.Scene {
     const isPendingOnchainStale = () =>
       pendingOnchainPurchase && performance.now() - pendingOnchainStartedAt > 12000;
 
-    // Measure button half-dims at UI_SCALE.
-    const probe = this.add.image(-9999, -9999, PACKS[0].key).setScale(UI_SCALE);
+    // Measure button half-dims at the current pause-menu scale.
+    const probe = this.add.image(-9999, -9999, PACKS[0].key).setScale(pauseUiScale);
     const halfW = probe.displayWidth / 2;
     const halfH = probe.displayHeight / 2;
     probe.destroy();
@@ -4463,7 +4474,7 @@ export class GameScene extends Phaser.Scene {
 
     for (const { pi, x, y } of grid) {
       const pack = PACKS[pi];
-      const img = this.add.image(x, y, pack.key).setScale(UI_SCALE);
+      const img = this.add.image(x, y, pack.key).setScale(pauseUiScale);
       const lbl = this.add.text(x, y + halfH + gap / 2, "", {
         fontFamily: "Orbitron",
         fontSize: "10px",
