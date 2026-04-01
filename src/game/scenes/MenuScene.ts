@@ -71,24 +71,24 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
   const dataSuffix = getBuilderCodeDataSuffix();
   if (paymasterServiceUrl) {
     const hasAuthSession = await hasAuthSessionForAddress(account);
-    if (!hasAuthSession) return null;
-
-    const data = encodeFunctionData({
-      abi,
-      functionName: "checkIn",
-      args: [],
-    });
-    return sendCallsWithOptionalPaymaster({
-      provider,
-      account,
-      chainIdHex: numberToHex(base.id),
-      calls: [{
-        to: contractAddress,
-        value: "0x0",
-        data,
-      }],
-      paymasterServiceUrl,
-    });
+    if (hasAuthSession) {
+      const data = encodeFunctionData({
+        abi,
+        functionName: "checkIn",
+        args: [],
+      });
+      return sendCallsWithOptionalPaymaster({
+        provider,
+        account,
+        chainIdHex: numberToHex(base.id),
+        calls: [{
+          to: contractAddress,
+          value: "0x0",
+          data,
+        }],
+        paymasterServiceUrl,
+      });
+    }
   }
 
   return walletClient.writeContract({
