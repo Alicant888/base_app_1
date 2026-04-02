@@ -3,7 +3,7 @@ import { appConfig } from "../../../app.config";
 const DEFAULT_ACCOUNT_ASSOCIATION = {
   header: "eyJmaWQiOjQ2NzE2MCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDIwZUEyMUI4QzcwMGM5MTg2RjRGOTEwZGIwQTM5NTc4RjEzMTU2RUEifQ",
   payload: "eyJkb21haW4iOiJiYXNlZnVyeS5hcHAifQ",
-  signature: "uL4zJmWGMudhIdjsXOrsk0NZdKVVpCuhyMNdbw/bCEBm8DjzZ+fETudsTHtdfG6y6u3XYf/wdsOw+1kvPx/QDBw=",
+  signature: "uL4zJmWGMudhIdjsXOrsk0NZdKVVpCuhyMNdbw_bCEBm8DjzZ-fETudsTHtdfG6y6u3XYf_wdsOw-1kvPx_QDBw",
 } as const;
 
 function trimTrailingSlash(value: string) {
