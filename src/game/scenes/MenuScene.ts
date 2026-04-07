@@ -11,6 +11,45 @@ import { SaveManager, SaveData } from "../systems/SaveManager";
 
 const DAY_MS = 86_400_000;
 const START_UNLOCK_DELAY_MS = 250;
+const CHECKIN_DAY_CACHE_KEY = "base_fury_daily_checkin_days";
+
+function getCurrentDayNumber() {
+  return Math.floor(Date.now() / DAY_MS);
+}
+
+function loadCheckInDayCache(): Record<string, number> {
+  if (typeof window === "undefined") return {};
+
+  try {
+    const raw = window.localStorage.getItem(CHECKIN_DAY_CACHE_KEY);
+    if (!raw) return {};
+
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return Object.fromEntries(
+      Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === "number"),
+    );
+  } catch {
+    return {};
+  }
+}
+
+function hasCachedCheckInForDay(account: `0x${string}`, dayNumber: number) {
+  return loadCheckInDayCache()[account.toLowerCase()] === dayNumber;
+}
+
+function cacheCheckInForDay(account: `0x${string}`, dayNumber: number) {
+  if (typeof window === "undefined") return;
+
+  try {
+    const nextCache = {
+      ...loadCheckInDayCache(),
+      [account.toLowerCase()]: dayNumber,
+    };
+    window.localStorage.setItem(CHECKIN_DAY_CACHE_KEY, JSON.stringify(nextCache));
+  } catch {
+    // localStorage unavailable
+  }
+}
 
 function getCheckInContractAddress(): `0x${string}` | null {
   const raw = process.env.NEXT_PUBLIC_CHECKIN_CONTRACT_ADDRESS?.trim();
@@ -33,6 +72,11 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
   const transport = custom(provider);
   const publicClient = createPublicClient({ chain: base, transport: http() });
   const walletClient = createWalletClient({ chain: base, transport });
+  const today = getCurrentDayNumber();
+
+  if (hasCachedCheckInForDay(account, today)) {
+    return null;
+  }
 
   const abi = [
     {
@@ -51,8 +95,6 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
     },
   ] as const;
 
-  const today = BigInt(Math.floor(Date.now() / DAY_MS));
-
   try {
     const lastDay = await publicClient.readContract({
       address: contractAddress,
@@ -60,7 +102,10 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
       functionName: "lastDay",
       args: [account],
     });
-    if (lastDay >= today) return null;
+    if (lastDay >= BigInt(today)) {
+      cacheCheckInForDay(account, today);
+      return null;
+    }
   } catch (error) {
     // If the contract doesn't expose `lastDay`, we can't preflight daily check-ins.
     // We'll attempt the write instead and let the contract enforce its own rules.
@@ -87,6 +132,9 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
           data,
         }],
         paymasterServiceUrl,
+      }).then((txHash) => {
+        cacheCheckInForDay(account, today);
+        return txHash;
       });
     }
   }
@@ -99,6 +147,9 @@ async function ensureDailyOnchainCheckIn(): Promise<`0x${string}` | null> {
     args: [],
     dataSuffix: dataSuffix ?? undefined,
     account,
+  }).then((txHash) => {
+    cacheCheckInForDay(account, today);
+    return txHash;
   });
 }
 
